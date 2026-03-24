@@ -13,7 +13,7 @@ use function Laravel\Prompts\info;
 use function Laravel\Prompts\password;
 use function Laravel\Prompts\text;
 
-#[Signature('auth:register')]
+#[Signature('auth:register {--name= : The name of the user} {--email= : The email of the user} {--password= : The password of the user} {--password_confirmation= : The password confirmation}')]
 #[Description('Register a new user manually')]
 class RegisterUser extends Command
 {
@@ -24,24 +24,24 @@ class RegisterUser extends Command
     {
         info('Register a new user');
 
-        $name = text(
+        $name = $this->option('name') ?? text(
             label: 'What is the user\'s name?',
             placeholder: 'John Doe',
             required: true,
         );
 
-        $email = text(
+        $email = $this->option('email') ?? text(
             label: 'What is the user\'s email address?',
             placeholder: 'john@example.com',
             required: true,
         );
 
-        $password = password(
+        $password = $this->option('password') ?? password(
             label: 'What is the user\'s password?',
             required: true,
         );
 
-        $passwordConfirmation = password(
+        $passwordConfirmation = $this->option('password_confirmation') ?? password(
             label: 'Confirm the password',
             required: true,
         );
