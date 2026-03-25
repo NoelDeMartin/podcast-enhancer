@@ -17,6 +17,7 @@ class StoreEntryRequest extends FormRequest
             'feed_id' => ['required', 'exists:feeds,id'],
             'name' => ['required', 'string', 'max:255'],
             'description' => ['nullable', 'string'],
+            'file' => ['nullable', 'file'],
         ];
     }
 }

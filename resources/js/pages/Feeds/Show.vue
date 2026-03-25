@@ -7,6 +7,7 @@ import {
     store as storeEntry,
     destroy as destroyEntry,
     update as updateEntryAction,
+    file as getEntryFile,
 } from '@/actions/App/Http/Controllers/EntryController';
 import { Button } from '@/components/ui/button';
 import {
@@ -57,14 +58,15 @@ const entryForm = useForm({
     feed_id: props.feed.id,
     name: '',
     description: '',
+    file: null as File | null,
 });
 
 const showEntryForm = ref(false);
 
 const submitEntry = () => {
-    entryForm.post(storeEntry.url(), {
+    entryForm.submit(storeEntry(), {
         onSuccess: () => {
-            entryForm.reset('name', 'description');
+            entryForm.reset('name', 'description', 'file');
             showEntryForm.value = false;
         },
     });
@@ -72,7 +74,7 @@ const submitEntry = () => {
 
 const deleteEntry = (id: number) => {
     if (confirm('Are you sure you want to delete this entry?')) {
-        useForm({}).delete(destroyEntry.url(id));
+        useForm({}).submit(destroyEntry(id));
     }
 };
 
@@ -81,17 +83,21 @@ const editingEntry = ref<any>(null);
 const editEntryForm = useForm({
     name: '',
     description: '',
+    file: null as File | null,
+    delete_file: false,
 });
 
 const startEditEntry = (entry: any) => {
     editingEntry.value = entry;
     editEntryForm.name = entry.name;
     editEntryForm.description = entry.description;
+    editEntryForm.file = null;
+    editEntryForm.delete_file = false;
     isEditDialogOpen.value = true;
 };
 
 const submitEditEntry = () => {
-    editEntryForm.put(updateEntryAction.url(editingEntry.value.id), {
+    editEntryForm.submit(updateEntryAction(editingEntry.value.id), {
         onSuccess: () => {
             editingEntry.value = null;
             isEditDialogOpen.value = false;
@@ -155,6 +161,24 @@ const submitEditEntry = () => {
                                         {{ entryForm.errors.description }}
                                     </div>
                                 </div>
+                                <div class="grid gap-2">
+                                    <Label for="file">Audio File</Label>
+                                    <Input
+                                        id="file"
+                                        type="file"
+                                        @input="
+                                            entryForm.file =
+                                                $event.target.files[0]
+                                        "
+                                        accept="audio/*"
+                                    />
+                                    <div
+                                        v-if="entryForm.errors.file"
+                                        class="text-sm text-red-500"
+                                    >
+                                        {{ entryForm.errors.file }}
+                                    </div>
+                                </div>
                             </div>
                             <DialogFooter>
                                 <Button
@@ -208,6 +232,64 @@ const submitEditEntry = () => {
                                     {{ editEntryForm.errors.description }}
                                 </div>
                             </div>
+                            <div class="grid gap-2">
+                                <Label for="edit-file">Audio File</Label>
+                                <div
+                                    v-if="
+                                        editingEntry?.file_path &&
+                                        !editEntryForm.delete_file &&
+                                        !editEntryForm.file
+                                    "
+                                    class="flex items-center gap-4"
+                                >
+                                    <span class="text-sm text-gray-500"
+                                        >Current file attached</span
+                                    >
+                                    <Button
+                                        type="button"
+                                        variant="destructive"
+                                        size="sm"
+                                        @click="
+                                            editEntryForm.delete_file = true
+                                        "
+                                    >
+                                        Delete
+                                    </Button>
+                                </div>
+                                <div v-else>
+                                    <Input
+                                        id="edit-file"
+                                        type="file"
+                                        @input="
+                                            editEntryForm.file =
+                                                $event.target.files[0]
+                                        "
+                                        accept="audio/*"
+                                    />
+                                    <div
+                                        v-if="editEntryForm.errors.file"
+                                        class="text-sm text-red-500"
+                                    >
+                                        {{ editEntryForm.errors.file }}
+                                    </div>
+                                    <Button
+                                        v-if="
+                                            editEntryForm.delete_file &&
+                                            editingEntry?.file_path
+                                        "
+                                        type="button"
+                                        variant="link"
+                                        size="sm"
+                                        class="mt-1 px-0 text-gray-500"
+                                        @click="
+                                            editEntryForm.delete_file = false;
+                                            editEntryForm.file = null;
+                                        "
+                                    >
+                                        Cancel deletion
+                                    </Button>
+                                </div>
+                            </div>
                         </div>
                         <DialogFooter>
                             <Button
@@ -226,7 +308,8 @@ const submitEditEntry = () => {
                     <TableHeader>
                         <TableRow>
                             <TableHead class="w-[30%]">Name</TableHead>
-                            <TableHead class="w-[50%]">Description</TableHead>
+                            <TableHead class="w-[40%]">Description</TableHead>
+                            <TableHead class="w-[15%]">File</TableHead>
                             <TableHead class="text-right">Actions</TableHead>
                         </TableRow>
                     </TableHeader>
@@ -240,6 +323,21 @@ const submitEditEntry = () => {
                                     class="align-top text-gray-600 dark:text-gray-300"
                                 >
                                     {{ entry.description || '-' }}
+                                </TableCell>
+                                <TableCell class="align-top">
+                                    <a
+                                        v-if="entry.file_path"
+                                        :href="getEntryFile.url(entry.id)"
+                                        target="_blank"
+                                        class="text-blue-600 hover:underline dark:text-blue-400"
+                                    >
+                                        Download
+                                    </a>
+                                    <span
+                                        v-else
+                                        class="text-gray-400 dark:text-gray-600"
+                                        >-</span
+                                    >
                                 </TableCell>
                                 <TableCell class="text-right align-top">
                                     <DropdownMenu>
@@ -274,7 +372,7 @@ const submitEditEntry = () => {
                             </TableRow>
                         </template>
                         <TableRow v-if="feed.entries.length === 0">
-                            <TableCell colspan="3" class="h-24 text-center">
+                            <TableCell colspan="4" class="h-24 text-center">
                                 No entries yet. Click "Add Entry" to create one.
                             </TableCell>
                         </TableRow>

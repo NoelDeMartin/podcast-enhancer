@@ -16,6 +16,7 @@ class Entry extends Model
         'feed_id',
         'name',
         'description',
+        'file_path',
     ];
 
     public function feed(): BelongsTo
