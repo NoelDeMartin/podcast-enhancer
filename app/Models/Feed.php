@@ -14,6 +14,7 @@ class Feed extends Model
 
     protected $fillable = [
         'title',
+        'description',
     ];
 
     public function entries(): HasMany

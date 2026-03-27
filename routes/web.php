@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\Route;
 
 Route::inertia('/', 'Welcome')->name('home');
 
-Route::get('feeds/{feed}/rss', FeedRssController::class)->name('feeds.rss');
+Route::get('feeds/{feed}.xml', FeedRssController::class)->name('feeds.rss');
 Route::get('entries/{entry}/file', [EntryController::class, 'file'])->name('entries.file');
 
 Route::middleware(['auth', 'verified'])->group(function () {

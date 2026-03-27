@@ -35,6 +35,7 @@ import {
     TableHeader,
     TableRow,
 } from '@/components/ui/table';
+import { Textarea } from '@/components/ui/textarea';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { dashboard } from '@/routes';
 import type { BreadcrumbItem } from '@/types';
@@ -52,6 +53,7 @@ const breadcrumbs: BreadcrumbItem[] = [
 
 const form = useForm({
     title: '',
+    description: '',
 });
 
 const isDialogOpen = ref(false);
@@ -75,11 +77,13 @@ const isEditDialogOpen = ref(false);
 const editingFeed = ref<any>(null);
 const editFeedForm = useForm({
     title: '',
+    description: '',
 });
 
 const startEditFeed = (feed: any) => {
     editingFeed.value = feed;
     editFeedForm.title = feed.title;
+    editFeedForm.description = feed.description ?? '';
     isEditDialogOpen.value = true;
 };
 
@@ -133,6 +137,21 @@ const submitEditFeed = () => {
                                         {{ form.errors.title }}
                                     </div>
                                 </div>
+                                <div class="grid gap-2">
+                                    <Label for="description">Description</Label>
+                                    <Textarea
+                                        id="description"
+                                        v-model="form.description"
+                                        placeholder="Optional description for this podcast feed..."
+                                        rows="3"
+                                    />
+                                    <div
+                                        v-if="form.errors.description"
+                                        class="text-sm text-red-500"
+                                    >
+                                        {{ form.errors.description }}
+                                    </div>
+                                </div>
                             </div>
                             <DialogFooter>
                                 <Button
@@ -153,7 +172,7 @@ const submitEditFeed = () => {
                         <DialogHeader>
                             <DialogTitle>Edit Feed</DialogTitle>
                             <DialogDescription>
-                                Update the title of this feed.
+                                Update the details of this feed.
                             </DialogDescription>
                         </DialogHeader>
                         <div class="grid gap-4 py-4">
@@ -169,6 +188,23 @@ const submitEditFeed = () => {
                                     class="text-sm text-red-500"
                                 >
                                     {{ editFeedForm.errors.title }}
+                                </div>
+                            </div>
+                            <div class="grid gap-2">
+                                <Label for="edit-description"
+                                    >Description</Label
+                                >
+                                <Textarea
+                                    id="edit-description"
+                                    v-model="editFeedForm.description"
+                                    placeholder="Optional description for this podcast feed..."
+                                    rows="3"
+                                />
+                                <div
+                                    v-if="editFeedForm.errors.description"
+                                    class="text-sm text-red-500"
+                                >
+                                    {{ editFeedForm.errors.description }}
                                 </div>
                             </div>
                         </div>

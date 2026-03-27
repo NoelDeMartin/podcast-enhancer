@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { Head } from '@inertiajs/vue3';
 import { useForm } from '@inertiajs/vue3';
-import { MoreHorizontal, Plus } from 'lucide-vue-next';
+import { MoreHorizontal, Plus, Rss } from 'lucide-vue-next';
 import { ref } from 'vue';
 import {
     store as storeEntry,
@@ -9,6 +9,7 @@ import {
     update as updateEntryAction,
     file as getEntryFile,
 } from '@/actions/App/Http/Controllers/EntryController';
+import FeedRssController from '@/actions/App/Http/Controllers/FeedRssController';
 import { Button } from '@/components/ui/button';
 import {
     Dialog,
@@ -114,7 +115,19 @@ const submitEditEntry = () => {
             class="mx-auto flex h-full w-full max-w-5xl flex-1 flex-col gap-6 overflow-x-auto rounded-xl p-4"
         >
             <div class="flex items-center justify-between">
-                <h2 class="text-2xl font-bold tracking-tight">Entries</h2>
+                <div class="flex items-center gap-3">
+                    <h2 class="text-2xl font-bold tracking-tight">
+                        {{ feed.title }}
+                    </h2>
+                    <a
+                        :href="FeedRssController.url(feed.id)"
+                        target="_blank"
+                        class="text-orange-500 hover:text-orange-600"
+                        title="RSS Feed"
+                    >
+                        <Rss class="h-5 w-5" />
+                    </a>
+                </div>
 
                 <Dialog v-model:open="showEntryForm">
                     <DialogTrigger as-child>
@@ -307,9 +320,8 @@ const submitEditEntry = () => {
                 <Table>
                     <TableHeader>
                         <TableRow>
-                            <TableHead class="w-[30%]">Name</TableHead>
-                            <TableHead class="w-[40%]">Description</TableHead>
-                            <TableHead class="w-[15%]">File</TableHead>
+                            <TableHead class="w-[55%]">Name</TableHead>
+                            <TableHead class="w-[20%]">File</TableHead>
                             <TableHead class="text-right">Actions</TableHead>
                         </TableRow>
                     </TableHeader>
@@ -319,11 +331,6 @@ const submitEditEntry = () => {
                                 <TableCell class="align-top font-medium">{{
                                     entry.name
                                 }}</TableCell>
-                                <TableCell
-                                    class="align-top text-gray-600 dark:text-gray-300"
-                                >
-                                    {{ entry.description || '-' }}
-                                </TableCell>
                                 <TableCell class="align-top">
                                     <a
                                         v-if="entry.file_path"
@@ -372,7 +379,7 @@ const submitEditEntry = () => {
                             </TableRow>
                         </template>
                         <TableRow v-if="feed.entries.length === 0">
-                            <TableCell colspan="4" class="h-24 text-center">
+                            <TableCell colspan="3" class="h-24 text-center">
                                 No entries yet. Click "Add Entry" to create one.
                             </TableCell>
                         </TableRow>
