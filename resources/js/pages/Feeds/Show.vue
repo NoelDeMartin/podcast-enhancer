@@ -372,7 +372,14 @@ const submitEditEntry = () => {
                     <div
                         class="max-h-[60vh] overflow-y-auto rounded-md border bg-red-50 p-4 dark:bg-red-950/20"
                     >
-                        <pre class="whitespace-pre-wrap text-xs leading-relaxed text-red-800 dark:text-red-300">{{ viewingFailure?.latest_job_batch?.job_batch?.failed_job_details?.[0]?.exception ?? 'No exception details available.' }}</pre>
+                        <pre
+                            class="text-xs leading-relaxed whitespace-pre-wrap text-red-800 dark:text-red-300"
+                            >{{
+                                viewingFailure?.latest_job_batch?.job_batch
+                                    ?.failed_job_details?.[0]?.exception ??
+                                'No exception details available.'
+                            }}</pre
+                        >
                     </div>
                 </DialogContent>
             </Dialog>

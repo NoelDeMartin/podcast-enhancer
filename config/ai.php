@@ -101,7 +101,7 @@ return [
                 'transcription' => [
                     'default' => 'voxtral-mini-latest',
                 ],
-            ]
+            ],
         ],
 
         'ollama' => [
