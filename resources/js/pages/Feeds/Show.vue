@@ -1,13 +1,14 @@
 <script setup lang="ts">
-import { Head } from '@inertiajs/vue3';
+import { Head, usePoll } from '@inertiajs/vue3';
 import { useForm } from '@inertiajs/vue3';
-import { MoreHorizontal, Plus, Rss } from 'lucide-vue-next';
-import { ref } from 'vue';
+import { Loader2, MoreHorizontal, Plus, Rss } from 'lucide-vue-next';
+import { computed, ref, watch } from 'vue';
 import {
     store as storeEntry,
     destroy as destroyEntry,
     update as updateEntryAction,
     file as getEntryFile,
+    transcribe as transcribeEntry,
 } from '@/actions/App/Http/Controllers/EntryController';
 import FeedRssController from '@/actions/App/Http/Controllers/FeedRssController';
 import { Button } from '@/components/ui/button';
@@ -78,6 +79,47 @@ const deleteEntry = (id: number) => {
         useForm({}).submit(destroyEntry(id));
     }
 };
+
+const regenerateTranscription = (id: number) => {
+    useForm({}).submit(transcribeEntry(id));
+};
+
+const viewingTranscription = ref<any>(null);
+const viewingFailure = ref<any>(null);
+
+type BatchStatus = 'pending' | 'failed' | 'completed' | null;
+
+function getBatchStatus(entry: any): BatchStatus {
+    const batch = entry.latest_job_batch?.job_batch;
+
+    if (!batch) {
+        return null;
+    }
+
+    if (batch.cancelled_at !== null) {
+        return 'failed';
+    }
+
+    if (batch.finished_at !== null) {
+        return 'completed';
+    }
+
+    return 'pending';
+}
+
+const hasActiveJobs = computed(() =>
+    props.feed.entries.some((e: any) => getBatchStatus(e) === 'pending'),
+);
+
+const { start: startPolling, stop: stopPolling } = usePoll(
+    3000,
+    { only: ['feed'] },
+    { autoStart: false },
+);
+
+watch(hasActiveJobs, (active) => (active ? startPolling() : stopPolling()), {
+    immediate: true,
+});
 
 const isEditDialogOpen = ref(false);
 const editingEntry = ref<any>(null);
@@ -316,12 +358,53 @@ const submitEditEntry = () => {
                 </DialogContent>
             </Dialog>
 
+            <Dialog
+                :open="!!viewingFailure"
+                @update:open="viewingFailure = null"
+            >
+                <DialogContent class="max-w-2xl">
+                    <DialogHeader>
+                        <DialogTitle>Transcription Failed</DialogTitle>
+                        <DialogDescription>
+                            {{ viewingFailure?.name }}
+                        </DialogDescription>
+                    </DialogHeader>
+                    <div
+                        class="max-h-[60vh] overflow-y-auto rounded-md border bg-red-50 p-4 dark:bg-red-950/20"
+                    >
+                        <pre class="whitespace-pre-wrap text-xs leading-relaxed text-red-800 dark:text-red-300">{{ viewingFailure?.latest_job_batch?.job_batch?.failed_job_details?.[0]?.exception ?? 'No exception details available.' }}</pre>
+                    </div>
+                </DialogContent>
+            </Dialog>
+
+            <Dialog
+                :open="!!viewingTranscription"
+                @update:open="viewingTranscription = null"
+            >
+                <DialogContent class="max-w-2xl">
+                    <DialogHeader>
+                        <DialogTitle>Transcription</DialogTitle>
+                        <DialogDescription>
+                            {{ viewingTranscription?.name }}
+                        </DialogDescription>
+                    </DialogHeader>
+                    <div
+                        class="max-h-[60vh] overflow-y-auto rounded-md border p-4"
+                    >
+                        <p class="text-sm leading-relaxed whitespace-pre-wrap">
+                            {{ viewingTranscription?.transcription }}
+                        </p>
+                    </div>
+                </DialogContent>
+            </Dialog>
+
             <div class="rounded-md border bg-white dark:bg-zinc-950">
                 <Table>
                     <TableHeader>
                         <TableRow>
-                            <TableHead class="w-[55%]">Name</TableHead>
-                            <TableHead class="w-[20%]">File</TableHead>
+                            <TableHead class="w-[45%]">Name</TableHead>
+                            <TableHead class="w-[15%]">File</TableHead>
+                            <TableHead class="w-[20%]">Transcription</TableHead>
                             <TableHead class="text-right">Actions</TableHead>
                         </TableRow>
                     </TableHeader>
@@ -345,6 +428,61 @@ const submitEditEntry = () => {
                                         class="text-gray-400 dark:text-gray-600"
                                         >-</span
                                     >
+                                </TableCell>
+                                <TableCell class="align-top">
+                                    <div class="flex items-center gap-3">
+                                        <span
+                                            v-if="
+                                                getBatchStatus(entry) ===
+                                                'pending'
+                                            "
+                                            class="flex items-center gap-1 text-sm text-muted-foreground"
+                                        >
+                                            <Loader2
+                                                class="h-3 w-3 animate-spin"
+                                            />
+                                            Pending
+                                        </span>
+                                        <button
+                                            v-else-if="
+                                                getBatchStatus(entry) ===
+                                                'failed'
+                                            "
+                                            class="text-sm text-red-500 hover:underline"
+                                            @click="viewingFailure = entry"
+                                        >
+                                            Failed
+                                        </button>
+                                        <button
+                                            v-else-if="entry.transcription"
+                                            class="text-blue-600 hover:underline dark:text-blue-400"
+                                            @click="
+                                                viewingTranscription = entry
+                                            "
+                                        >
+                                            View
+                                        </button>
+                                        <span
+                                            v-else
+                                            class="text-gray-400 dark:text-gray-600"
+                                            >-</span
+                                        >
+                                        <button
+                                            v-if="
+                                                entry.file_path &&
+                                                getBatchStatus(entry) !==
+                                                    'pending'
+                                            "
+                                            class="text-gray-500 hover:underline dark:text-gray-400"
+                                            @click="
+                                                regenerateTranscription(
+                                                    entry.id,
+                                                )
+                                            "
+                                        >
+                                            Regenerate
+                                        </button>
+                                    </div>
                                 </TableCell>
                                 <TableCell class="text-right align-top">
                                     <DropdownMenu>
@@ -379,7 +517,7 @@ const submitEditEntry = () => {
                             </TableRow>
                         </template>
                         <TableRow v-if="feed.entries.length === 0">
-                            <TableCell colspan="3" class="h-24 text-center">
+                            <TableCell colspan="4" class="h-24 text-center">
                                 No entries yet. Click "Add Entry" to create one.
                             </TableCell>
                         </TableRow>

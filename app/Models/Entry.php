@@ -6,6 +6,8 @@ use Database\Factories\EntryFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Entry extends Model
 {
@@ -17,10 +19,21 @@ class Entry extends Model
         'name',
         'description',
         'file_path',
+        'transcription',
     ];
 
     public function feed(): BelongsTo
     {
         return $this->belongsTo(Feed::class);
+    }
+
+    public function jobBatches(): HasMany
+    {
+        return $this->hasMany(EntryJobBatch::class);
+    }
+
+    public function latestJobBatch(): HasOne
+    {
+        return $this->hasOne(EntryJobBatch::class)->latestOfMany();
     }
 }

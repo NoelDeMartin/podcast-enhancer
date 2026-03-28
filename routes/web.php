@@ -16,6 +16,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::resource('feeds', FeedController::class)->only(['store', 'show', 'update', 'destroy']);
     Route::resource('entries', EntryController::class)->only(['store', 'update', 'destroy']);
+    Route::post('entries/{entry}/transcribe', [EntryController::class, 'transcribe'])->name('entries.transcribe');
 });
 
 require __DIR__.'/settings.php';
