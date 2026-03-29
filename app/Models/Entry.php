@@ -19,8 +19,17 @@ class Entry extends Model
         'name',
         'description',
         'file_path',
-        'transcription',
+        'transcription_path',
+        'summary',
+        'chapters',
     ];
+
+    protected function casts(): array
+    {
+        return [
+            'chapters' => 'json',
+        ];
+    }
 
     public function feed(): BelongsTo
     {

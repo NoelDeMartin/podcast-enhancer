@@ -7,6 +7,7 @@ use App\Http\Requests\UpdateFeedRequest;
 use App\Models\FailedJob;
 use App\Models\Feed;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -24,6 +25,10 @@ class FeedController extends Controller
         $feed->load('entries.latestJobBatch');
 
         $this->loadFailedJobDetails($feed);
+
+        $feed->entries->each(function ($entry) {
+            $entry->transcription = $entry->transcription_path ? Storage::get($entry->transcription_path) : null;
+        });
 
         return Inertia::render('Feeds/Show', [
             'feed' => $feed,

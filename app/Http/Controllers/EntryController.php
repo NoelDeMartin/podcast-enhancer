@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreEntryRequest;
 use App\Http\Requests\UpdateEntryRequest;
+use App\Jobs\GenerateEntryChaptersJob;
+use App\Jobs\SummarizeEntryJob;
 use App\Jobs\TranscribeEntryJob;
 use App\Models\Entry;
 use Illuminate\Http\RedirectResponse;
@@ -39,12 +41,23 @@ class EntryController extends Controller
             if ($entry->file_path) {
                 Storage::delete($entry->file_path);
             }
+            if ($entry->transcription_path) {
+                Storage::delete($entry->transcription_path);
+                $validated['transcription_path'] = null;
+            }
             $validated['file_path'] = $request->file('file')->store('entries');
+            $validated['summary'] = null;
+            $validated['chapters'] = null;
             $fileChanged = true;
         } elseif ($request->boolean('delete_file') && $entry->file_path) {
             Storage::delete($entry->file_path);
+            if ($entry->transcription_path) {
+                Storage::delete($entry->transcription_path);
+            }
             $validated['file_path'] = null;
-            $validated['transcription'] = null;
+            $validated['transcription_path'] = null;
+            $validated['summary'] = null;
+            $validated['chapters'] = null;
         }
 
         unset($validated['delete_file']);
@@ -62,6 +75,10 @@ class EntryController extends Controller
     {
         if ($entry->file_path) {
             Storage::delete($entry->file_path);
+        }
+
+        if ($entry->transcription_path) {
+            Storage::delete($entry->transcription_path);
         }
 
         $entry->delete();
@@ -91,7 +108,13 @@ class EntryController extends Controller
 
     private function dispatchTranscriptionBatch(Entry $entry): void
     {
-        $batch = Bus::batch([new TranscribeEntryJob($entry)])
+        $batch = Bus::batch([
+            [
+                new TranscribeEntryJob($entry),
+                new SummarizeEntryJob($entry),
+                new GenerateEntryChaptersJob($entry),
+            ],
+        ])
             ->name('Transcribe Entry: '.$entry->id)
             ->dispatch();
 

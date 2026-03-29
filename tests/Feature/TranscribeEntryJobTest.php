@@ -16,7 +16,10 @@ it('transcribes the audio file and saves the result', function () {
 
     (new TranscribeEntryJob($entry))->handle();
 
-    expect($entry->fresh()->transcription)->toBe('This is the transcribed content.');
+    $entry->refresh();
+    expect($entry->transcription_path)->not->toBeNull();
+    Storage::disk('local')->assertExists($entry->transcription_path);
+    expect(Storage::disk('local')->get($entry->transcription_path))->toEqual('This is the transcribed content.');
     Transcription::assertGenerated(fn ($prompt) => true);
 });
 
@@ -27,7 +30,7 @@ it('does nothing when the entry has no file', function () {
 
     (new TranscribeEntryJob($entry))->handle();
 
-    expect($entry->fresh()->transcription)->toBeNull();
+    expect($entry->fresh()->transcription_path)->toBeNull();
     Transcription::assertNothingGenerated();
 });
 
@@ -45,6 +48,6 @@ it('does nothing when the batch has been cancelled', function () {
     $job->batchId = $batch->id;
     $job->handle();
 
-    expect($entry->fresh()->transcription)->toBeNull();
+    expect($entry->fresh()->transcription_path)->toBeNull();
     Transcription::assertNothingGenerated();
 });

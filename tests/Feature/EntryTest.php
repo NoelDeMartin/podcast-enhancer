@@ -1,6 +1,5 @@
 <?php
 
-use App\Jobs\TranscribeEntryJob;
 use App\Models\Entry;
 use App\Models\EntryJobBatch;
 use App\Models\Feed;
@@ -35,7 +34,7 @@ it('can store an entry with an uploaded file', function () {
     expect($entry->file_path)->not->toBeNull();
 
     Storage::disk('local')->assertExists($entry->file_path);
-    Bus::assertBatched(fn ($batch) => $batch->jobs[0] instanceof TranscribeEntryJob);
+    Bus::assertBatched(fn ($batch) => $batch->name === 'Transcribe Entry: '.$entry->id);
 });
 
 it('does not dispatch a transcription batch when storing entry without a file', function () {
@@ -61,6 +60,7 @@ it('can update an entry and replace the file', function () {
     $entry = Entry::factory()->create([
         'feed_id' => $feed->id,
         'file_path' => $oldPath,
+        'transcription_path' => 'transcriptions/old.txt',
     ]);
 
     $newFile = UploadedFile::fake()->create('new.mp3', 1024);
@@ -77,13 +77,15 @@ it('can update an entry and replace the file', function () {
     expect($entry->name)->toBe('Updated Entry');
     expect($entry->file_path)->not->toBe($oldPath);
     expect($entry->file_path)->not->toBeNull();
+    expect($entry->transcription_path)->toBeNull();
 
     Storage::disk('local')->assertMissing($oldPath);
+    Storage::disk('local')->assertMissing('transcriptions/old.txt');
     Storage::disk('local')->assertExists($entry->file_path);
-    Bus::assertBatched(fn ($batch) => $batch->jobs[0] instanceof TranscribeEntryJob);
+    Bus::assertBatched(fn ($batch) => $batch->name === 'Transcribe Entry: '.$entry->id);
 });
 
-it('clears transcription when deleting a file', function () {
+it('clears transcription, summary, and chapters when deleting a file', function () {
     Storage::fake('local');
     Bus::fake();
     $feed = Feed::factory()->create();
@@ -93,7 +95,9 @@ it('clears transcription when deleting a file', function () {
     $entry = Entry::factory()->create([
         'feed_id' => $feed->id,
         'file_path' => $oldPath,
-        'transcription' => 'Old transcription text.',
+        'transcription_path' => 'transcriptions/old.txt',
+        'summary' => 'Old Summary',
+        'chapters' => ['Old Chapter'],
     ]);
 
     $response = $this->actingAs($this->user)
@@ -106,7 +110,9 @@ it('clears transcription when deleting a file', function () {
 
     $entry->refresh();
     expect($entry->file_path)->toBeNull();
-    expect($entry->transcription)->toBeNull();
+    expect($entry->transcription_path)->toBeNull();
+    expect($entry->summary)->toBeNull();
+    expect($entry->chapters)->toBeNull();
     Bus::assertNothingBatched();
 });
 
