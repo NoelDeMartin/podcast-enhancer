@@ -31,7 +31,7 @@ class ProcessEntryJob implements ShouldQueue
             ->map(fn (array $segment) => "[{$segment['start_seconds']}] {$segment['text']}")
             ->implode("\n");
 
-        $response = (new PodcastEditorAgent)->prompt($transcription);
+        $response = (new PodcastEditorAgent)->prompt($transcription, timeout: 300);
 
         $this->entry->update([
             'summary' => $response['summary'],

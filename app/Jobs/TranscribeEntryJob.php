@@ -25,7 +25,7 @@ class TranscribeEntryJob implements ShouldQueue
             return;
         }
 
-        $transcript = Transcription::fromStorage($this->entry->file_path)->diarize()->generate();
+        $transcript = Transcription::fromStorage($this->entry->file_path)->diarize()->timeout(300)->generate();
 
         $entryId = $this->entry->id;
         $path = "transcriptions/{$entryId}.json";
