@@ -10,6 +10,7 @@ Route::inertia('/', 'Welcome')->name('home');
 
 Route::get('feeds/{feed}.xml', FeedRssController::class)->name('feeds.rss');
 Route::get('entries/{entry}/file', [EntryController::class, 'file'])->name('entries.file');
+Route::get('entries/{entry}/chapters.json', [EntryController::class, 'chapters'])->name('entries.chapters');
 
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');

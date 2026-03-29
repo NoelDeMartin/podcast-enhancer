@@ -23,7 +23,6 @@ it('can store an entry with an uploaded file', function () {
         ->post(route('entries.store'), [
             'feed_id' => $feed->id,
             'name' => 'New Entry',
-            'description' => 'A great entry',
             'file' => $file,
         ]);
 
@@ -34,7 +33,7 @@ it('can store an entry with an uploaded file', function () {
     expect($entry->file_path)->not->toBeNull();
 
     Storage::disk('local')->assertExists($entry->file_path);
-    Bus::assertBatched(fn ($batch) => $batch->name === 'Transcribe Entry: '.$entry->id);
+    Bus::assertBatched(fn ($batch) => $batch->name === 'Process entry '.$entry->id);
 });
 
 it('does not dispatch a transcription batch when storing entry without a file', function () {
@@ -82,7 +81,7 @@ it('can update an entry and replace the file', function () {
     Storage::disk('local')->assertMissing($oldPath);
     Storage::disk('local')->assertMissing('transcriptions/old.txt');
     Storage::disk('local')->assertExists($entry->file_path);
-    Bus::assertBatched(fn ($batch) => $batch->name === 'Transcribe Entry: '.$entry->id);
+    Bus::assertBatched(fn ($batch) => $batch->name === 'Process entry '.$entry->id);
 });
 
 it('clears transcription, summary, and chapters when deleting a file', function () {
@@ -188,6 +187,33 @@ it('returns 422 when regenerating transcription for entry without a file', funct
         ->assertStatus(422);
 
     expect(EntryJobBatch::where('entry_id', $entry->id)->count())->toBe(0);
+});
+
+it('returns chapters json for an entry with chapters', function () {
+    $entry = Entry::factory()->create([
+        'chapters' => [
+            ['title' => 'Intro', 'startTime' => 0],
+            ['title' => 'Main Topic', 'startTime' => 60],
+        ],
+    ]);
+
+    $response = $this->get(route('entries.chapters', $entry));
+
+    $response->assertSuccessful();
+    $response->assertJson([
+        'version' => '1.2.0',
+        'chapters' => [
+            ['title' => 'Intro', 'startTime' => 0],
+            ['title' => 'Main Topic', 'startTime' => 60],
+        ],
+    ]);
+});
+
+it('returns 404 when requesting chapters for entry without chapters', function () {
+    $entry = Entry::factory()->create(['chapters' => null]);
+
+    $this->get(route('entries.chapters', $entry))
+        ->assertNotFound();
 });
 
 it('deletes the file when an entry is destroyed', function () {

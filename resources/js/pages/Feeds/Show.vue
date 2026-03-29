@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { Head, usePoll } from '@inertiajs/vue3';
 import { useForm } from '@inertiajs/vue3';
-import { Loader2, MoreHorizontal, Plus, Rss } from 'lucide-vue-next';
+import { Clock, Loader2, MoreHorizontal, Plus, Rss } from 'lucide-vue-next';
 import { computed, ref, watch } from 'vue';
 import {
     store as storeEntry,
@@ -11,6 +11,7 @@ import {
     transcribe as transcribeEntry,
 } from '@/actions/App/Http/Controllers/EntryController';
 import FeedRssController from '@/actions/App/Http/Controllers/FeedRssController';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
     Dialog,
@@ -29,6 +30,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Separator } from '@/components/ui/separator';
 import {
     Table,
     TableBody,
@@ -59,7 +61,6 @@ const breadcrumbs: BreadcrumbItem[] = [
 const entryForm = useForm({
     feed_id: props.feed.id,
     name: '',
-    description: '',
     file: null as File | null,
 });
 
@@ -68,7 +69,7 @@ const showEntryForm = ref(false);
 const submitEntry = () => {
     entryForm.submit(storeEntry(), {
         onSuccess: () => {
-            entryForm.reset('name', 'description', 'file');
+            entryForm.reset('name', 'file');
             showEntryForm.value = false;
         },
     });
@@ -84,8 +85,34 @@ const regenerateTranscription = (id: number) => {
     useForm({}).submit(transcribeEntry(id));
 };
 
-const viewingTranscription = ref<any>(null);
+const viewingEntry = ref<any>(null);
 const viewingFailure = ref<any>(null);
+
+function formatTimestamp(seconds: number): string {
+    const h = Math.floor(seconds / 3600);
+    const m = Math.floor((seconds % 3600) / 60);
+    const s = Math.floor(seconds % 60);
+
+    return h > 0
+        ? `${h}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`
+        : `${m}:${String(s).padStart(2, '0')}`;
+}
+
+function parsedTranscription(entry: any): any[] | null {
+    if (!entry?.transcription) {
+        return null;
+    }
+
+    try {
+        return JSON.parse(entry.transcription);
+    } catch {
+        return null;
+    }
+}
+
+function hasDetails(entry: any): boolean {
+    return !!(entry.transcription || entry.summary || entry.chapters?.length);
+}
 
 type BatchStatus = 'pending' | 'failed' | 'completed' | null;
 
@@ -125,7 +152,6 @@ const isEditDialogOpen = ref(false);
 const editingEntry = ref<any>(null);
 const editEntryForm = useForm({
     name: '',
-    description: '',
     file: null as File | null,
     delete_file: false,
 });
@@ -133,7 +159,6 @@ const editEntryForm = useForm({
 const startEditEntry = (entry: any) => {
     editingEntry.value = entry;
     editEntryForm.name = entry.name;
-    editEntryForm.description = entry.description;
     editEntryForm.file = null;
     editEntryForm.delete_file = false;
     isEditDialogOpen.value = true;
@@ -203,20 +228,6 @@ const submitEditEntry = () => {
                                     </div>
                                 </div>
                                 <div class="grid gap-2">
-                                    <Label for="description">Description</Label>
-                                    <Input
-                                        id="description"
-                                        v-model="entryForm.description"
-                                        placeholder="Optional description"
-                                    />
-                                    <div
-                                        v-if="entryForm.errors.description"
-                                        class="text-sm text-red-500"
-                                    >
-                                        {{ entryForm.errors.description }}
-                                    </div>
-                                </div>
-                                <div class="grid gap-2">
                                     <Label for="file">Audio File</Label>
                                     <Input
                                         id="file"
@@ -270,21 +281,6 @@ const submitEditEntry = () => {
                                     class="text-sm text-red-500"
                                 >
                                     {{ editEntryForm.errors.name }}
-                                </div>
-                            </div>
-                            <div class="grid gap-2">
-                                <Label for="edit-description"
-                                    >Description</Label
-                                >
-                                <Input
-                                    id="edit-description"
-                                    v-model="editEntryForm.description"
-                                />
-                                <div
-                                    v-if="editEntryForm.errors.description"
-                                    class="text-sm text-red-500"
-                                >
-                                    {{ editEntryForm.errors.description }}
                                 </div>
                             </div>
                             <div class="grid gap-2">
@@ -384,23 +380,90 @@ const submitEditEntry = () => {
                 </DialogContent>
             </Dialog>
 
-            <Dialog
-                :open="!!viewingTranscription"
-                @update:open="viewingTranscription = null"
-            >
+            <Dialog :open="!!viewingEntry" @update:open="viewingEntry = null">
                 <DialogContent class="max-w-2xl">
                     <DialogHeader>
-                        <DialogTitle>Transcription</DialogTitle>
+                        <DialogTitle>Entry Details</DialogTitle>
                         <DialogDescription>
-                            {{ viewingTranscription?.name }}
+                            {{ viewingEntry?.name }}
                         </DialogDescription>
                     </DialogHeader>
-                    <div
-                        class="max-h-[60vh] overflow-y-auto rounded-md border p-4"
-                    >
-                        <p class="text-sm leading-relaxed whitespace-pre-wrap">
-                            {{ viewingTranscription?.transcription }}
-                        </p>
+                    <div class="max-h-[60vh] space-y-4 overflow-y-auto">
+                        <div v-if="viewingEntry?.summary">
+                            <h4 class="mb-2 text-sm font-semibold">Summary</h4>
+                            <p
+                                class="text-sm leading-relaxed text-muted-foreground"
+                            >
+                                {{ viewingEntry.summary }}
+                            </p>
+                        </div>
+
+                        <Separator
+                            v-if="
+                                viewingEntry?.summary &&
+                                viewingEntry?.chapters?.length
+                            "
+                        />
+
+                        <div v-if="viewingEntry?.chapters?.length">
+                            <h4 class="mb-2 text-sm font-semibold">Chapters</h4>
+                            <ul class="space-y-2">
+                                <li
+                                    v-for="(
+                                        chapter, index
+                                    ) in viewingEntry.chapters"
+                                    :key="index"
+                                    class="flex items-center gap-3"
+                                >
+                                    <Badge
+                                        variant="secondary"
+                                        class="shrink-0 font-mono text-xs"
+                                    >
+                                        <Clock class="mr-1 h-3 w-3" />
+                                        {{ formatTimestamp(chapter.startTime) }}
+                                    </Badge>
+                                    <span class="text-sm">{{
+                                        chapter.title
+                                    }}</span>
+                                </li>
+                            </ul>
+                        </div>
+
+                        <Separator
+                            v-if="
+                                (viewingEntry?.summary ||
+                                    viewingEntry?.chapters?.length) &&
+                                parsedTranscription(viewingEntry)
+                            "
+                        />
+
+                        <div v-if="parsedTranscription(viewingEntry)">
+                            <h4 class="mb-2 text-sm font-semibold">
+                                Transcription
+                            </h4>
+                            <div class="rounded-md border p-4">
+                                <div
+                                    v-for="(
+                                        segment, index
+                                    ) in parsedTranscription(viewingEntry)"
+                                    :key="index"
+                                    class="mb-2 last:mb-0"
+                                >
+                                    <span
+                                        class="mr-2 text-xs font-medium text-muted-foreground"
+                                    >
+                                        [{{
+                                            formatTimestamp(
+                                                segment.start_seconds,
+                                            )
+                                        }}] {{ segment.speaker }}:
+                                    </span>
+                                    <span class="text-sm leading-relaxed">{{
+                                        segment.text
+                                    }}</span>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </DialogContent>
             </Dialog>
@@ -411,7 +474,7 @@ const submitEditEntry = () => {
                         <TableRow>
                             <TableHead class="w-[45%]">Name</TableHead>
                             <TableHead class="w-[15%]">File</TableHead>
-                            <TableHead class="w-[20%]">Transcription</TableHead>
+                            <TableHead class="w-[20%]">Details</TableHead>
                             <TableHead class="text-right">Actions</TableHead>
                         </TableRow>
                     </TableHeader>
@@ -461,11 +524,9 @@ const submitEditEntry = () => {
                                             Failed
                                         </button>
                                         <button
-                                            v-else-if="entry.transcription"
+                                            v-else-if="hasDetails(entry)"
                                             class="text-blue-600 hover:underline dark:text-blue-400"
-                                            @click="
-                                                viewingTranscription = entry
-                                            "
+                                            @click="viewingEntry = entry"
                                         >
                                             View
                                         </button>

@@ -19,7 +19,16 @@ it('transcribes the audio file and saves the result', function () {
     $entry->refresh();
     expect($entry->transcription_path)->not->toBeNull();
     Storage::disk('local')->assertExists($entry->transcription_path);
-    expect(Storage::disk('local')->get($entry->transcription_path))->toEqual('This is the transcribed content.');
+
+    $transcription = json_decode(Storage::disk('local')->get($entry->transcription_path), true);
+    expect($transcription)->toMatchArray([
+        [
+            'text' => 'This is the transcribed content.',
+            'speaker' => 'Speaker 1',
+            'start_seconds' => 0,
+            'end_seconds' => 1,
+        ],
+    ]);
     Transcription::assertGenerated(fn ($prompt) => true);
 });
 

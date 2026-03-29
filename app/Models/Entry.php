@@ -17,7 +17,6 @@ class Entry extends Model
     protected $fillable = [
         'feed_id',
         'name',
-        'description',
         'file_path',
         'transcription_path',
         'summary',

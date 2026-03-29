@@ -16,7 +16,6 @@ it('can manage entries for a feed', function () {
     $entry = Entry::factory()->create([
         'feed_id' => $feed->id,
         'name' => 'Initial Entry',
-        'description' => 'A starter entry',
     ]);
 
     $this->actingAs($user);
@@ -28,7 +27,6 @@ it('can manage entries for a feed', function () {
     $page->click('Add Entry')
         ->waitForText('New Entry')
         ->fill('name', 'Pest 4 Released')
-        ->fill('description', 'The latest version is out')
         ->click('Save Entry')
         ->waitForText('Pest 4 Released');
 

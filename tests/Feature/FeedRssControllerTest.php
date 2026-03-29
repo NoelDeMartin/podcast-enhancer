@@ -11,7 +11,7 @@ it('generates an rss feed for a feed', function () {
     $entry = Entry::factory()->create([
         'feed_id' => $feed->id,
         'name' => 'Episode 1',
-        'description' => 'This is the first episode.',
+        'summary' => 'This is the first episode summary.',
         'file_path' => 'entries/audio.mp3',
     ]);
 
@@ -24,7 +24,49 @@ it('generates an rss feed for a feed', function () {
 
     $response->assertSee('<title>My Podcast</title>', false);
     $response->assertSee('<title>Episode 1</title>', false);
-    $response->assertSee('<description>This is the first episode.</description>', false);
+    $response->assertSee('<description>This is the first episode summary.</description>', false);
     $response->assertSee(route('entries.file', $entry), false);
     $response->assertSee('length="13"', false); // "dummy content" is 13 bytes
+});
+
+it('includes podcast chapters in rss when available', function () {
+    Storage::fake('local');
+
+    $feed = Feed::factory()->create(['title' => 'My Podcast']);
+    $entry = Entry::factory()->create([
+        'feed_id' => $feed->id,
+        'name' => 'Episode With Chapters',
+        'file_path' => 'entries/audio.mp3',
+        'chapters' => [
+            ['title' => 'Intro', 'startTime' => 0],
+            ['title' => 'Main Topic', 'startTime' => 60],
+        ],
+    ]);
+
+    Storage::put('entries/audio.mp3', 'dummy content');
+
+    $response = $this->get(route('feeds.rss', $feed));
+
+    $response->assertSuccessful();
+    $response->assertSee('xmlns:podcast="https://podcastindex.org/namespace/1.0"', false);
+    $response->assertSee('<podcast:chapters url="'.route('entries.chapters', $entry).'" type="application/json+chapters"/>', false);
+});
+
+it('omits podcast chapters in rss when not available', function () {
+    Storage::fake('local');
+
+    $feed = Feed::factory()->create(['title' => 'My Podcast']);
+    Entry::factory()->create([
+        'feed_id' => $feed->id,
+        'name' => 'Episode Without Chapters',
+        'file_path' => 'entries/audio.mp3',
+        'chapters' => null,
+    ]);
+
+    Storage::put('entries/audio.mp3', 'dummy content');
+
+    $response = $this->get(route('feeds.rss', $feed));
+
+    $response->assertSuccessful();
+    $response->assertDontSee('<podcast:chapters', false);
 });

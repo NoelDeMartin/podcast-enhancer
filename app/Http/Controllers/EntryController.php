@@ -4,10 +4,10 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreEntryRequest;
 use App\Http\Requests\UpdateEntryRequest;
-use App\Jobs\GenerateEntryChaptersJob;
-use App\Jobs\SummarizeEntryJob;
+use App\Jobs\ProcessEntryJob;
 use App\Jobs\TranscribeEntryJob;
 use App\Models\Entry;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Bus;
 use Illuminate\Support\Facades\Storage;
@@ -106,16 +106,27 @@ class EntryController extends Controller
         return Storage::response($entry->file_path);
     }
 
+    public function chapters(Entry $entry): JsonResponse
+    {
+        if (! $entry->chapters) {
+            abort(404);
+        }
+
+        return response()->json([
+            'version' => '1.2.0',
+            'chapters' => $entry->chapters,
+        ]);
+    }
+
     private function dispatchTranscriptionBatch(Entry $entry): void
     {
         $batch = Bus::batch([
             [
                 new TranscribeEntryJob($entry),
-                new SummarizeEntryJob($entry),
-                new GenerateEntryChaptersJob($entry),
+                new ProcessEntryJob($entry),
             ],
         ])
-            ->name('Transcribe Entry: '.$entry->id)
+            ->name('Process entry '.$entry->id)
             ->dispatch();
 
         $entry->jobBatches()->create(['batch_id' => $batch->id]);
