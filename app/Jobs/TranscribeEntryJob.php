@@ -8,11 +8,11 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Queue\Attributes\Timeout;
 use Illuminate\Queue\Attributes\Tries;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Storage;
-use Laravel\Ai\Files\RemoteAudio;
 use Laravel\Ai\Transcription;
 
-#[Timeout(300)]
+#[Timeout(600)]
 #[Tries(1)]
 class TranscribeEntryJob implements ShouldQueue
 {
@@ -30,13 +30,27 @@ class TranscribeEntryJob implements ShouldQueue
             return;
         }
 
-        if (filter_var($this->entry->audio_url, FILTER_VALIDATE_URL)) {
-            $audio = new RemoteAudio($this->entry->audio_url);
-            $transcript = Transcription::of($audio)->diarize()->timeout(300)->generate();
-        } else {
-            $transcript = Transcription::fromStorage($this->entry->audio_url)->diarize()->timeout(300)->generate();
+        if (! filter_var($this->entry->audio_url, FILTER_VALIDATE_URL)) {
+            $this->transcribe($this->entry->audio_url);
+
+            return;
         }
 
+        $tmpFilename = 'tmp_audio_'.$this->entry->id;
+
+        try {
+            $response = Http::timeout(300)->get($this->entry->audio_url);
+            Storage::disk('local')->writeStream($tmpFilename, $response->resource());
+
+            $this->transcribe($tmpFilename);
+        } finally {
+            Storage::disk('local')->delete($tmpFilename);
+        }
+    }
+
+    private function transcribe(string $storagePath): void
+    {
+        $transcript = Transcription::fromStorage($storagePath)->diarize()->timeout(300)->generate();
         $entryId = $this->entry->id;
         $path = "transcriptions/{$entryId}.json";
         Storage::put($path, json_encode($transcript->segments->toArray()));

@@ -591,7 +591,7 @@ const submitEditEntry = () => {
                                 <TableCell class="align-top">
                                     <a
                                         v-if="entry.audio_url"
-                                        :href="getEntryFile.url(entry.id)"
+                                        :href="entry.audio_url.startsWith('http') ? entry.audio_url : getEntryFile.url(entry.id)"
                                         target="_blank"
                                         class="text-blue-600 hover:underline dark:text-blue-400"
                                     >

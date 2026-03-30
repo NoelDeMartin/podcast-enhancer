@@ -4,6 +4,7 @@ use App\Jobs\TranscribeEntryJob;
 use App\Models\Entry;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Bus;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Storage;
 use Laravel\Ai\Transcription;
 
@@ -59,4 +60,30 @@ it('does nothing when the batch has been cancelled', function () {
 
     expect($entry->fresh()->transcription_path)->toBeNull();
     Transcription::assertNothingGenerated();
+});
+
+it('downloads external audio urls to a temporary file, transcribes, and cleans up the temp file', function () {
+    Storage::fake('local');
+    Transcription::fake(['This is the transcribed content.']);
+
+    Http::fake([
+        'https://example.com/audio.mp3' => Http::response('FAKE_MP3_BYTES', 200, [
+            'Content-Type' => 'audio/mpeg',
+        ]),
+    ]);
+
+    $entry = Entry::factory()->create(['audio_url' => 'https://example.com/audio.mp3']);
+
+    (new TranscribeEntryJob($entry))->handle();
+
+    Http::assertSent(fn ($request) => $request->url() === 'https://example.com/audio.mp3');
+
+    $entry->refresh();
+    expect($entry->transcription_path)->not->toBeNull();
+    Storage::assertExists($entry->transcription_path);
+
+    $tmpFilename = 'tmp_audio_'.$entry->id;
+    Storage::assertMissing($tmpFilename);
+
+    Transcription::assertGenerated(fn ($prompt) => true);
 });
