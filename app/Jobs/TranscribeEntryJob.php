@@ -36,21 +36,23 @@ class TranscribeEntryJob implements ShouldQueue
             return;
         }
 
-        $tmpFilename = 'tmp_audio_'.$this->entry->id;
+        $audioPath = parse_url($this->entry->audio_url, PHP_URL_PATH);
+        $extension = pathinfo($audioPath, PATHINFO_EXTENSION);
+        $tmpFilename = 'tmp_audio_'.$this->entry->id.'.'.$extension;
 
         try {
             $response = Http::timeout(300)->get($this->entry->audio_url);
             Storage::disk('local')->writeStream($tmpFilename, $response->resource());
 
-            $this->transcribe($tmpFilename);
+            $this->transcribe($tmpFilename, 'local');
         } finally {
             Storage::disk('local')->delete($tmpFilename);
         }
     }
 
-    private function transcribe(string $storagePath): void
+    private function transcribe(string $storagePath, ?string $disk = null): void
     {
-        $transcript = Transcription::fromStorage($storagePath)->diarize()->timeout(300)->generate();
+        $transcript = Transcription::fromStorage($storagePath, $disk)->diarize()->timeout(300)->generate();
         $entryId = $this->entry->id;
         $path = "transcriptions/{$entryId}.json";
         Storage::put($path, json_encode($transcript->segments->toArray()));
