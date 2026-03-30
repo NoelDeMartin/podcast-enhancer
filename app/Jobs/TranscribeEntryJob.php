@@ -7,6 +7,7 @@ use Illuminate\Bus\Batchable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Support\Facades\Storage;
+use Laravel\Ai\Files\RemoteAudio;
 use Laravel\Ai\Transcription;
 
 class TranscribeEntryJob implements ShouldQueue
@@ -21,11 +22,16 @@ class TranscribeEntryJob implements ShouldQueue
             return;
         }
 
-        if (! $this->entry->file_path) {
+        if (! $this->entry->audio_url) {
             return;
         }
 
-        $transcript = Transcription::fromStorage($this->entry->file_path)->diarize()->timeout(300)->generate();
+        if (filter_var($this->entry->audio_url, FILTER_VALIDATE_URL)) {
+            $audio = new RemoteAudio($this->entry->audio_url);
+            $transcript = Transcription::of($audio)->diarize()->timeout(300)->generate();
+        } else {
+            $transcript = Transcription::fromStorage($this->entry->audio_url)->diarize()->timeout(300)->generate();
+        }
 
         $entryId = $this->entry->id;
         $path = "transcriptions/{$entryId}.json";

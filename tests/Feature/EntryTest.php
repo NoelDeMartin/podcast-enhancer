@@ -30,9 +30,50 @@ it('can store an entry with an uploaded file', function () {
 
     $entry = Entry::where('name', 'New Entry')->first();
     expect($entry)->not->toBeNull();
-    expect($entry->file_path)->not->toBeNull();
+    expect($entry->audio_url)->not->toBeNull();
 
-    Storage::disk('local')->assertExists($entry->file_path);
+    Storage::disk('local')->assertExists($entry->audio_url);
+    Bus::assertBatched(fn ($batch) => $batch->name === 'Process entry '.$entry->id);
+});
+
+it('can store an entry with an external audio URL', function () {
+    Bus::fake();
+    $feed = Feed::factory()->create();
+
+    $response = $this->actingAs($this->user)
+        ->post(route('entries.store'), [
+            'feed_id' => $feed->id,
+            'name' => 'External Entry',
+            'audio_url' => 'https://example.com/audio.mp3',
+        ]);
+
+    $response->assertRedirect();
+
+    $entry = Entry::where('name', 'External Entry')->first();
+    expect($entry)->not->toBeNull();
+    expect($entry->audio_url)->toBe('https://example.com/audio.mp3');
+
+    Bus::assertBatched(fn ($batch) => $batch->name === 'Process entry '.$entry->id);
+});
+
+it('triggers transcription when a new audio_url is provided', function () {
+    Bus::fake();
+    $feed = Feed::factory()->create();
+    $entry = Entry::factory()->create([
+        'feed_id' => $feed->id,
+        'audio_url' => 'https://example.com/old.mp3',
+    ]);
+
+    $response = $this->actingAs($this->user)
+        ->put(route('entries.update', $entry), [
+            'name' => 'Updated Entry',
+            'audio_url' => 'https://example.com/new.mp3',
+        ]);
+
+    $response->assertRedirect();
+
+    $entry->refresh();
+    expect($entry->audio_url)->toBe('https://example.com/new.mp3');
     Bus::assertBatched(fn ($batch) => $batch->name === 'Process entry '.$entry->id);
 });
 
@@ -58,7 +99,7 @@ it('can update an entry and replace the file', function () {
 
     $entry = Entry::factory()->create([
         'feed_id' => $feed->id,
-        'file_path' => $oldPath,
+        'audio_url' => $oldPath,
         'transcription_path' => 'transcriptions/old.txt',
     ]);
 
@@ -74,13 +115,13 @@ it('can update an entry and replace the file', function () {
 
     $entry->refresh();
     expect($entry->name)->toBe('Updated Entry');
-    expect($entry->file_path)->not->toBe($oldPath);
-    expect($entry->file_path)->not->toBeNull();
+    expect($entry->audio_url)->not->toBe($oldPath);
+    expect($entry->audio_url)->not->toBeNull();
     expect($entry->transcription_path)->toBeNull();
 
     Storage::disk('local')->assertMissing($oldPath);
     Storage::disk('local')->assertMissing('transcriptions/old.txt');
-    Storage::disk('local')->assertExists($entry->file_path);
+    Storage::disk('local')->assertExists($entry->audio_url);
     Bus::assertBatched(fn ($batch) => $batch->name === 'Process entry '.$entry->id);
 });
 
@@ -93,22 +134,22 @@ it('clears transcription, summary, and chapters when deleting a file', function 
 
     $entry = Entry::factory()->create([
         'feed_id' => $feed->id,
-        'file_path' => $oldPath,
+        'audio_url' => $oldPath,
         'transcription_path' => 'transcriptions/old.txt',
         'summary' => 'Old Summary',
-        'chapters' => ['Old Chapter'],
+        'chapters' => [['title' => 'Old Chapter', 'startTime' => 0]],
     ]);
 
     $response = $this->actingAs($this->user)
         ->put(route('entries.update', $entry), [
             'name' => 'Updated Entry',
-            'delete_file' => true,
+            'delete_file' => '1',
         ]);
 
     $response->assertRedirect();
 
     $entry->refresh();
-    expect($entry->file_path)->toBeNull();
+    expect($entry->audio_url)->toBeNull();
     expect($entry->transcription_path)->toBeNull();
     expect($entry->summary)->toBeNull();
     expect($entry->chapters)->toBeNull();
@@ -124,20 +165,21 @@ it('can delete a file when updating an entry', function () {
 
     $entry = Entry::factory()->create([
         'feed_id' => $feed->id,
-        'file_path' => $oldPath,
+        'name' => 'Original Name',
+        'audio_url' => $oldPath,
     ]);
 
     $response = $this->actingAs($this->user)
         ->put(route('entries.update', $entry), [
             'name' => 'Updated Entry',
-            'delete_file' => true,
+            'delete_file' => '1',
         ]);
 
     $response->assertRedirect();
 
     $entry->refresh();
     expect($entry->name)->toBe('Updated Entry');
-    expect($entry->file_path)->toBeNull();
+    expect($entry->audio_url)->toBeNull();
 
     Storage::disk('local')->assertMissing($oldPath);
 });
@@ -151,7 +193,7 @@ it('records the job batch on the entry when dispatching transcription', function
 
     $entry = Entry::factory()->create([
         'feed_id' => $feed->id,
-        'file_path' => $path,
+        'audio_url' => $path,
     ]);
 
     $this->actingAs($this->user)
@@ -170,7 +212,7 @@ it('accumulates a new batch record each time transcription is triggered', functi
 
     $entry = Entry::factory()->create([
         'feed_id' => $feed->id,
-        'file_path' => $path,
+        'audio_url' => $path,
     ]);
 
     $this->actingAs($this->user)->post(route('entries.transcribe', $entry));
@@ -180,7 +222,7 @@ it('accumulates a new batch record each time transcription is triggered', functi
 });
 
 it('returns 422 when regenerating transcription for entry without a file', function () {
-    $entry = Entry::factory()->create(['file_path' => null]);
+    $entry = Entry::factory()->create(['audio_url' => null]);
 
     $this->actingAs($this->user)
         ->post(route('entries.transcribe', $entry))
@@ -224,7 +266,7 @@ it('deletes the file when an entry is destroyed', function () {
 
     $entry = Entry::factory()->create([
         'feed_id' => $feed->id,
-        'file_path' => $path,
+        'audio_url' => $path,
     ]);
 
     $response = $this->actingAs($this->user)

@@ -16,13 +16,18 @@
             <item>
                 <title>{{ $entry->name }}</title>
                 <description>{{ $entry->summary ?? '' }}</description>
-                <link>{{ $entry->file_path ? route('entries.file', $entry) : '' }}</link>
+                <link>{{ $entry->audio_url ? route('entries.file', $entry) : '' }}</link>
                 <guid isPermaLink="false">{{ $entry->id }}</guid>
                 <pubDate>{{ $entry->created_at->toRfc2822String() }}</pubDate>
                 <itunes:summary>{{ $entry->summary ?? '' }}</itunes:summary>
                 <itunes:episodeType>full</itunes:episodeType>
-                @if($entry->file_path)
-                    <enclosure url="{{ route('entries.file', $entry) }}" type="audio/mpeg" length="{{ Storage::exists($entry->file_path) ? Storage::size($entry->file_path) : 0 }}"/>
+                @if($entry->audio_url)
+                    @php
+                        $isUrl = filter_var($entry->audio_url, FILTER_VALIDATE_URL);
+                        $url = $isUrl ? $entry->audio_url : route('entries.file', $entry);
+                        $length = $isUrl ? 0 : (Storage::exists($entry->audio_url) ? Storage::size($entry->audio_url) : 0);
+                    @endphp
+                    <enclosure url="{{ $url }}" type="audio/mpeg" length="{{ $length }}"/>
                 @endif
                 @if($entry->chapters)
                     <podcast:chapters url="{{ route('entries.chapters', $entry) }}" type="application/json+chapters"/>

@@ -7,6 +7,7 @@ use App\Http\Requests\UpdateEntryRequest;
 use App\Jobs\ProcessEntryJob;
 use App\Jobs\TranscribeEntryJob;
 use App\Models\Entry;
+use App\Models\EntryJobBatch;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Bus;
@@ -19,12 +20,12 @@ class EntryController extends Controller
         $validated = $request->validated();
 
         if ($request->hasFile('file')) {
-            $validated['file_path'] = $request->file('file')->store('entries');
+            $validated['audio_url'] = $request->file('file')->store('entries');
         }
 
         $entry = Entry::create($validated);
 
-        if ($entry->file_path) {
+        if ($entry->audio_url) {
             $this->dispatchTranscriptionBatch($entry);
         }
 
@@ -38,26 +39,39 @@ class EntryController extends Controller
         $fileChanged = false;
 
         if ($request->hasFile('file')) {
-            if ($entry->file_path) {
-                Storage::delete($entry->file_path);
+            if ($entry->audio_url && ! filter_var($entry->audio_url, FILTER_VALIDATE_URL)) {
+                Storage::delete($entry->audio_url);
             }
             if ($entry->transcription_path) {
                 Storage::delete($entry->transcription_path);
                 $validated['transcription_path'] = null;
             }
-            $validated['file_path'] = $request->file('file')->store('entries');
+            $validated['audio_url'] = $request->file('file')->store('entries');
             $validated['summary'] = null;
             $validated['chapters'] = null;
             $fileChanged = true;
-        } elseif ($request->boolean('delete_file') && $entry->file_path) {
-            Storage::delete($entry->file_path);
+        } elseif ($request->boolean('delete_file') && $entry->audio_url) {
+            if (! filter_var($entry->audio_url, FILTER_VALIDATE_URL)) {
+                Storage::delete($entry->audio_url);
+            }
             if ($entry->transcription_path) {
                 Storage::delete($entry->transcription_path);
             }
-            $validated['file_path'] = null;
+            $validated['audio_url'] = null;
             $validated['transcription_path'] = null;
             $validated['summary'] = null;
             $validated['chapters'] = null;
+        } elseif ($request->has('audio_url') && $request->audio_url !== $entry->audio_url) {
+            if ($entry->audio_url && ! filter_var($entry->audio_url, FILTER_VALIDATE_URL)) {
+                Storage::delete($entry->audio_url);
+            }
+            if ($entry->transcription_path) {
+                Storage::delete($entry->transcription_path);
+                $validated['transcription_path'] = null;
+            }
+            $validated['summary'] = null;
+            $validated['chapters'] = null;
+            $fileChanged = true;
         }
 
         unset($validated['delete_file']);
@@ -73,8 +87,8 @@ class EntryController extends Controller
 
     public function destroy(Entry $entry): RedirectResponse
     {
-        if ($entry->file_path) {
-            Storage::delete($entry->file_path);
+        if ($entry->audio_url && ! filter_var($entry->audio_url, FILTER_VALIDATE_URL)) {
+            Storage::delete($entry->audio_url);
         }
 
         if ($entry->transcription_path) {
@@ -88,7 +102,7 @@ class EntryController extends Controller
 
     public function transcribe(Entry $entry): RedirectResponse
     {
-        if (! $entry->file_path) {
+        if (! $entry->audio_url) {
             abort(422, 'No audio file attached to this entry.');
         }
 
@@ -99,11 +113,15 @@ class EntryController extends Controller
 
     public function file(Entry $entry)
     {
-        if (! $entry->file_path) {
+        if (! $entry->audio_url) {
             abort(404);
         }
 
-        return Storage::response($entry->file_path);
+        if (filter_var($entry->audio_url, FILTER_VALIDATE_URL)) {
+            return redirect()->away($entry->audio_url);
+        }
+
+        return Storage::response($entry->audio_url);
     }
 
     public function chapters(Entry $entry): JsonResponse
@@ -121,14 +139,15 @@ class EntryController extends Controller
     private function dispatchTranscriptionBatch(Entry $entry): void
     {
         $batch = Bus::batch([
-            [
-                new TranscribeEntryJob($entry),
-                new ProcessEntryJob($entry),
-            ],
+            new TranscribeEntryJob($entry),
+            new ProcessEntryJob($entry),
         ])
             ->name('Process entry '.$entry->id)
             ->dispatch();
 
-        $entry->jobBatches()->create(['batch_id' => $batch->id]);
+        EntryJobBatch::forceCreate([
+            'entry_id' => $entry->id,
+            'batch_id' => $batch->id,
+        ]);
     }
 }

@@ -12,7 +12,7 @@ it('transcribes the audio file and saves the result', function () {
     Transcription::fake(['This is the transcribed content.']);
 
     $path = UploadedFile::fake()->create('audio.mp3', 1024)->store('entries', 'local');
-    $entry = Entry::factory()->create(['file_path' => $path]);
+    $entry = Entry::factory()->create(['audio_url' => $path]);
 
     (new TranscribeEntryJob($entry))->handle();
 
@@ -35,7 +35,7 @@ it('transcribes the audio file and saves the result', function () {
 it('does nothing when the entry has no file', function () {
     Transcription::fake()->preventStrayTranscriptions();
 
-    $entry = Entry::factory()->create(['file_path' => null]);
+    $entry = Entry::factory()->create(['audio_url' => null]);
 
     (new TranscribeEntryJob($entry))->handle();
 
@@ -48,7 +48,7 @@ it('does nothing when the batch has been cancelled', function () {
 
     Storage::fake('local');
     $path = UploadedFile::fake()->create('audio.mp3', 1024)->store('entries', 'local');
-    $entry = Entry::factory()->create(['file_path' => $path]);
+    $entry = Entry::factory()->create(['audio_url' => $path]);
 
     $batch = Bus::batch([])->dispatch();
     $batch->cancel();

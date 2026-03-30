@@ -12,7 +12,7 @@ it('generates an rss feed for a feed', function () {
         'feed_id' => $feed->id,
         'name' => 'Episode 1',
         'summary' => 'This is the first episode summary.',
-        'file_path' => 'entries/audio.mp3',
+        'audio_url' => 'entries/audio.mp3',
     ]);
 
     Storage::put('entries/audio.mp3', 'dummy content');
@@ -36,7 +36,7 @@ it('includes podcast chapters in rss when available', function () {
     $entry = Entry::factory()->create([
         'feed_id' => $feed->id,
         'name' => 'Episode With Chapters',
-        'file_path' => 'entries/audio.mp3',
+        'audio_url' => 'entries/audio.mp3',
         'chapters' => [
             ['title' => 'Intro', 'startTime' => 0],
             ['title' => 'Main Topic', 'startTime' => 60],
@@ -59,7 +59,7 @@ it('omits podcast chapters in rss when not available', function () {
     Entry::factory()->create([
         'feed_id' => $feed->id,
         'name' => 'Episode Without Chapters',
-        'file_path' => 'entries/audio.mp3',
+        'audio_url' => 'entries/audio.mp3',
         'chapters' => null,
     ]);
 

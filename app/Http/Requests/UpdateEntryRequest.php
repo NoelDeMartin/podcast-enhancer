@@ -15,6 +15,7 @@ class UpdateEntryRequest extends FormRequest
     {
         return [
             'name' => ['required', 'string', 'max:255'],
+            'audio_url' => ['nullable', 'string'],
             'file' => ['nullable', 'file', 'mimes:mp3,mp4,m4a,ogg,wav,flac,aac,opus,wma'],
             'delete_file' => ['nullable', 'boolean'],
         ];

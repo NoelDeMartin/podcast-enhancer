@@ -30,6 +30,13 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
 import {
     Table,
@@ -61,15 +68,18 @@ const breadcrumbs: BreadcrumbItem[] = [
 const entryForm = useForm({
     feed_id: props.feed.id,
     name: '',
+    audio_url: '',
     file: null as File | null,
 });
+
+const entrySource = ref<'url' | 'file'>('url');
 
 const showEntryForm = ref(false);
 
 const submitEntry = () => {
     entryForm.submit(storeEntry(), {
         onSuccess: () => {
-            entryForm.reset('name', 'file');
+            entryForm.reset('name', 'audio_url', 'file');
             showEntryForm.value = false;
         },
     });
@@ -152,13 +162,27 @@ const isEditDialogOpen = ref(false);
 const editingEntry = ref<any>(null);
 const editEntryForm = useForm({
     name: '',
+    audio_url: '',
     file: null as File | null,
     delete_file: false,
 });
 
+const editEntrySource = ref<'url' | 'file'>('url');
+
+const isExternal = (url: string | null) => {
+    if (!url) {
+        return false;
+    }
+
+    return url.startsWith('http://') || url.startsWith('https://');
+};
+
 const startEditEntry = (entry: any) => {
     editingEntry.value = entry;
     editEntryForm.name = entry.name;
+    const external = isExternal(entry.audio_url);
+    editEntrySource.value = external ? 'url' : 'file';
+    editEntryForm.audio_url = external ? entry.audio_url : '';
     editEntryForm.file = null;
     editEntryForm.delete_file = false;
     isEditDialogOpen.value = true;
@@ -228,6 +252,44 @@ const submitEditEntry = () => {
                                     </div>
                                 </div>
                                 <div class="grid gap-2">
+                                    <Label for="source">Source Type</Label>
+                                    <Select v-model="entrySource">
+                                        <SelectTrigger>
+                                            <SelectValue
+                                                placeholder="Select source"
+                                            />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem value="url"
+                                                >Remote URL</SelectItem
+                                            >
+                                            <SelectItem value="file"
+                                                >Upload File</SelectItem
+                                            >
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+                                <div
+                                    v-if="entrySource === 'url'"
+                                    class="grid gap-2"
+                                >
+                                    <Label for="audio_url">Audio URL</Label>
+                                    <Input
+                                        id="audio_url"
+                                        v-model="entryForm.audio_url"
+                                        placeholder="https://example.com/audio.mp3"
+                                    />
+                                    <div
+                                        v-if="entryForm.errors.audio_url"
+                                        class="text-sm text-red-500"
+                                    >
+                                        {{ entryForm.errors.audio_url }}
+                                    </div>
+                                </div>
+                                <div
+                                    v-if="entrySource === 'file'"
+                                    class="grid gap-2"
+                                >
                                     <Label for="file">Audio File</Label>
                                     <Input
                                         id="file"
@@ -284,10 +346,49 @@ const submitEditEntry = () => {
                                 </div>
                             </div>
                             <div class="grid gap-2">
+                                <Label for="edit-source">Source Type</Label>
+                                <Select v-model="editEntrySource">
+                                    <SelectTrigger>
+                                        <SelectValue
+                                            placeholder="Select source"
+                                        />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="url"
+                                            >Remote URL</SelectItem
+                                        >
+                                        <SelectItem value="file"
+                                            >Upload File</SelectItem
+                                        >
+                                    </SelectContent>
+                                </Select>
+                            </div>
+                            <div
+                                v-if="editEntrySource === 'url'"
+                                class="grid gap-2"
+                            >
+                                <Label for="edit-audio_url">Audio URL</Label>
+                                <Input
+                                    id="edit-audio_url"
+                                    v-model="editEntryForm.audio_url"
+                                    placeholder="https://example.com/audio.mp3"
+                                />
+                                <div
+                                    v-if="editEntryForm.errors.audio_url"
+                                    class="text-sm text-red-500"
+                                >
+                                    {{ editEntryForm.errors.audio_url }}
+                                </div>
+                            </div>
+                            <div
+                                v-if="editEntrySource === 'file'"
+                                class="grid gap-2"
+                            >
                                 <Label for="edit-file">Audio File</Label>
                                 <div
                                     v-if="
-                                        editingEntry?.file_path &&
+                                        !isExternal(editingEntry?.audio_url) &&
+                                        editingEntry?.audio_url &&
                                         !editEntryForm.delete_file &&
                                         !editEntryForm.file
                                     "
@@ -326,7 +427,10 @@ const submitEditEntry = () => {
                                     <Button
                                         v-if="
                                             editEntryForm.delete_file &&
-                                            editingEntry?.file_path
+                                            !isExternal(
+                                                editingEntry?.audio_url,
+                                            ) &&
+                                            editingEntry?.audio_url
                                         "
                                         type="button"
                                         variant="link"
@@ -486,12 +590,12 @@ const submitEditEntry = () => {
                                 }}</TableCell>
                                 <TableCell class="align-top">
                                     <a
-                                        v-if="entry.file_path"
+                                        v-if="entry.audio_url"
                                         :href="getEntryFile.url(entry.id)"
                                         target="_blank"
                                         class="text-blue-600 hover:underline dark:text-blue-400"
                                     >
-                                        Download
+                                        View
                                     </a>
                                     <span
                                         v-else
@@ -537,7 +641,7 @@ const submitEditEntry = () => {
                                         >
                                         <button
                                             v-if="
-                                                entry.file_path &&
+                                                entry.audio_url &&
                                                 getBatchStatus(entry) !==
                                                     'pending'
                                             "
