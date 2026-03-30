@@ -7,8 +7,12 @@ use App\Models\Entry;
 use Illuminate\Bus\Batchable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
+use Illuminate\Queue\Attributes\Timeout;
+use Illuminate\Queue\Attributes\Tries;
 use Illuminate\Support\Facades\Storage;
 
+#[Timeout(300)]
+#[Tries(1)]
 class ProcessEntryJob implements ShouldQueue
 {
     use Batchable, Queueable;
