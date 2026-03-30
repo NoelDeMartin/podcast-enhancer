@@ -8,7 +8,7 @@ import {
     destroy as destroyEntry,
     update as updateEntryAction,
     file as getEntryFile,
-    transcribe as transcribeEntry,
+    produce as produceEntry,
 } from '@/actions/App/Http/Controllers/EntryController';
 import FeedRssController from '@/actions/App/Http/Controllers/FeedRssController';
 import { Badge } from '@/components/ui/badge';
@@ -92,7 +92,7 @@ const deleteEntry = (id: number) => {
 };
 
 const regenerateTranscription = (id: number) => {
-    useForm({}).submit(transcribeEntry(id));
+    useForm({}).submit(produceEntry(id));
 };
 
 const viewingEntry = ref<any>(null);

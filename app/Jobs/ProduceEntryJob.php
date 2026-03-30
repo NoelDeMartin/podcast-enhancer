@@ -13,7 +13,7 @@ use Illuminate\Support\Facades\Storage;
 
 #[Timeout(300)]
 #[Tries(1)]
-class ProcessEntryJob implements ShouldQueue
+class ProduceEntryJob implements ShouldQueue
 {
     use Batchable, Queueable;
 

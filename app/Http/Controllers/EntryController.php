@@ -4,10 +4,12 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreEntryRequest;
 use App\Http\Requests\UpdateEntryRequest;
-use App\Jobs\ProcessEntryJob;
-use App\Jobs\TranscribeEntryJob;
+use App\Jobs\PrepareTranscriptionJob;
+use App\Jobs\ProduceEntryJob;
+use App\Jobs\StitchTranscriptionsJob;
 use App\Models\Entry;
 use App\Models\EntryJobBatch;
+use Illuminate\Bus\Batch;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Bus;
@@ -100,7 +102,7 @@ class EntryController extends Controller
         return redirect()->back()->with('success', 'Entry deleted successfully.');
     }
 
-    public function transcribe(Entry $entry): RedirectResponse
+    public function produce(Entry $entry): RedirectResponse
     {
         if (! $entry->audio_url) {
             abort(422, 'No audio file attached to this entry.');
@@ -138,12 +140,39 @@ class EntryController extends Controller
 
     private function dispatchTranscriptionBatch(Entry $entry): void
     {
+        $entryId = $entry->id;
+
+        if (! $entryId) {
+            throw new \Exception('Entry ID is missing before dispatching batch');
+        }
+
         $batch = Bus::batch([
-            new TranscribeEntryJob($entry),
-            new ProcessEntryJob($entry),
+            new PrepareTranscriptionJob($entry),
         ])
-            ->name('Process entry '.$entry->id)
+            ->then(function (Batch $batch) use ($entryId) {
+                $entry = Entry::find($entryId);
+
+                if ($entry) {
+                    $this->dispatchProductionBatch($entry, $batch->id);
+                }
+            })
+            ->name('Process entry '.$entryId)
             ->dispatch();
+
+        EntryJobBatch::forceCreate([
+            'entry_id' => $entryId,
+            'batch_id' => $batch->id,
+        ]);
+    }
+
+    private function dispatchProductionBatch(Entry $entry, string $transcriptionBatchId): void
+    {
+        $batch = Bus::batch([
+            [
+                new StitchTranscriptionsJob($entry, $transcriptionBatchId),
+                new ProduceEntryJob($entry),
+            ],
+        ])->dispatch();
 
         EntryJobBatch::forceCreate([
             'entry_id' => $entry->id,

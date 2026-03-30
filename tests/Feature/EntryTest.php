@@ -197,7 +197,7 @@ it('records the job batch on the entry when dispatching transcription', function
     ]);
 
     $this->actingAs($this->user)
-        ->post(route('entries.transcribe', $entry))
+        ->post(route('entries.produce', $entry))
         ->assertRedirect();
 
     expect(EntryJobBatch::where('entry_id', $entry->id)->count())->toBe(1);
@@ -215,8 +215,10 @@ it('accumulates a new batch record each time transcription is triggered', functi
         'audio_url' => $path,
     ]);
 
-    $this->actingAs($this->user)->post(route('entries.transcribe', $entry));
-    $this->actingAs($this->user)->post(route('entries.transcribe', $entry));
+    $this->actingAs($this->user)
+        ->post(route('entries.produce', $entry));
+    $this->actingAs($this->user)
+        ->post(route('entries.produce', $entry));
 
     expect(EntryJobBatch::where('entry_id', $entry->id)->count())->toBe(2);
 });
@@ -225,7 +227,7 @@ it('returns 422 when regenerating transcription for entry without a file', funct
     $entry = Entry::factory()->create(['audio_url' => null]);
 
     $this->actingAs($this->user)
-        ->post(route('entries.transcribe', $entry))
+        ->post(route('entries.produce', $entry))
         ->assertStatus(422);
 
     expect(EntryJobBatch::where('entry_id', $entry->id)->count())->toBe(0);

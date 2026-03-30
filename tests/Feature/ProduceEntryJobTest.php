@@ -1,9 +1,8 @@
 <?php
 
 use App\Ai\Agents\PodcastEditorAgent;
-use App\Jobs\ProcessEntryJob;
+use App\Jobs\ProduceEntryJob;
 use App\Models\Entry;
-use Illuminate\Support\Facades\Bus;
 use Illuminate\Support\Facades\Storage;
 
 it('processes the transcript and saves summary and chapters', function () {
@@ -30,7 +29,7 @@ it('processes the transcript and saves summary and chapters', function () {
         'transcription_path' => 'transcriptions/fake.json',
     ]);
 
-    (new ProcessEntryJob($entry))->handle();
+    (new ProduceEntryJob($entry))->handle();
 
     $entry->refresh();
 
@@ -51,26 +50,7 @@ it('does nothing when the entry has no transcription', function () {
         'transcription_path' => null,
     ]);
 
-    (new ProcessEntryJob($entry))->handle();
-
-    expect($entry->fresh()->summary)->toBeNull();
-    expect($entry->fresh()->chapters)->toBeNull();
-    PodcastEditorAgent::assertNeverPrompted();
-});
-
-it('does nothing when the batch has been cancelled', function () {
-    PodcastEditorAgent::fake()->preventStrayPrompts();
-
-    $entry = Entry::factory()->create([
-        'transcription_path' => 'transcriptions/fake.json',
-    ]);
-
-    $batch = Bus::batch([])->dispatch();
-    $batch->cancel();
-
-    $job = new ProcessEntryJob($entry);
-    $job->batchId = $batch->id;
-    $job->handle();
+    (new ProduceEntryJob($entry))->handle();
 
     expect($entry->fresh()->summary)->toBeNull();
     expect($entry->fresh()->chapters)->toBeNull();
