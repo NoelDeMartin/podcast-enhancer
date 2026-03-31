@@ -40,7 +40,7 @@ it('processes the transcript and saves summary and chapters', function () {
         ->and($entry->chapters[1]['title'])->toBe('Main Topic')
         ->and($entry->chapters[1]['startTime'])->toBe(5);
 
-    PodcastEditorAgent::assertPrompted("[0] Welcome to the show.\n[5] Today we discuss AI.");
+    PodcastEditorAgent::assertPrompted('[0] Welcome to the show. Today we discuss AI.');
 });
 
 it('does nothing when the entry has no transcription', function () {

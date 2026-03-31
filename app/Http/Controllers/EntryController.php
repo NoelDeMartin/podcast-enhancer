@@ -12,6 +12,7 @@ use App\Models\EntryJobBatch;
 use Illuminate\Bus\Batch;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Bus;
 use Illuminate\Support\Facades\Storage;
 
@@ -102,15 +103,27 @@ class EntryController extends Controller
         return redirect()->back()->with('success', 'Entry deleted successfully.');
     }
 
-    public function produce(Entry $entry): RedirectResponse
+    public function produce(Request $request, Entry $entry): RedirectResponse
     {
-        if (! $entry->audio_url) {
+        $reuseTranscript = $request->boolean('reuse_transcript');
+
+        if (! $reuseTranscript && ! $entry->audio_url) {
             abort(422, 'No audio file attached to this entry.');
         }
 
-        $this->dispatchTranscriptionBatch($entry);
+        if ($reuseTranscript && ! $entry->transcription_path) {
+            abort(422, 'No transcription available to regenerate chapters and summary.');
+        }
 
-        return redirect()->back()->with('success', 'Transcription queued successfully.');
+        if ($reuseTranscript) {
+            $this->dispatchMetadataBatch($entry);
+        } else {
+            $this->dispatchTranscriptionBatch($entry);
+        }
+
+        return redirect()->back()->with('success', $reuseTranscript
+            ? 'Chapters and summary regeneration queued successfully.'
+            : 'Transcription queued successfully.');
     }
 
     public function file(Entry $entry)
@@ -170,6 +183,20 @@ class EntryController extends Controller
         $batch = Bus::batch([
             [
                 new StitchTranscriptionsJob($entry, $transcriptionBatchId),
+                new ProduceEntryJob($entry),
+            ],
+        ])->dispatch();
+
+        EntryJobBatch::forceCreate([
+            'entry_id' => $entry->id,
+            'batch_id' => $batch->id,
+        ]);
+    }
+
+    private function dispatchMetadataBatch(Entry $entry): void
+    {
+        $batch = Bus::batch([
+            [
                 new ProduceEntryJob($entry),
             ],
         ])->dispatch();

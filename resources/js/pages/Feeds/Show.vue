@@ -95,6 +95,10 @@ const regenerateTranscription = (id: number) => {
     useForm({}).submit(produceEntry(id));
 };
 
+const regenerateMetadata = (id: number) => {
+    useForm({ reuse_transcript: true }).submit(produceEntry(id));
+};
+
 const viewingEntry = ref<any>(null);
 const viewingFailure = ref<any>(null);
 
@@ -643,21 +647,6 @@ const submitEditEntry = () => {
                                             class="text-gray-400 dark:text-gray-600"
                                             >-</span
                                         >
-                                        <button
-                                            v-if="
-                                                entry.audio_url &&
-                                                getBatchStatus(entry) !==
-                                                    'pending'
-                                            "
-                                            class="text-gray-500 hover:underline dark:text-gray-400"
-                                            @click="
-                                                regenerateTranscription(
-                                                    entry.id,
-                                                )
-                                            "
-                                        >
-                                            Regenerate
-                                        </button>
                                     </div>
                                 </TableCell>
                                 <TableCell class="text-right align-top">
@@ -680,6 +669,33 @@ const submitEditEntry = () => {
                                                 @click="startEditEntry(entry)"
                                             >
                                                 Edit
+                                            </DropdownMenuItem>
+                                            <DropdownMenuItem
+                                                v-if="
+                                                    entry.audio_url &&
+                                                    getBatchStatus(entry) !==
+                                                        'pending'
+                                                "
+                                                @click="
+                                                    regenerateTranscription(
+                                                        entry.id,
+                                                    )
+                                                "
+                                            >
+                                                Regenerate
+                                            </DropdownMenuItem>
+                                            <DropdownMenuItem
+                                                v-if="
+                                                    entry.transcription_path &&
+                                                    getBatchStatus(entry) !==
+                                                        'pending'
+                                                "
+                                                @click="
+                                                    regenerateMetadata(entry.id)
+                                                "
+                                            >
+                                                Regenerate (only chapters &
+                                                summary)
                                             </DropdownMenuItem>
                                             <DropdownMenuItem
                                                 class="text-red-600"

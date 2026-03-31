@@ -233,6 +233,41 @@ it('returns 422 when regenerating transcription for entry without a file', funct
     expect(EntryJobBatch::where('entry_id', $entry->id)->count())->toBe(0);
 });
 
+it('can regenerate chapters and summary from an existing transcription', function () {
+    Storage::fake('local');
+    Bus::fake();
+    $feed = Feed::factory()->create();
+
+    $entry = Entry::factory()->create([
+        'feed_id' => $feed->id,
+        'audio_url' => 'entries/audio.mp3',
+        'transcription_path' => 'transcriptions/example.json',
+    ]);
+
+    $this->actingAs($this->user)
+        ->post(route('entries.produce', $entry), [
+            'reuse_transcript' => true,
+        ])
+        ->assertRedirect();
+
+    expect(EntryJobBatch::where('entry_id', $entry->id)->count())->toBe(1);
+});
+
+it('returns 422 when regenerating chapters and summary without a transcription', function () {
+    $entry = Entry::factory()->create([
+        'audio_url' => 'entries/audio.mp3',
+        'transcription_path' => null,
+    ]);
+
+    $this->actingAs($this->user)
+        ->post(route('entries.produce', $entry), [
+            'reuse_transcript' => true,
+        ])
+        ->assertStatus(422);
+
+    expect(EntryJobBatch::where('entry_id', $entry->id)->count())->toBe(0);
+});
+
 it('returns chapters json for an entry with chapters', function () {
     $entry = Entry::factory()->create([
         'chapters' => [
