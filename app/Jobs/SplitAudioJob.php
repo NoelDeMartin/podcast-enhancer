@@ -49,7 +49,7 @@ class SplitAudioJob implements ShouldQueue
             return;
         }
 
-        Log::info(static::class.' started', [
+        Log::info(static::class." started (chunk #{$this->chunkIndex})", [
             'entry_id' => $this->entry->id,
             'audio_path' => $this->audioPath,
             'chunk_index' => $this->chunkIndex,
@@ -57,9 +57,8 @@ class SplitAudioJob implements ShouldQueue
             'batch_id' => $this->batchId,
         ]);
 
-        $tmpDir = "tmp/batch-{$this->batch()->id}/";
         $extension = pathinfo($this->audioPath, PATHINFO_EXTENSION);
-        $chunkFile = "{$tmpDir}/chunks/chunk_{$this->chunkIndex}.{$extension}";
+        $chunkFile = "tmp/batch-{$this->batch()->id}/chunks/chunk_{$this->chunkIndex}.{$extension}";
 
         Log::info(static::class.' exporting chunk', [
             'entry_id' => $this->entry->id,
@@ -84,7 +83,7 @@ class SplitAudioJob implements ShouldQueue
             (int) $this->startTime
         ));
 
-        Log::info(static::class.' finished (queued TranscribeAudioJob chunk)', [
+        Log::info(static::class." finished (queued TranscribeAudioJob chunk #{$this->chunkIndex})", [
             'entry_id' => $this->entry->id,
             'audio_path' => $this->audioPath,
             'chunk_index' => $this->chunkIndex,

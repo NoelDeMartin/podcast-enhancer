@@ -54,7 +54,7 @@ class TranscribeAudioJob implements ShouldQueue
             return;
         }
 
-        Log::info(static::class.' started', [
+        Log::info(static::class." started (chunk #{$this->chunkIndex})", [
             'entry_id' => $this->entry->id,
             'chunk_path' => $this->chunkPath,
             'chunk_index' => $this->chunkIndex,
@@ -98,7 +98,7 @@ class TranscribeAudioJob implements ShouldQueue
             json_encode($segments->toArray())
         );
 
-        Log::info(static::class.' finished (saved transcription chunk)', [
+        Log::info(static::class." finished (saved transcription chunk #{$this->chunkIndex})", [
             'entry_id' => $this->entry->id,
             'chunk_path' => $this->chunkPath,
             'chunk_index' => $this->chunkIndex,
