@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Bus;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Queue;
 use Illuminate\Support\Facades\Storage;
+use ProtoneMedia\LaravelFFMpeg\Support\FFMpeg;
 use Tests\TestCase;
 
 it('dispatches the correct initial batch', function () {
@@ -48,6 +49,10 @@ it('prepare transcription job downloads file and adds next job', function () {
 
     $batch = Bus::batch([])->dispatch();
 
+    FFMpeg::shouldReceive('fromDisk->open->getDurationInSeconds')
+        ->once()
+        ->andReturn(60); // 1 minute, so a single chunk
+
     $job = new PrepareTranscriptionJob($entry);
     $job->withBatchId($batch->id);
     $job->handle();
@@ -56,6 +61,9 @@ it('prepare transcription job downloads file and adds next job', function () {
     Storage::assertExists($tmpPath);
 
     Queue::assertPushed(SplitAudioJob::class, function (SplitAudioJob $job) use ($entry, $tmpPath) {
-        return $job->entry->is($entry) && $job->audioPath === $tmpPath;
+        return $job->entry->is($entry)
+            && $job->audioPath === $tmpPath
+            && $job->chunkIndex === 0
+            && $job->startTime === 0;
     });
 });

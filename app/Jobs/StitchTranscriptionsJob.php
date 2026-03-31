@@ -8,6 +8,7 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Queue\Attributes\Timeout;
 use Illuminate\Queue\Attributes\Tries;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 
 #[Timeout(300)]
@@ -21,6 +22,12 @@ class StitchTranscriptionsJob implements ShouldQueue
     public function handle(): void
     {
         if ($this->batch()?->cancelled()) {
+            Log::info(static::class.' skipped (batch cancelled)', [
+                'entry_id' => $this->entry->id,
+                'transcription_batch_id' => $this->transcriptionBatchId,
+                'batch_id' => $this->batchId,
+            ]);
+
             return;
         }
 
@@ -28,8 +35,23 @@ class StitchTranscriptionsJob implements ShouldQueue
         $files = Storage::files($transcriptionsDir);
 
         if (empty($files)) {
+            Log::info(static::class.' skipped (no transcription chunks found)', [
+                'entry_id' => $this->entry->id,
+                'transcriptions_dir' => $transcriptionsDir,
+                'transcription_batch_id' => $this->transcriptionBatchId,
+                'batch_id' => $this->batchId,
+            ]);
+
             return;
         }
+
+        Log::info(static::class.' started', [
+            'entry_id' => $this->entry->id,
+            'transcriptions_dir' => $transcriptionsDir,
+            'files_count' => count($files),
+            'transcription_batch_id' => $this->transcriptionBatchId,
+            'batch_id' => $this->batchId,
+        ]);
 
         // Sort files by index in filename chunk_{index}.json
         $files = collect($files)->sortBy(function ($file) {
@@ -65,5 +87,22 @@ class StitchTranscriptionsJob implements ShouldQueue
 
         // Clean up tmp files
         Storage::deleteDirectory("tmp/batch-{$this->transcriptionBatchId}/");
+
+        Log::info(static::class.' finished (saved stitched transcription)', [
+            'entry_id' => $this->entry->id,
+            'transcription_path' => $path,
+            'transcription_batch_id' => $this->transcriptionBatchId,
+            'batch_id' => $this->batchId,
+        ]);
+    }
+
+    public function failed(\Throwable $exception): void
+    {
+        Log::error(static::class.' failed: '.$exception->getMessage(), [
+            'entry_id' => $this->entry->id,
+            'transcription_batch_id' => $this->transcriptionBatchId,
+            'batch_id' => $this->batchId,
+            'exception' => $exception,
+        ]);
     }
 }
