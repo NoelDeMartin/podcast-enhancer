@@ -42,12 +42,13 @@ PROMPT;
     {
         return [
             'summary' => $schema->string()->required()->description('Summary of the episode'),
-            'chapters' => $schema->array(
-                $schema->object([
+            'chapters' => $schema->array()
+                ->items($schema->object([
                     'title' => $schema->string()->required()->description('Title of the chapter'),
                     'startTime' => $schema->integer()->required()->description('Start of the chapter in seconds'),
-                ])
-            )->required()->description('List of chapters'),
+                ])->required())
+                ->required()
+                ->description('List of chapters'),
         ];
     }
 }
