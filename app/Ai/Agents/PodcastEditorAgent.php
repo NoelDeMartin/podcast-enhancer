@@ -32,6 +32,7 @@ CRITICAL RULES:
 - Every chapter `startTime` MUST exactly match one of the bracketed timestamps present in the transcript.
 - Do NOT guess timestamps. If you are unsure, choose the closest earlier timestamp that is clearly relevant.
 - Create enough chapters so no single chapter spans an excessively large portion of the episode.
+- Use the same language as the transcription for both the summary and the chapters.
 PROMPT;
     }
 
