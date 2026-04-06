@@ -43,6 +43,34 @@ it('processes the transcript and saves summary and chapters', function () {
     PodcastEditorAgent::assertPrompted('[0] Welcome to the show. Today we discuss AI.');
 });
 
+it('appends AI summary after original summary if tag is present', function () {
+    Storage::fake('local');
+
+    $segments = [
+        ['text' => 'Hello.', 'speaker' => 'Speaker 1', 'start_seconds' => 0, 'end_seconds' => 5],
+    ];
+
+    Storage::put('transcriptions/fake.json', json_encode($segments));
+
+    PodcastEditorAgent::fake([
+        [
+            'summary' => 'AI Summary.',
+            'chapters' => [['title' => 'Intro', 'startTime' => 0]],
+        ],
+    ]);
+
+    $entry = Entry::factory()->create([
+        'transcription_path' => 'transcriptions/fake.json',
+        'summary' => '<original_summary>Original Summary.</original_summary>',
+    ]);
+
+    (new ProduceEntryJob($entry))->handle();
+
+    $entry->refresh();
+
+    expect($entry->summary)->toBe("<original_summary>Original Summary.</original_summary>\n\nAI Summary.");
+});
+
 it('does nothing when the entry has no transcription', function () {
     PodcastEditorAgent::fake()->preventStrayPrompts();
 

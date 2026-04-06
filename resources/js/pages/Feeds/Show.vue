@@ -11,8 +11,13 @@ import {
     produce as produceEntry,
 } from '@/actions/App/Http/Controllers/EntryController';
 import FeedRssController from '@/actions/App/Http/Controllers/FeedRssController';
+import {
+    fetch as fetchRssAction,
+    store as storeRssAction,
+} from '@/actions/App/Http/Controllers/RssImportController';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
 import {
     Dialog,
     DialogContent,
@@ -97,6 +102,73 @@ const regenerateTranscription = (id: number) => {
 
 const regenerateMetadata = (id: number) => {
     useForm({ reuse_transcript: true }).submit(produceEntry(id));
+};
+
+const showRssModal = ref(false);
+const rssUrl = ref('');
+const episodes = ref<any[]>([]);
+const selectedEpisodes = ref<number[]>([]);
+const isFetchingRss = ref(false);
+const rssError = ref('');
+
+const fetchRss = async () => {
+    isFetchingRss.value = true;
+    rssError.value = '';
+
+    try {
+        const response = await fetch(fetchRssAction(props.feed.id).url, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                Accept: 'application/json',
+                'X-CSRF-TOKEN':
+                    (
+                        document.querySelector(
+                            'meta[name="csrf-token"]',
+                        ) as HTMLMetaElement
+                    )?.content || '',
+            },
+            body: JSON.stringify({ url: rssUrl.value }),
+        });
+
+        if (!response.ok) {
+            const data = await response.json();
+
+            throw new Error(data.message || 'Failed to fetch RSS feed.');
+        }
+
+        const data = await response.json();
+        episodes.value = data.episodes;
+        selectedEpisodes.value = [];
+    } catch (e: any) {
+        rssError.value = e.message;
+    } finally {
+        isFetchingRss.value = false;
+    }
+};
+
+const importRss = () => {
+    const selected = episodes.value.filter((_, i) =>
+        selectedEpisodes.value.includes(i),
+    );
+    useForm({ episodes: selected }).submit(storeRssAction(props.feed.id), {
+        onSuccess: () => {
+            showRssModal.value = false;
+            rssUrl.value = '';
+            episodes.value = [];
+            selectedEpisodes.value = [];
+        },
+    });
+};
+
+const toggleEpisode = (index: number) => {
+    if (selectedEpisodes.value.includes(index)) {
+        selectedEpisodes.value = selectedEpisodes.value.filter(
+            (i) => i !== index,
+        );
+    } else {
+        selectedEpisodes.value.push(index);
+    }
 };
 
 const viewingEntry = ref<any>(null);
@@ -224,105 +296,238 @@ const submitEditEntry = () => {
                     </a>
                 </div>
 
-                <Dialog v-model:open="showEntryForm">
-                    <DialogTrigger as-child>
-                        <Button>
-                            <Plus class="mr-2 h-4 w-4" />
-                            Add Entry
-                        </Button>
-                    </DialogTrigger>
-                    <DialogContent>
-                        <form @submit.prevent="submitEntry">
-                            <DialogHeader>
-                                <DialogTitle>New Entry</DialogTitle>
-                                <DialogDescription>
-                                    Add a new entry to this feed.
-                                </DialogDescription>
-                            </DialogHeader>
-                            <div class="grid gap-4 py-4">
-                                <div class="grid gap-2">
-                                    <Label for="name">Name</Label>
-                                    <Input
-                                        id="name"
-                                        v-model="entryForm.name"
-                                        placeholder="Entry Name"
-                                        required
-                                    />
+                <div class="flex items-center gap-2">
+                    <Dialog v-model:open="showEntryForm">
+                        <DialogTrigger as-child>
+                            <Button>
+                                <Plus class="mr-2 h-4 w-4" />
+                                Add Entry
+                            </Button>
+                        </DialogTrigger>
+                        <DialogContent>
+                            <form @submit.prevent="submitEntry">
+                                <DialogHeader>
+                                    <DialogTitle>New Entry</DialogTitle>
+                                    <DialogDescription>
+                                        Add a new entry to this feed.
+                                    </DialogDescription>
+                                </DialogHeader>
+                                <div class="grid gap-4 py-4">
+                                    <div class="grid gap-2">
+                                        <Label for="name">Name</Label>
+                                        <Input
+                                            id="name"
+                                            v-model="entryForm.name"
+                                            placeholder="Entry Name"
+                                            required
+                                        />
+                                        <div
+                                            v-if="entryForm.errors.name"
+                                            class="text-sm text-red-500"
+                                        >
+                                            {{ entryForm.errors.name }}
+                                        </div>
+                                    </div>
+                                    <div class="grid gap-2">
+                                        <Label for="source">Source Type</Label>
+                                        <Select v-model="entrySource">
+                                            <SelectTrigger>
+                                                <SelectValue
+                                                    placeholder="Select source"
+                                                />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                <SelectItem value="url"
+                                                    >Remote URL</SelectItem
+                                                >
+                                                <SelectItem value="file"
+                                                    >Upload File</SelectItem
+                                                >
+                                            </SelectContent>
+                                        </Select>
+                                    </div>
                                     <div
-                                        v-if="entryForm.errors.name"
-                                        class="text-sm text-red-500"
+                                        v-if="entrySource === 'url'"
+                                        class="grid gap-2"
                                     >
-                                        {{ entryForm.errors.name }}
+                                        <Label for="audio_url">Audio URL</Label>
+                                        <Input
+                                            id="audio_url"
+                                            v-model="entryForm.audio_url"
+                                            placeholder="https://example.com/audio.mp3"
+                                        />
+                                        <div
+                                            v-if="entryForm.errors.audio_url"
+                                            class="text-sm text-red-500"
+                                        >
+                                            {{ entryForm.errors.audio_url }}
+                                        </div>
+                                    </div>
+                                    <div
+                                        v-if="entrySource === 'file'"
+                                        class="grid gap-2"
+                                    >
+                                        <Label for="file">Audio File</Label>
+                                        <Input
+                                            id="file"
+                                            type="file"
+                                            @input="
+                                                entryForm.file =
+                                                    $event.target.files[0]
+                                            "
+                                            accept="audio/*"
+                                        />
+                                        <div
+                                            v-if="entryForm.errors.file"
+                                            class="text-sm text-red-500"
+                                        >
+                                            {{ entryForm.errors.file }}
+                                        </div>
                                     </div>
                                 </div>
-                                <div class="grid gap-2">
-                                    <Label for="source">Source Type</Label>
-                                    <Select v-model="entrySource">
-                                        <SelectTrigger>
-                                            <SelectValue
-                                                placeholder="Select source"
-                                            />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            <SelectItem value="url"
-                                                >Remote URL</SelectItem
-                                            >
-                                            <SelectItem value="file"
-                                                >Upload File</SelectItem
-                                            >
-                                        </SelectContent>
-                                    </Select>
-                                </div>
-                                <div
-                                    v-if="entrySource === 'url'"
-                                    class="grid gap-2"
-                                >
-                                    <Label for="audio_url">Audio URL</Label>
-                                    <Input
-                                        id="audio_url"
-                                        v-model="entryForm.audio_url"
-                                        placeholder="https://example.com/audio.mp3"
-                                    />
-                                    <div
-                                        v-if="entryForm.errors.audio_url"
-                                        class="text-sm text-red-500"
+                                <DialogFooter>
+                                    <Button
+                                        type="submit"
+                                        :disabled="entryForm.processing"
                                     >
-                                        {{ entryForm.errors.audio_url }}
+                                        Save Entry
+                                    </Button>
+                                </DialogFooter>
+                            </form>
+                        </DialogContent>
+                    </Dialog>
+
+                    <Dialog v-model:open="showRssModal">
+                        <DialogTrigger as-child>
+                            <Button variant="outline">
+                                <Rss class="mr-2 h-4 w-4" />
+                                Add from RSS
+                            </Button>
+                        </DialogTrigger>
+                        <DialogContent class="sm:max-w-[600px]">
+                            <div v-if="episodes.length === 0">
+                                <DialogHeader>
+                                    <DialogTitle
+                                        >Import from RSS Feed</DialogTitle
+                                    >
+                                    <DialogDescription>
+                                        Enter the RSS feed URL to fetch
+                                        episodes.
+                                    </DialogDescription>
+                                </DialogHeader>
+                                <div class="grid gap-4 py-4">
+                                    <div class="grid gap-2">
+                                        <Label for="rss-url">RSS URL</Label>
+                                        <Input
+                                            id="rss-url"
+                                            v-model="rssUrl"
+                                            placeholder="https://example.com/feed.xml"
+                                            :disabled="isFetchingRss"
+                                        />
+                                        <p
+                                            v-if="rssError"
+                                            class="text-sm text-red-500"
+                                        >
+                                            {{ rssError }}
+                                        </p>
                                     </div>
                                 </div>
-                                <div
-                                    v-if="entrySource === 'file'"
-                                    class="grid gap-2"
-                                >
-                                    <Label for="file">Audio File</Label>
-                                    <Input
-                                        id="file"
-                                        type="file"
-                                        @input="
-                                            entryForm.file =
-                                                $event.target.files[0]
-                                        "
-                                        accept="audio/*"
-                                    />
-                                    <div
-                                        v-if="entryForm.errors.file"
-                                        class="text-sm text-red-500"
+                                <DialogFooter>
+                                    <Button
+                                        :disabled="isFetchingRss || !rssUrl"
+                                        @click="fetchRss"
                                     >
-                                        {{ entryForm.errors.file }}
-                                    </div>
-                                </div>
+                                        <Loader2
+                                            v-if="isFetchingRss"
+                                            class="mr-2 h-4 w-4 animate-spin"
+                                        />
+                                        Fetch Episodes
+                                    </Button>
+                                </DialogFooter>
                             </div>
-                            <DialogFooter>
-                                <Button
-                                    type="submit"
-                                    :disabled="entryForm.processing"
+                            <div v-else>
+                                <DialogHeader>
+                                    <DialogTitle
+                                        >Select Episodes to Import</DialogTitle
+                                    >
+                                    <DialogDescription>
+                                        Select the episodes you want to add to
+                                        this feed.
+                                    </DialogDescription>
+                                </DialogHeader>
+                                <div
+                                    class="my-4 max-h-[400px] overflow-y-auto rounded-md border"
                                 >
-                                    Save Entry
-                                </Button>
-                            </DialogFooter>
-                        </form>
-                    </DialogContent>
-                </Dialog>
+                                    <Table>
+                                        <TableHeader>
+                                            <TableRow>
+                                                <TableHead
+                                                    class="w-[50px]"
+                                                ></TableHead>
+                                                <TableHead>Episode</TableHead>
+                                            </TableRow>
+                                        </TableHeader>
+                                        <TableBody>
+                                            <TableRow
+                                                v-for="(
+                                                    episode, index
+                                                ) in episodes"
+                                                :key="index"
+                                            >
+                                                <TableCell>
+                                                    <Checkbox
+                                                        :model-value="
+                                                            selectedEpisodes.includes(
+                                                                index,
+                                                            )
+                                                        "
+                                                        :disabled="
+                                                            !episode.audio_url
+                                                        "
+                                                        @update:modelValue="
+                                                            toggleEpisode(index)
+                                                        "
+                                                    />
+                                                </TableCell>
+                                                <TableCell>
+                                                    <div class="font-medium">
+                                                        {{ episode.name }}
+                                                    </div>
+                                                    <div
+                                                        v-if="
+                                                            !episode.audio_url
+                                                        "
+                                                        class="text-xs text-red-500"
+                                                    >
+                                                        No audio URL found
+                                                    </div>
+                                                </TableCell>
+                                            </TableRow>
+                                        </TableBody>
+                                    </Table>
+                                </div>
+                                <DialogFooter
+                                    class="flex justify-between sm:justify-between"
+                                >
+                                    <Button
+                                        variant="ghost"
+                                        @click="episodes = []"
+                                        >Back</Button
+                                    >
+                                    <Button
+                                        :disabled="
+                                            selectedEpisodes.length === 0
+                                        "
+                                        @click="importRss"
+                                    >
+                                        Import
+                                        {{ selectedEpisodes.length }} Episodes
+                                    </Button>
+                                </DialogFooter>
+                            </div>
+                        </DialogContent>
+                    </Dialog>
+                </div>
             </div>
 
             <Dialog v-model:open="isEditDialogOpen">
