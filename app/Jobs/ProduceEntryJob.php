@@ -55,7 +55,7 @@ class ProduceEntryJob implements ShouldQueue
         $summary = $response['summary'];
 
         if (preg_match('/(<original_summary>.*?<\/original_summary>)/s', $this->entry->summary ?? '', $matches)) {
-            $summary = $matches[1]."\n\n".$summary;
+            $summary = $matches[1]."\n\n[Auto-generated summary]\n\n".$summary;
         }
 
         $this->entry->update([

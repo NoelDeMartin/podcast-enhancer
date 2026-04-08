@@ -68,7 +68,7 @@ it('appends AI summary after original summary if tag is present', function () {
 
     $entry->refresh();
 
-    expect($entry->summary)->toBe("<original_summary>Original Summary.</original_summary>\n\nAI Summary.");
+    expect($entry->summary)->toBe("<original_summary>Original Summary.</original_summary>\n\n[Auto-generated summary]\n\nAI Summary.");
 });
 
 it('does nothing when the entry has no transcription', function () {
