@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\StoreEntryRequest;
 use App\Http\Requests\UpdateEntryRequest;
 use App\Models\Entry;
+use App\Models\Feed;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -17,6 +18,11 @@ class EntryController extends Controller
     public function store(StoreEntryRequest $request): RedirectResponse
     {
         $validated = $request->validated();
+
+        $feed = Feed::findOrFail($validated['feed_id']);
+        if ($feed->rss_url) {
+            abort(403, 'Manual entries cannot be added to a synchronized feed.');
+        }
 
         if ($request->hasFile('file')) {
             $validated['audio_url'] = $request->file('file')->store('entries');
@@ -33,6 +39,10 @@ class EntryController extends Controller
 
     public function update(UpdateEntryRequest $request, Entry $entry): RedirectResponse
     {
+        if ($entry->feed->rss_url) {
+            abort(403, 'Entries in a synchronized feed cannot be modified manually.');
+        }
+
         $validated = $request->validated();
 
         $fileChanged = false;
@@ -86,6 +96,10 @@ class EntryController extends Controller
 
     public function destroy(Entry $entry): RedirectResponse
     {
+        if ($entry->feed->rss_url) {
+            abort(403, 'Entries in a synchronized feed cannot be deleted manually.');
+        }
+
         if ($entry->audio_url && ! filter_var($entry->audio_url, FILTER_VALIDATE_URL)) {
             Storage::delete($entry->audio_url);
         }

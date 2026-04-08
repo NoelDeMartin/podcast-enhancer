@@ -16,6 +16,7 @@ class StoreFeedRequest extends FormRequest
         return [
             'title' => ['required', 'string', 'max:255'],
             'description' => ['nullable', 'string'],
+            'rss_url' => ['nullable', 'url', 'max:255'],
         ];
     }
 }

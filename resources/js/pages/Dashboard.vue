@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { Head, Link } from '@inertiajs/vue3';
 import { useForm } from '@inertiajs/vue3';
-import { MoreHorizontal, Plus } from 'lucide-vue-next';
+import { MoreHorizontal, Plus, Rss, Loader2 } from 'lucide-vue-next';
 import { ref } from 'vue';
 import {
     store,
@@ -9,6 +9,7 @@ import {
     show,
     update,
 } from '@/actions/App/Http/Controllers/FeedController';
+import { store as syncStore } from '@/actions/App/Http/Controllers/FeedSyncController';
 import { Button } from '@/components/ui/button';
 import {
     Dialog,
@@ -95,6 +96,22 @@ const submitEditFeed = () => {
         },
     });
 };
+
+const isImportRssDialogOpen = ref(false);
+const importRssForm = useForm({
+    rss_url: '',
+    title: '',
+    description: '',
+});
+
+const submitImportRss = () => {
+    importRssForm.post(syncStore.url(), {
+        onSuccess: () => {
+            importRssForm.reset();
+            isImportRssDialogOpen.value = false;
+        },
+    });
+};
 </script>
 
 <template>
@@ -106,64 +123,164 @@ const submitEditFeed = () => {
         >
             <div class="flex items-center justify-between">
                 <h2 class="text-2xl font-bold tracking-tight">Feeds</h2>
-                <Dialog v-model:open="isDialogOpen">
-                    <DialogTrigger as-child>
-                        <Button>
-                            <Plus class="mr-2 h-4 w-4" />
-                            New Feed
-                        </Button>
-                    </DialogTrigger>
-                    <DialogContent>
-                        <form @submit.prevent="submit">
-                            <DialogHeader>
-                                <DialogTitle>Create New Feed</DialogTitle>
-                                <DialogDescription>
-                                    Add a new feed to start tracking entries.
-                                </DialogDescription>
-                            </DialogHeader>
-                            <div class="grid gap-4 py-4">
-                                <div class="grid gap-2">
-                                    <Label for="title">Title</Label>
-                                    <Input
-                                        id="title"
-                                        v-model="form.title"
-                                        placeholder="Enter feed title..."
-                                        required
-                                    />
-                                    <div
-                                        v-if="form.errors.title"
-                                        class="text-sm text-red-500"
+                <div class="flex gap-2">
+                    <Dialog v-model:open="isImportRssDialogOpen">
+                        <DialogTrigger as-child>
+                            <Button variant="outline">
+                                <Rss class="mr-2 h-4 w-4" />
+                                Import from RSS
+                            </Button>
+                        </DialogTrigger>
+                        <DialogContent>
+                            <form @submit.prevent="submitImportRss">
+                                <DialogHeader>
+                                    <DialogTitle
+                                        >Import Feed from RSS</DialogTitle
                                     >
-                                        {{ form.errors.title }}
+                                    <DialogDescription>
+                                        Create a synchronized feed automatically
+                                        from an RSS URL.
+                                    </DialogDescription>
+                                </DialogHeader>
+                                <div class="grid gap-4 py-4">
+                                    <div class="grid gap-2">
+                                        <Label for="rss_url"
+                                            >RSS URL
+                                            <span class="text-red-500"
+                                                >*</span
+                                            ></Label
+                                        >
+                                        <Input
+                                            id="rss_url"
+                                            v-model="importRssForm.rss_url"
+                                            placeholder="https://example.com/feed.xml"
+                                            required
+                                        />
+                                        <div
+                                            v-if="importRssForm.errors.rss_url"
+                                            class="text-sm text-red-500"
+                                        >
+                                            {{ importRssForm.errors.rss_url }}
+                                        </div>
+                                    </div>
+                                    <div class="grid gap-2">
+                                        <Label for="import-title">Title</Label>
+                                        <Input
+                                            id="import-title"
+                                            v-model="importRssForm.title"
+                                            placeholder="Leave empty to use feed title"
+                                        />
+                                        <div
+                                            v-if="importRssForm.errors.title"
+                                            class="text-sm text-red-500"
+                                        >
+                                            {{ importRssForm.errors.title }}
+                                        </div>
+                                    </div>
+                                    <div class="grid gap-2">
+                                        <Label for="import-description"
+                                            >Description</Label
+                                        >
+                                        <Textarea
+                                            id="import-description"
+                                            v-model="importRssForm.description"
+                                            placeholder="Leave empty to use feed description"
+                                            rows="3"
+                                        />
+                                        <div
+                                            v-if="
+                                                importRssForm.errors.description
+                                            "
+                                            class="text-sm text-red-500"
+                                        >
+                                            {{
+                                                importRssForm.errors.description
+                                            }}
+                                        </div>
+                                    </div>
+                                    <div class="text-xs text-muted-foreground">
+                                        Note: Synchronized feeds will not
+                                        automatically transcribe imported
+                                        episodes to reduce server load.
                                     </div>
                                 </div>
-                                <div class="grid gap-2">
-                                    <Label for="description">Description</Label>
-                                    <Textarea
-                                        id="description"
-                                        v-model="form.description"
-                                        placeholder="Optional description for this podcast feed..."
-                                        rows="3"
-                                    />
-                                    <div
-                                        v-if="form.errors.description"
-                                        class="text-sm text-red-500"
+                                <DialogFooter>
+                                    <Button
+                                        type="submit"
+                                        :disabled="importRssForm.processing"
                                     >
-                                        {{ form.errors.description }}
+                                        <Loader2
+                                            v-if="importRssForm.processing"
+                                            class="mr-2 h-4 w-4 animate-spin"
+                                        />
+                                        Import Feed
+                                    </Button>
+                                </DialogFooter>
+                            </form>
+                        </DialogContent>
+                    </Dialog>
+                    <Dialog v-model:open="isDialogOpen">
+                        <DialogTrigger as-child>
+                            <Button>
+                                <Plus class="mr-2 h-4 w-4" />
+                                New Feed
+                            </Button>
+                        </DialogTrigger>
+                        <DialogContent>
+                            <form @submit.prevent="submit">
+                                <DialogHeader>
+                                    <DialogTitle>Create New Feed</DialogTitle>
+                                    <DialogDescription>
+                                        Add a new feed to start tracking
+                                        entries.
+                                    </DialogDescription>
+                                </DialogHeader>
+                                <div class="grid gap-4 py-4">
+                                    <div class="grid gap-2">
+                                        <Label for="title">Title</Label>
+                                        <Input
+                                            id="title"
+                                            v-model="form.title"
+                                            placeholder="Enter feed title..."
+                                            required
+                                        />
+                                        <div
+                                            v-if="form.errors.title"
+                                            class="text-sm text-red-500"
+                                        >
+                                            {{ form.errors.title }}
+                                        </div>
+                                    </div>
+                                    <div class="grid gap-2">
+                                        <Label for="description"
+                                            >Description</Label
+                                        >
+                                        <Textarea
+                                            id="description"
+                                            v-model="form.description"
+                                            placeholder="Optional description for this podcast feed..."
+                                            rows="3"
+                                        />
+                                        <div
+                                            v-if="form.errors.description"
+                                            class="text-sm text-red-500"
+                                        >
+                                            {{ form.errors.description }}
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
-                            <DialogFooter>
-                                <Button
-                                    type="submit"
-                                    :disabled="form.processing"
-                                >
-                                    Create Feed
-                                </Button>
-                            </DialogFooter>
-                        </form>
-                    </DialogContent>
-                </Dialog>
+                                <DialogFooter>
+                                    <Button
+                                        type="submit"
+                                        :disabled="form.processing"
+                                    >
+                                        Create Feed
+                                    </Button>
+                                </DialogFooter>
+                            </form>
+                        </DialogContent>
+                    </Dialog>
+                </div>
             </div>
 
             <Dialog v-model:open="isEditDialogOpen">
@@ -176,6 +293,18 @@ const submitEditFeed = () => {
                             </DialogDescription>
                         </DialogHeader>
                         <div class="grid gap-4 py-4">
+                            <div v-if="editingFeed?.rss_url" class="grid gap-2">
+                                <Label for="edit-rss-url">RSS URL</Label>
+                                <div
+                                    id="edit-rss-url"
+                                    class="rounded-md border bg-muted px-3 py-2 text-sm break-all text-muted-foreground select-all"
+                                >
+                                    {{ editingFeed.rss_url }}
+                                </div>
+                                <div class="text-xs text-muted-foreground">
+                                    The RSS URL cannot be changed.
+                                </div>
+                            </div>
                             <div class="grid gap-2">
                                 <Label for="edit-title">Title</Label>
                                 <Input

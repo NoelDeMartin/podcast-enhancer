@@ -6,11 +6,11 @@ use App\Models\Feed;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Http;
 
 class RssImportController extends Controller
 {
     use Concerns\DispatchesBatches;
+    use Concerns\FetchesRssFeeds;
 
     public function fetch(Request $request): JsonResponse
     {
@@ -19,36 +19,24 @@ class RssImportController extends Controller
         ]);
 
         try {
-            $response = Http::get($request->url);
+            $data = $this->fetchAndParseRss($request->url);
 
-            if ($response->failed()) {
-                return response()->json(['message' => 'Failed to fetch RSS feed.'], 422);
-            }
-
-            $xml = new \SimpleXMLElement($response->body());
-            $episodes = [];
-
-            foreach ($xml->channel->item as $item) {
-                $audioUrl = null;
-                if ($item->enclosure && $item->enclosure['url']) {
-                    $audioUrl = (string) $item->enclosure['url'];
-                }
-
-                $episodes[] = [
-                    'name' => (string) $item->title,
-                    'summary' => (string) $item->description,
-                    'audio_url' => $audioUrl,
-                ];
-            }
-
-            return response()->json(['episodes' => $episodes]);
+            return response()->json(['episodes' => $data['episodes']]);
         } catch (\Exception $e) {
-            return response()->json(['message' => 'Invalid RSS feed format.'], 422);
+            $message = $e->getMessage() === 'Failed to fetch RSS feed.'
+                ? 'Failed to fetch RSS feed.'
+                : 'Invalid RSS feed format.';
+
+            return response()->json(['message' => $message], 422);
         }
     }
 
     public function store(Request $request, Feed $feed): RedirectResponse
     {
+        if ($feed->rss_url) {
+            abort(403, 'Manual RSS imports are not allowed for synchronized feeds.');
+        }
+
         $request->validate([
             'episodes' => ['required', 'array'],
             'episodes.*.name' => ['required', 'string'],

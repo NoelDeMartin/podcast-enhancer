@@ -19,6 +19,7 @@ class FeedFactory extends Factory
     {
         return [
             'title' => fake()->sentence(),
+            'rss_url' => null,
         ];
     }
 }

@@ -4,6 +4,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\EntryController;
 use App\Http\Controllers\FeedController;
 use App\Http\Controllers\FeedRssController;
+use App\Http\Controllers\FeedSyncController;
 use App\Http\Controllers\RssImportController;
 use Illuminate\Support\Facades\Route;
 
@@ -15,6 +16,9 @@ Route::get('entries/{entry}/chapters.json', [EntryController::class, 'chapters']
 
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
+
+    Route::post('feeds/sync', [FeedSyncController::class, 'store'])->name('feeds.sync.store');
+    Route::post('feeds/{feed}/sync', [FeedSyncController::class, 'sync'])->name('feeds.sync');
 
     Route::resource('feeds', FeedController::class)->only(['store', 'show', 'update', 'destroy']);
     Route::resource('entries', EntryController::class)->only(['store', 'update', 'destroy']);
