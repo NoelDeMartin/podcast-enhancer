@@ -9,6 +9,7 @@ use App\Models\Entry;
 use App\Models\EntryJobBatch;
 use Illuminate\Bus\Batch;
 use Illuminate\Support\Facades\Bus;
+use Illuminate\Support\Facades\Storage;
 
 trait DispatchesBatches
 {
@@ -29,6 +30,9 @@ trait DispatchesBatches
                 if ($entry) {
                     $this->dispatchProductionBatch($entry, $batch->id);
                 }
+            })
+            ->finally(function (Batch $batch) {
+                Storage::deleteDirectory("tmp/batch-{$batch->id}/");
             })
             ->name('Process entry '.$entryId)
             ->dispatch();

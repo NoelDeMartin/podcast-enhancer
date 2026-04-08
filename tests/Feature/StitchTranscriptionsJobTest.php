@@ -40,7 +40,4 @@ it('stitches transcription chunks and saves the result', function () {
     expect($stitched)->toHaveCount(2);
     expect($stitched[0]['text'])->toBe('Chunk 0 segment');
     expect($stitched[1]['text'])->toBe('Chunk 1 segment');
-
-    // Verify cleanup
-    Storage::assertMissing("tmp/batch-{$batch->id}");
 });

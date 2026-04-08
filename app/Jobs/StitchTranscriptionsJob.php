@@ -85,9 +85,6 @@ class StitchTranscriptionsJob implements ShouldQueue
 
         $this->entry->update(['transcription_path' => $path]);
 
-        // Clean up tmp files
-        Storage::deleteDirectory("tmp/batch-{$this->transcriptionBatchId}/");
-
         Log::info(static::class.' finished (saved stitched transcription)', [
             'entry_id' => $this->entry->id,
             'transcription_path' => $path,
