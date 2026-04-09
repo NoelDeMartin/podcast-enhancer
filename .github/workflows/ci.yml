@@ -50,6 +50,17 @@ jobs:
       - name: Tests
         run: ./vendor/bin/pest
 
+      - name: Upload browser failure screenshots
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: browser-artifacts-php-${{ matrix.php-version }}
+          path: |
+            tests/Browser/Screenshots
+            tests/Browser/Console
+            tests/Browser/Logs
+          if-no-files-found: ignore
+
   lint:
     runs-on: ubuntu-latest
     permissions:

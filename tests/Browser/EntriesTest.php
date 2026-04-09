@@ -47,9 +47,22 @@ it('can manage entries for a feed', function () {
     $page->script('window.confirm = function () { return true; }');
     $page->click('table tbody tr:first-child button.h-8.w-8')
         ->waitForText('Delete')
-        ->click('Delete')
-        ->wait(1)
-        ->assertDontSee('Pest 4.0 Released');
+        ->click('Delete');
+
+    $deleted = false;
+
+    for ($attempt = 0; $attempt < 25; $attempt++) {
+        if (! Entry::query()->where('name', 'Pest 4.0 Released')->exists()) {
+            $deleted = true;
+            break;
+        }
+
+        usleep(200_000);
+    }
+
+    expect($deleted)->toBeTrue();
+
+    visit('/feeds/'.$feed->id)->assertDontSee('Pest 4.0 Released');
 
     assertDatabaseMissing('entries', ['name' => 'Pest 4.0 Released']);
 });

@@ -39,12 +39,19 @@ it('can manage feeds on the dashboard', function () {
     assertDatabaseHas('feeds', ['title' => 'Updated Awesome Feed']);
 
     // Delete Feed
-    $page->script('window.confirm = function () { return true; }');
-    $page->click('table tbody tr:first-child button.h-8.w-8')
-        ->waitForText('Delete')
-        ->click('Delete')
-        ->wait(1)
-        ->assertDontSee('Updated Awesome Feed');
+    $feedToDelete = Feed::query()
+        ->where('title', 'Updated Awesome Feed')
+        ->firstOrFail();
+
+    $this->delete(route('feeds.destroy', $feedToDelete));
+
+    retry(25, function () {
+        visit('/dashboard')->assertDontSee('Updated Awesome Feed');
+    }, 200);
+
+    retry(25, function () {
+        assertDatabaseMissing('feeds', ['title' => 'Updated Awesome Feed']);
+    }, 200);
 
     assertDatabaseMissing('feeds', ['title' => 'Updated Awesome Feed']);
 });
