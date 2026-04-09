@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Concerns;
 
+use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\Http;
 
 trait FetchesRssFeeds
@@ -33,10 +34,17 @@ trait FetchesRssFeeds
                 $audioUrl = (string) $item->enclosure['url'];
             }
 
+            $publishedAt = null;
+            $pubDate = trim((string) ($item->pubDate ?? ''));
+            if ($pubDate !== '') {
+                $publishedAt = CarbonImmutable::parse($pubDate);
+            }
+
             $episodes[] = [
                 'name' => (string) $item->title,
                 'summary' => (string) $item->description,
                 'audio_url' => $audioUrl,
+                'published_at' => $publishedAt,
             ];
         }
 

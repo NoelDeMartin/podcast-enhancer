@@ -42,6 +42,7 @@ class RssImportController extends Controller
             'episodes.*.name' => ['required', 'string'],
             'episodes.*.audio_url' => ['required', 'url'],
             'episodes.*.summary' => ['nullable', 'string'],
+            'episodes.*.published_at' => ['nullable', 'date'],
         ]);
 
         foreach ($request->episodes as $episodeData) {
@@ -49,6 +50,7 @@ class RssImportController extends Controller
                 'name' => $episodeData['name'],
                 'audio_url' => $episodeData['audio_url'],
                 'summary' => $episodeData['summary'] ? "<original_summary>{$episodeData['summary']}</original_summary>" : null,
+                'published_at' => $episodeData['published_at'] ?? null,
             ]);
 
             $this->dispatchTranscriptionBatch($entry);

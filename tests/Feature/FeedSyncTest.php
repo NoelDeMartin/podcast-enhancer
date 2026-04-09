@@ -6,6 +6,7 @@ use App\Jobs\PrepareTranscriptionJob;
 use App\Models\Entry;
 use App\Models\Feed;
 use App\Models\User;
+use Carbon\CarbonImmutable;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Bus;
 use Illuminate\Support\Facades\Http;
@@ -25,6 +26,7 @@ it('can import feed from rss without dispatching jobs', function () {
         <description>Podcast Description</description>
         <item>
             <title>Episode 1</title>
+            <pubDate>Tue, 07 Apr 2026 12:34:56 +0000</pubDate>
             <description>Summary 1</description>
             <enclosure url="https://example.com/audio1.mp3" type="audio/mpeg"/>
         </item>
@@ -57,6 +59,11 @@ it('can import feed from rss without dispatching jobs', function () {
         'name' => 'Episode 1',
         'audio_url' => 'https://example.com/audio1.mp3',
     ]);
+
+    $entry = Entry::where('feed_id', $feed->id)->where('name', 'Episode 1')->first();
+    expect($entry)->not->toBeNull();
+    expect($entry->published_at)->not->toBeNull();
+    expect($entry->published_at->equalTo(CarbonImmutable::parse('Tue, 07 Apr 2026 12:34:56 +0000')))->toBeTrue();
 
     Bus::assertNotDispatched(PrepareTranscriptionJob::class);
     Bus::assertNotDispatched(ProduceEntryJob::class);

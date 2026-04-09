@@ -21,6 +21,7 @@ class EntryFactory extends Factory
         return [
             'feed_id' => Feed::factory(),
             'name' => fake()->sentence(),
+            'published_at' => now(),
         ];
     }
 }

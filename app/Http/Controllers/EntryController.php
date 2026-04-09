@@ -28,6 +28,8 @@ class EntryController extends Controller
             $validated['audio_url'] = $request->file('file')->store('entries');
         }
 
+        $validated['published_at'] = now();
+
         $entry = Entry::create($validated);
 
         if ($entry->audio_url) {

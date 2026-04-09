@@ -192,6 +192,26 @@ function formatTimestamp(seconds: number): string {
         : `${m}:${String(s).padStart(2, '0')}`;
 }
 
+function formatPublishedAt(entry: any): string {
+    const value = entry?.published_at ?? entry?.created_at;
+
+    if (!value) {
+        return '-';
+    }
+
+    const date = new Date(value);
+
+    if (Number.isNaN(date.getTime())) {
+        return '-';
+    }
+
+    return new Intl.DateTimeFormat(undefined, {
+        year: 'numeric',
+        month: 'short',
+        day: '2-digit',
+    }).format(date);
+}
+
 function parsedTranscription(entry: any): any[] | null {
     if (!entry?.transcription) {
         return null;
@@ -831,7 +851,8 @@ const submitEditEntry = () => {
                 <Table>
                     <TableHeader>
                         <TableRow>
-                            <TableHead class="w-[45%]">Name</TableHead>
+                            <TableHead class="w-[38%]">Name</TableHead>
+                            <TableHead class="w-[12%]">Published</TableHead>
                             <TableHead class="w-[15%]">File</TableHead>
                             <TableHead class="w-[20%]">Details</TableHead>
                             <TableHead class="text-right">Actions</TableHead>
@@ -843,6 +864,11 @@ const submitEditEntry = () => {
                                 <TableCell class="align-top font-medium">{{
                                     entry.name
                                 }}</TableCell>
+                                <TableCell
+                                    class="align-top text-sm text-muted-foreground"
+                                >
+                                    {{ formatPublishedAt(entry) }}
+                                </TableCell>
                                 <TableCell class="align-top">
                                     <a
                                         v-if="entry.audio_url"

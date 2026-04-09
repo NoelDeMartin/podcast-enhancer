@@ -21,12 +21,14 @@ class Entry extends Model
         'transcription_path',
         'summary',
         'chapters',
+        'published_at',
     ];
 
     protected function casts(): array
     {
         return [
             'chapters' => 'json',
+            'published_at' => 'datetime',
         ];
     }
 

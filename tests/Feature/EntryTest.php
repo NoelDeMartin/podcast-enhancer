@@ -31,6 +31,8 @@ it('can store an entry with an uploaded file', function () {
     $entry = Entry::where('name', 'New Entry')->first();
     expect($entry)->not->toBeNull();
     expect($entry->audio_url)->not->toBeNull();
+    expect($entry->published_at)->not->toBeNull();
+    expect($entry->published_at->equalTo($entry->created_at))->toBeTrue();
 
     Storage::disk('local')->assertExists($entry->audio_url);
     Bus::assertBatched(fn ($batch) => $batch->name === 'Process entry '.$entry->id);
@@ -52,6 +54,8 @@ it('can store an entry with an external audio URL', function () {
     $entry = Entry::where('name', 'External Entry')->first();
     expect($entry)->not->toBeNull();
     expect($entry->audio_url)->toBe('https://example.com/audio.mp3');
+    expect($entry->published_at)->not->toBeNull();
+    expect($entry->published_at->equalTo($entry->created_at))->toBeTrue();
 
     Bus::assertBatched(fn ($batch) => $batch->name === 'Process entry '.$entry->id);
 });
@@ -86,6 +90,11 @@ it('does not dispatch a transcription batch when storing entry without a file', 
             'feed_id' => $feed->id,
             'name' => 'No File Entry',
         ]);
+
+    $entry = Entry::where('name', 'No File Entry')->first();
+    expect($entry)->not->toBeNull();
+    expect($entry->published_at)->not->toBeNull();
+    expect($entry->published_at->equalTo($entry->created_at))->toBeTrue();
 
     Bus::assertNothingBatched();
 });

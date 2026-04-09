@@ -42,6 +42,7 @@ class FeedSyncController extends Controller
                         'name' => $episodeData['name'],
                         'audio_url' => $episodeData['audio_url'],
                         'summary' => $episodeData['summary'] ? '<original_summary>'.$episodeData['summary'].'</original_summary>' : null,
+                        'published_at' => $episodeData['published_at'] ?? null,
                     ]);
                     $importedCount++;
                 }
@@ -79,6 +80,7 @@ class FeedSyncController extends Controller
                         'name' => $name,
                         'audio_url' => $audioUrl,
                         'summary' => $episodeData['summary'] ? '<original_summary>'.$episodeData['summary'].'</original_summary>' : null,
+                        'published_at' => $episodeData['published_at'] ?? null,
                     ]);
                     $existingAudioUrls[] = $audioUrl;
                     $existingNames[] = $name;
