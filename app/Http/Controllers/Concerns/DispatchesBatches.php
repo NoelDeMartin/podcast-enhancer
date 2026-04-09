@@ -9,6 +9,7 @@ use App\Models\Entry;
 use App\Models\EntryJobBatch;
 use Illuminate\Bus\Batch;
 use Illuminate\Support\Facades\Bus;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Storage;
 
 trait DispatchesBatches
@@ -25,14 +26,21 @@ trait DispatchesBatches
             new PrepareTranscriptionJob($entry),
         ])
             ->then(function (Batch $batch) use ($entryId) {
+                /** @var Entry|null $entry */
                 $entry = Entry::find($entryId);
 
                 if ($entry) {
-                    $this->dispatchProductionBatch($entry, $batch->id);
+                    $productionBatch = $this->dispatchProductionBatch($entry, $batch->id);
+
+                    Cache::put(
+                        $this->transcriptionTmpCleanupDeferralCacheKey($batch->id),
+                        $productionBatch->id,
+                        now()->addHours(6),
+                    );
                 }
             })
             ->finally(function (Batch $batch) {
-                Storage::deleteDirectory("tmp/batch-{$batch->id}/");
+                $this->cleanupTranscriptionTmpDirectoryUnlessDeferred($batch->id);
             })
             ->name('Process entry '.$entryId)
             ->dispatch();
@@ -43,19 +51,25 @@ trait DispatchesBatches
         ]);
     }
 
-    protected function dispatchProductionBatch(Entry $entry, string $transcriptionBatchId): void
+    protected function dispatchProductionBatch(Entry $entry, string $transcriptionBatchId): Batch
     {
         $batch = Bus::batch([
             [
                 new StitchTranscriptionsJob($entry, $transcriptionBatchId),
                 new ProduceEntryJob($entry),
             ],
-        ])->dispatch();
+        ])
+            ->finally(function () use ($transcriptionBatchId) {
+                Storage::deleteDirectory($this->transcriptionTmpDirectory($transcriptionBatchId));
+            })
+            ->dispatch();
 
         EntryJobBatch::forceCreate([
             'entry_id' => $entry->id,
             'batch_id' => $batch->id,
         ]);
+
+        return $batch;
     }
 
     protected function dispatchMetadataBatch(Entry $entry): void
@@ -70,5 +84,27 @@ trait DispatchesBatches
             'entry_id' => $entry->id,
             'batch_id' => $batch->id,
         ]);
+    }
+
+    protected function transcriptionTmpDirectory(string $transcriptionBatchId): string
+    {
+        return "tmp/batch-{$transcriptionBatchId}/";
+    }
+
+    protected function transcriptionTmpCleanupDeferralCacheKey(string $transcriptionBatchId): string
+    {
+        return "transcription_tmp_cleanup_defer:{$transcriptionBatchId}";
+    }
+
+    protected function cleanupTranscriptionTmpDirectoryUnlessDeferred(string $transcriptionBatchId): void
+    {
+        $cacheKey = $this->transcriptionTmpCleanupDeferralCacheKey($transcriptionBatchId);
+        $productionBatchId = Cache::pull($cacheKey);
+
+        if ($productionBatchId) {
+            return;
+        }
+
+        Storage::deleteDirectory($this->transcriptionTmpDirectory($transcriptionBatchId));
     }
 }
