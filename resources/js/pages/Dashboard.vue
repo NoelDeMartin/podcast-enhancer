@@ -13,6 +13,7 @@ import { store as syncStore } from '@/actions/App/Http/Controllers/FeedSyncContr
 import { Button } from '@/components/ui/button';
 import {
     Dialog,
+    DialogClose,
     DialogContent,
     DialogDescription,
     DialogFooter,
@@ -68,10 +69,31 @@ const submit = () => {
     });
 };
 
-const deleteFeed = (id: number) => {
-    if (confirm('Are you sure you want to delete this feed?')) {
-        useForm({}).delete(destroy.url(id));
+const isDeleteDialogOpen = ref(false);
+const deletingFeed = ref<any>(null);
+const deleteFeedForm = useForm({});
+
+const startDeleteFeed = (feed: any) => {
+    deletingFeed.value = feed;
+    isDeleteDialogOpen.value = true;
+};
+
+const cancelDeleteFeed = () => {
+    isDeleteDialogOpen.value = false;
+    deletingFeed.value = null;
+};
+
+const submitDeleteFeed = () => {
+    if (!deletingFeed.value) {
+        return;
     }
+
+    deleteFeedForm.delete(destroy.url(deletingFeed.value.id), {
+        onFinish: () => {
+            isDeleteDialogOpen.value = false;
+            deletingFeed.value = null;
+        },
+    });
 };
 
 const isEditDialogOpen = ref(false);
@@ -349,6 +371,64 @@ const submitImportRss = () => {
                 </DialogContent>
             </Dialog>
 
+            <Dialog v-model:open="isDeleteDialogOpen">
+                <DialogContent>
+                    <form @submit.prevent="submitDeleteFeed" class="space-y-6">
+                        <DialogHeader class="space-y-3">
+                            <DialogTitle>Delete feed</DialogTitle>
+                            <DialogDescription>
+                                This is a dangerous operation and cannot be
+                                undone.
+                            </DialogDescription>
+                        </DialogHeader>
+
+                        <div
+                            class="space-y-3 rounded-lg border border-red-100 bg-red-50 p-4 text-sm text-red-700 dark:border-red-200/10 dark:bg-red-700/10 dark:text-red-100"
+                        >
+                            <div class="space-y-1">
+                                <div class="font-medium">
+                                    You are about to permanently delete:
+                                </div>
+                                <div class="font-semibold">
+                                    {{ deletingFeed?.title ?? 'This feed' }}
+                                </div>
+                            </div>
+                            <div>
+                                This will also permanently delete
+                                <span class="font-semibold">
+                                    {{ deletingFeed?.entries_count ?? 0 }}
+                                </span>
+                                {{
+                                    (deletingFeed?.entries_count ?? 0) === 1
+                                        ? 'entry'
+                                        : 'entries'
+                                }}.
+                            </div>
+                        </div>
+
+                        <DialogFooter class="gap-2">
+                            <DialogClose as-child>
+                                <Button
+                                    type="button"
+                                    variant="secondary"
+                                    :disabled="deleteFeedForm.processing"
+                                    @click="cancelDeleteFeed"
+                                >
+                                    Cancel
+                                </Button>
+                            </DialogClose>
+                            <Button
+                                type="submit"
+                                variant="destructive"
+                                :disabled="deleteFeedForm.processing"
+                            >
+                                Delete feed
+                            </Button>
+                        </DialogFooter>
+                    </form>
+                </DialogContent>
+            </Dialog>
+
             <div class="rounded-md border bg-white dark:bg-zinc-950">
                 <Table>
                     <TableHeader>
@@ -390,7 +470,7 @@ const submitImportRss = () => {
                                         </DropdownMenuItem>
                                         <DropdownMenuItem
                                             class="text-red-600"
-                                            @click="deleteFeed(feed.id)"
+                                            @click="startDeleteFeed(feed)"
                                         >
                                             Delete
                                         </DropdownMenuItem>
