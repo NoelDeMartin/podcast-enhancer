@@ -20,6 +20,6 @@ class Feed extends Model
 
     public function entries(): HasMany
     {
-        return $this->hasMany(Entry::class);
+        return $this->hasMany(Entry::class)->latest('published_at');
     }
 }
