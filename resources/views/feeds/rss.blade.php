@@ -18,7 +18,7 @@
                 <description>{{ $entry->summary ?? '' }}</description>
                 <link>{{ $entry->audio_url ? route('entries.file', $entry) : '' }}</link>
                 <guid isPermaLink="false">{{ $entry->id }}</guid>
-                <pubDate>{{ $entry->created_at->toRfc2822String() }}</pubDate>
+                <pubDate>{{ $entry->published_at->toRfc2822String() }}</pubDate>
                 <itunes:summary>{{ $entry->summary ?? '' }}</itunes:summary>
                 <itunes:episodeType>full</itunes:episodeType>
                 @if($entry->audio_url)

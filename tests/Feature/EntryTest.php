@@ -23,6 +23,7 @@ it('can store an entry with an uploaded file', function () {
         ->post(route('entries.store'), [
             'feed_id' => $feed->id,
             'name' => 'New Entry',
+            'published_at' => now()->format('Y-m-d\TH:i'),
             'file' => $file,
         ]);
 
@@ -32,7 +33,6 @@ it('can store an entry with an uploaded file', function () {
     expect($entry)->not->toBeNull();
     expect($entry->audio_url)->not->toBeNull();
     expect($entry->published_at)->not->toBeNull();
-    expect($entry->published_at->equalTo($entry->created_at))->toBeTrue();
 
     Storage::disk('local')->assertExists($entry->audio_url);
     Bus::assertBatched(fn ($batch) => $batch->name === 'Process entry '.$entry->id);
@@ -46,6 +46,7 @@ it('can store an entry with an external audio URL', function () {
         ->post(route('entries.store'), [
             'feed_id' => $feed->id,
             'name' => 'External Entry',
+            'published_at' => now()->format('Y-m-d\TH:i'),
             'audio_url' => 'https://example.com/audio.mp3',
         ]);
 
@@ -55,7 +56,6 @@ it('can store an entry with an external audio URL', function () {
     expect($entry)->not->toBeNull();
     expect($entry->audio_url)->toBe('https://example.com/audio.mp3');
     expect($entry->published_at)->not->toBeNull();
-    expect($entry->published_at->equalTo($entry->created_at))->toBeTrue();
 
     Bus::assertBatched(fn ($batch) => $batch->name === 'Process entry '.$entry->id);
 });
@@ -89,12 +89,12 @@ it('does not dispatch a transcription batch when storing entry without a file', 
         ->post(route('entries.store'), [
             'feed_id' => $feed->id,
             'name' => 'No File Entry',
+            'published_at' => now()->format('Y-m-d\TH:i'),
         ]);
 
     $entry = Entry::where('name', 'No File Entry')->first();
     expect($entry)->not->toBeNull();
     expect($entry->published_at)->not->toBeNull();
-    expect($entry->published_at->equalTo($entry->created_at))->toBeTrue();
 
     Bus::assertNothingBatched();
 });

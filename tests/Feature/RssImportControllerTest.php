@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Jobs\PrepareTranscriptionJob;
+use App\Models\Entry;
 use App\Models\Feed;
 use App\Models\User;
 use Illuminate\Foundation\Http\Middleware\PreventRequestForgery;
@@ -63,6 +64,7 @@ it('can import selected episodes', function () {
             'name' => 'Episode 1',
             'summary' => 'Summary 1',
             'audio_url' => 'https://example.com/audio1.mp3',
+            'published_at' => '2026-04-07 12:34:56',
         ],
     ];
 
@@ -79,6 +81,10 @@ it('can import selected episodes', function () {
         'audio_url' => 'https://example.com/audio1.mp3',
         'summary' => '<original_summary>Summary 1</original_summary>',
     ]);
+
+    $entry = Entry::where('feed_id', $feed->id)->where('name', 'Episode 1')->first();
+    expect($entry)->not->toBeNull();
+    expect($entry->published_at)->not->toBeNull();
 
     Bus::assertBatched(function ($batch) {
         return $batch->jobs->first() instanceof PrepareTranscriptionJob;
@@ -120,4 +126,32 @@ it('fails to import episode without audio url', function () {
         ]);
 
     $response->assertStatus(422);
+});
+
+it('imports episode without published_at using current time', function () {
+    Bus::fake();
+
+    $this->travelTo(now()->startOfSecond());
+
+    $user = User::factory()->create();
+    $feed = Feed::factory()->create();
+
+    $episodes = [
+        [
+            'name' => 'Episode 1',
+            'summary' => 'Summary 1',
+            'audio_url' => 'https://example.com/audio1.mp3',
+        ],
+    ];
+
+    $response = $this->actingAs($user)
+        ->post(route('feeds.import-rss.store', $feed), [
+            'episodes' => $episodes,
+        ]);
+
+    $response->assertRedirect();
+
+    $entry = Entry::where('feed_id', $feed->id)->where('name', 'Episode 1')->first();
+    expect($entry)->not->toBeNull();
+    expect($entry->published_at->equalTo(now()))->toBeTrue();
 });

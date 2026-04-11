@@ -67,6 +67,12 @@ const props = defineProps<{
     feed: any;
 }>();
 
+function formatDatetimeLocalForInput(date: Date): string {
+    const pad = (n: number) => String(n).padStart(2, '0');
+
+    return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
+}
+
 const breadcrumbs: BreadcrumbItem[] = [
     {
         title: 'Dashboard',
@@ -83,6 +89,7 @@ const entryForm = useForm({
     name: '',
     audio_url: '',
     file: null as File | null,
+    published_at: formatDatetimeLocalForInput(new Date()),
 });
 
 const entrySource = ref<'url' | 'file'>('url');
@@ -93,6 +100,7 @@ const submitEntry = () => {
     entryForm.submit(storeEntry(), {
         onSuccess: () => {
             entryForm.reset('name', 'audio_url', 'file');
+            entryForm.published_at = formatDatetimeLocalForInput(new Date());
             showEntryForm.value = false;
         },
     });
@@ -193,7 +201,7 @@ function formatTimestamp(seconds: number): string {
 }
 
 function formatPublishedAt(entry: any): string {
-    const value = entry?.published_at ?? entry?.created_at;
+    const value = entry?.published_at;
 
     if (!value) {
         return '-';
@@ -377,6 +385,29 @@ const submitEditEntry = () => {
                                                 class="text-sm text-red-500"
                                             >
                                                 {{ entryForm.errors.name }}
+                                            </div>
+                                        </div>
+                                        <div class="grid gap-2">
+                                            <Label for="published_at"
+                                                >Published at</Label
+                                            >
+                                            <Input
+                                                id="published_at"
+                                                v-model="entryForm.published_at"
+                                                type="datetime-local"
+                                                required
+                                            />
+                                            <div
+                                                v-if="
+                                                    entryForm.errors
+                                                        .published_at
+                                                "
+                                                class="text-sm text-red-500"
+                                            >
+                                                {{
+                                                    entryForm.errors
+                                                        .published_at
+                                                }}
                                             </div>
                                         </div>
                                         <div class="grid gap-2">

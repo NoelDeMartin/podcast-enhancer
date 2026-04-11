@@ -78,6 +78,7 @@ it('can synchronize existing feed without duplicates and without jobs', function
     $feed->entries()->create([
         'name' => 'Episode 1',
         'audio_url' => 'https://example.com/audio1.mp3',
+        'published_at' => now(),
     ]);
 
     $rssContent = '<?xml version="1.0" encoding="UTF-8"?>
@@ -90,6 +91,7 @@ it('can synchronize existing feed without duplicates and without jobs', function
         </item>
         <item>
             <title>Episode 2</title>
+            <pubDate>Wed, 08 Apr 2026 10:00:00 +0000</pubDate>
             <enclosure url="https://example.com/audio2.mp3" type="audio/mpeg"/>
         </item>
     </channel>
@@ -124,6 +126,7 @@ it('blocks manual entry creation for synchronized feeds', function () {
         ->post(route('entries.store'), [
             'feed_id' => $feed->id,
             'name' => 'Manual Episode',
+            'published_at' => now()->format('Y-m-d\TH:i'),
         ]);
 
     $response->assertStatus(403);
@@ -137,6 +140,7 @@ it('blocks manual entry updates for synchronized feeds', function () {
     $entry = $feed->entries()->create([
         'name' => 'Episode 1',
         'audio_url' => 'https://example.com/audio1.mp3',
+        'published_at' => now(),
     ]);
 
     $response = $this->actingAs($this->user)
@@ -155,6 +159,7 @@ it('blocks manual entry deletion for synchronized feeds', function () {
     $entry = $feed->entries()->create([
         'name' => 'Episode 1',
         'audio_url' => 'https://example.com/audio1.mp3',
+        'published_at' => now(),
     ]);
 
     $response = $this->actingAs($this->user)

@@ -46,11 +46,15 @@ class RssImportController extends Controller
         ]);
 
         foreach ($request->episodes as $episodeData) {
+            $publishedAt = filled($episodeData['published_at'] ?? null)
+                ? $episodeData['published_at']
+                : now();
+
             $entry = $feed->entries()->create([
                 'name' => $episodeData['name'],
                 'audio_url' => $episodeData['audio_url'],
                 'summary' => $episodeData['summary'] ? "<original_summary>{$episodeData['summary']}</original_summary>" : null,
-                'published_at' => $episodeData['published_at'] ?? null,
+                'published_at' => $publishedAt,
             ]);
 
             $this->dispatchTranscriptionBatch($entry);

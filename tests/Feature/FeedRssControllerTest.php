@@ -25,6 +25,7 @@ it('generates an rss feed for a feed', function () {
     $response->assertSee('<title>My Podcast</title>', false);
     $response->assertSee('<title>Episode 1</title>', false);
     $response->assertSee('<description>This is the first episode summary.</description>', false);
+    $response->assertSee('<pubDate>'.$entry->published_at->toRfc2822String().'</pubDate>', false);
     $response->assertSee(route('entries.file', $entry), false);
     $response->assertSee('length="13"', false); // "dummy content" is 13 bytes
 });
