@@ -1,24 +1,12 @@
 {
-    "_hash": "1d8ce1b948563e5312c3585529071f5728b32c9980fabe716eebeddea32acff8",
+    "_hash": "461df00991c35623b31bd8d5ba4a5c441ad05d0e1ef32a4e28e8da3151417d0a",
     "patches": {
-        "prism-php/prism": [
-            {
-                "package": "prism-php/prism",
-                "description": "0",
-                "url": "patches/prism-php-prism-src-providers-mistral-handlers-audio-php.patch",
-                "sha256": "c0c0d1b702f42360263bc8ff7e5176110c6e25245fcca034fcbeb741e6235a1a",
-                "depth": 1,
-                "extra": {
-                    "provenance": "root"
-                }
-            }
-        ],
         "laravel/ai": [
             {
                 "package": "laravel/ai",
                 "description": "0",
-                "url": "patches/laravel-ai-src-gateway-prism-prismgateway-php.patch",
-                "sha256": "61b642b5a2b93ebb28ab248009567842a9ad5eb6d5088660730f860ad6d2bf0a",
+                "url": "patches/laravel-ai-src-gateway-mistral-mistralgateway-php.patch",
+                "sha256": "6aa80dc1a2d845d57e05254fce37d8e3e15861b520924007bf2f7a0bd356b8e8",
                 "depth": 1,
                 "extra": {
                     "provenance": "root"

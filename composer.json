@@ -12,7 +12,7 @@
         "php": "^8.3",
         "cweagans/composer-patches": "^2.0",
         "inertiajs/inertia-laravel": "^2.0",
-        "laravel/ai": "^0.4.1",
+        "laravel/ai": "^0.5.0",
         "laravel/fortify": "^1.34",
         "laravel/framework": "^13.0",
         "laravel/nightwatch": "^1.24",
@@ -104,11 +104,8 @@
     },
     "extra": {
         "patches": {
-            "prism-php/prism": [
-                "patches/prism-php-prism-src-providers-mistral-handlers-audio-php.patch"
-            ],
             "laravel/ai": [
-                "patches/laravel-ai-src-gateway-prism-prismgateway-php.patch"
+                "patches/laravel-ai-src-gateway-mistral-mistralgateway-php.patch"
             ]
         },
         "laravel": {
