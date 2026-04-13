@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Database\Factories\EntryFactory;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -30,6 +31,26 @@ class Entry extends Model
             'chapters' => 'json',
             'published_at' => 'datetime',
         ];
+    }
+
+    protected function rssDescription(): Attribute
+    {
+        return Attribute::make(
+            get: function () {
+                $description = $this->summary ?? '';
+
+                if ($this->chapters) {
+                    $description .= "\n<ul>\n";
+                    foreach ($this->chapters as $chapter) {
+                        $time = gmdate($chapter['startTime'] >= 3600 ? 'H:i:s' : 'i:s', (int) $chapter['startTime']);
+                        $description .= "<li>{$time} - {$chapter['title']}</li>\n";
+                    }
+                    $description .= "</ul>\n";
+                }
+
+                return trim($description);
+            },
+        );
     }
 
     public function feed(): BelongsTo

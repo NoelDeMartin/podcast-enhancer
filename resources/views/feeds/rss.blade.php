@@ -1,5 +1,5 @@
 <?= '<?xml version="1.0" encoding="UTF-8"?>'.PHP_EOL ?>
-<rss version="2.0" xmlns:itunes="http://www.itunes.com/dtds/podcast-1.0.dtd" xmlns:content="http://purl.org/rss/1.0/modules/content/" xmlns:podcast="https://podcastindex.org/namespace/1.0">
+<rss version="2.0" xmlns:itunes="http://www.itunes.com/dtds/podcast-1.0.dtd" xmlns:content="http://purl.org/rss/1.0/modules/content/">
     <script src="{{ asset('podcast-rss-style.js') }}" xmlns="http://www.w3.org/1999/xhtml"></script>
     <channel>
         <title>{{ $feed->title }}</title>
@@ -15,7 +15,8 @@
         @foreach($entries as $entry)
             <item>
                 <title>{{ $entry->name }}</title>
-                <description>{{ $entry->summary ?? '' }}</description>
+                <description><![CDATA[{!! $entry->rss_description !!}]]></description>
+                <content:encoded><![CDATA[{!! $entry->rss_description !!}]]></content:encoded>
                 <link>{{ $entry->audio_url ? route('entries.file', $entry) : '' }}</link>
                 <guid isPermaLink="false">{{ $entry->id }}</guid>
                 <pubDate>{{ $entry->published_at->toRfc2822String() }}</pubDate>
@@ -28,9 +29,6 @@
                         $length = $isUrl ? 0 : (Storage::exists($entry->audio_url) ? Storage::size($entry->audio_url) : 0);
                     @endphp
                     <enclosure url="{{ $url }}" type="audio/mpeg" length="{{ $length }}"/>
-                @endif
-                @if($entry->chapters)
-                    <podcast:chapters url="{{ route('entries.chapters', $entry) }}" type="application/json+chapters"/>
                 @endif
             </item>
         @endforeach

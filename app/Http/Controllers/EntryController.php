@@ -6,7 +6,6 @@ use App\Http\Requests\StoreEntryRequest;
 use App\Http\Requests\UpdateEntryRequest;
 use App\Models\Entry;
 use App\Models\Feed;
-use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -147,17 +146,5 @@ class EntryController extends Controller
         }
 
         return Storage::response($entry->audio_url);
-    }
-
-    public function chapters(Entry $entry): JsonResponse
-    {
-        if (! $entry->chapters) {
-            abort(404);
-        }
-
-        return response()->json([
-            'version' => '1.2.0',
-            'chapters' => $entry->chapters,
-        ]);
     }
 }

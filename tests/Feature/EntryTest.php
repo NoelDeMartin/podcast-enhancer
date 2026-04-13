@@ -277,33 +277,6 @@ it('returns 422 when regenerating chapters and summary without a transcription',
     expect(EntryJobBatch::where('entry_id', $entry->id)->count())->toBe(0);
 });
 
-it('returns chapters json for an entry with chapters', function () {
-    $entry = Entry::factory()->create([
-        'chapters' => [
-            ['title' => 'Intro', 'startTime' => 0],
-            ['title' => 'Main Topic', 'startTime' => 60],
-        ],
-    ]);
-
-    $response = $this->get(route('entries.chapters', $entry));
-
-    $response->assertSuccessful();
-    $response->assertJson([
-        'version' => '1.2.0',
-        'chapters' => [
-            ['title' => 'Intro', 'startTime' => 0],
-            ['title' => 'Main Topic', 'startTime' => 60],
-        ],
-    ]);
-});
-
-it('returns 404 when requesting chapters for entry without chapters', function () {
-    $entry = Entry::factory()->create(['chapters' => null]);
-
-    $this->get(route('entries.chapters', $entry))
-        ->assertNotFound();
-});
-
 it('deletes the file when an entry is destroyed', function () {
     Storage::fake('local');
     $feed = Feed::factory()->create();
