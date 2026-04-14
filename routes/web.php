@@ -21,6 +21,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::resource('feeds', FeedController::class)->only(['store', 'show', 'update', 'destroy']);
     Route::resource('entries', EntryController::class)->only(['store', 'update', 'destroy']);
+    Route::get('feeds/{feed}/entries/{entry}', [EntryController::class, 'show'])->name('entries.show');
     Route::post('entries/{entry}/produce', [EntryController::class, 'produce'])->name('entries.produce');
 
     Route::post('feeds/{feed}/import-rss/fetch', [RssImportController::class, 'fetch'])->name('feeds.import-rss.fetch');

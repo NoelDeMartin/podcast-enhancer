@@ -5,14 +5,50 @@ namespace App\Http\Controllers;
 use App\Http\Requests\StoreEntryRequest;
 use App\Http\Requests\UpdateEntryRequest;
 use App\Models\Entry;
+use App\Models\FailedJob;
 use App\Models\Feed;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Inertia\Inertia;
+use Inertia\Response;
 
 class EntryController extends Controller
 {
     use Concerns\DispatchesBatches;
+
+    public function show(Feed $feed, Entry $entry): Response
+    {
+        if ($entry->feed_id !== $feed->id) {
+            abort(404);
+        }
+
+        $entry->load('feed', 'latestJobBatch');
+
+        $this->loadFailedJobDetails($entry);
+
+        $entry->transcription = $entry->transcription_path ? Storage::get($entry->transcription_path) : null;
+
+        return Inertia::render('Entries/Show', [
+            'entry' => $entry,
+        ]);
+    }
+
+    private function loadFailedJobDetails(Entry $entry): void
+    {
+        $batch = $entry->latestJobBatch?->jobBatch;
+
+        if (! $batch || empty($batch->failed_job_ids)) {
+            return;
+        }
+
+        $failedJobs = FailedJob::whereIn('uuid', $batch->failed_job_ids)->get()->keyBy('uuid');
+
+        $batch->setRelation(
+            'failedJobDetails',
+            collect($batch->failed_job_ids)->map(fn ($uuid) => $failedJobs->get($uuid))->filter()->values(),
+        );
+    }
 
     public function store(StoreEntryRequest $request): RedirectResponse
     {

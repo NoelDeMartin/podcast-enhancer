@@ -66,3 +66,21 @@ it('can manage entries for a feed', function () {
 
     assertDatabaseMissing('entries', ['name' => 'Pest 4.0 Released']);
 });
+
+it('can view an entry page', function () {
+    $user = User::factory()->create();
+    $feed = Feed::factory()->create(['title' => 'Tech News']);
+    $entry = Entry::factory()->create([
+        'feed_id' => $feed->id,
+        'name' => 'My Awesome Entry',
+        'summary' => 'This is a great summary.',
+        'transcription_path' => null,
+    ]);
+
+    $this->actingAs($user);
+
+    visit('/feeds/'.$feed->id.'/entries/'.$entry->id)
+        ->assertSee('My Awesome Entry')
+        ->assertSee('This is a great summary.')
+        ->assertSee('Tech News');
+});

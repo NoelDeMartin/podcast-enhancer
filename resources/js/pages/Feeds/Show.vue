@@ -1,6 +1,8 @@
 <script setup lang="ts">
-import { Head, usePoll } from '@inertiajs/vue3';
+import { Head, Link, usePoll } from '@inertiajs/vue3';
 import { useForm } from '@inertiajs/vue3';
+import DOMPurify from 'dompurify';
+import linkifyHtml from 'linkify-html';
 import {
     Clock,
     Loader2,
@@ -16,6 +18,7 @@ import {
     update as updateEntryAction,
     file as getEntryFile,
     produce as produceEntry,
+    show as showEntryAction,
 } from '@/actions/App/Http/Controllers/EntryController';
 import FeedRssController from '@/actions/App/Http/Controllers/FeedRssController';
 import { sync as syncFeedAction } from '@/actions/App/Http/Controllers/FeedSyncController';
@@ -241,8 +244,18 @@ function parsedTranscription(entry: any): any[] | null {
     }
 }
 
-function hasDetails(entry: any): boolean {
-    return !!(entry.transcription || entry.summary || entry.chapters?.length);
+function formatSummary(summary: string | null | undefined): string {
+    if (!summary) {
+        return '';
+    }
+
+    const linkedSummary = linkifyHtml(summary, {
+        defaultProtocol: 'https',
+        target: '_blank',
+        rel: 'noopener noreferrer',
+    });
+
+    return DOMPurify.sanitize(linkedSummary, { ADD_ATTR: ['target'] });
 }
 
 type BatchStatus = 'pending' | 'failed' | 'completed' | null;
@@ -991,11 +1004,10 @@ const submitEditEntry = () => {
                     <div class="max-h-[60vh] space-y-4 overflow-y-auto">
                         <div v-if="viewingEntry?.summary">
                             <h4 class="mb-2 text-sm font-semibold">Summary</h4>
-                            <p
-                                class="text-sm leading-relaxed text-muted-foreground"
-                            >
-                                {{ viewingEntry.summary }}
-                            </p>
+                            <div
+                                class="text-sm leading-relaxed text-muted-foreground [&_a]:text-blue-600 dark:[&_a]:text-blue-400 [&_a:hover]:underline [&_ol]:list-decimal [&_ol]:pl-5 [&_p]:mb-4 [&_ul]:list-disc [&_ul]:pl-5"
+                                v-html="formatSummary(viewingEntry.summary)"
+                            ></div>
                         </div>
 
                         <Separator
@@ -1105,9 +1117,19 @@ const submitEditEntry = () => {
                                         <Rss class="h-5 w-5 text-gray-400" />
                                     </div>
                                 </TableCell>
-                                <TableCell class="align-top font-medium">{{
-                                    entry.name
-                                }}</TableCell>
+                                <TableCell class="align-top font-medium">
+                                    <Link
+                                        :href="
+                                            showEntryAction.url([
+                                                feed.id,
+                                                entry.id,
+                                            ])
+                                        "
+                                        class="hover:underline"
+                                    >
+                                        {{ entry.name }}
+                                    </Link>
+                                </TableCell>
                                 <TableCell
                                     class="align-top text-sm text-muted-foreground"
                                 >
@@ -1156,18 +1178,17 @@ const submitEditEntry = () => {
                                         >
                                             Failed
                                         </button>
-                                        <button
-                                            v-else-if="hasDetails(entry)"
+                                        <Link
                                             class="text-blue-600 hover:underline dark:text-blue-400"
-                                            @click="viewingEntry = entry"
+                                            :href="
+                                                showEntryAction.url([
+                                                    feed.id,
+                                                    entry.id,
+                                                ])
+                                            "
                                         >
                                             View
-                                        </button>
-                                        <span
-                                            v-else
-                                            class="text-gray-400 dark:text-gray-600"
-                                            >-</span
-                                        >
+                                        </Link>
                                     </div>
                                 </TableCell>
                                 <TableCell class="text-right align-top">

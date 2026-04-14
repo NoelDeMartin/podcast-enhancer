@@ -296,3 +296,18 @@ it('deletes the file when an entry is destroyed', function () {
     $this->assertDatabaseMissing('entries', ['id' => $entry->id]);
     Storage::disk('local')->assertMissing($path);
 });
+
+it('can view an entry', function () {
+    $feed = Feed::factory()->create();
+    $entry = Entry::factory()->create([
+        'feed_id' => $feed->id,
+    ]);
+
+    $this->actingAs($this->user)
+        ->get(route('entries.show', [$feed, $entry]))
+        ->assertOk()
+        ->assertInertia(fn ($page) => $page
+            ->component('Entries/Show')
+            ->has('entry')
+        );
+});
