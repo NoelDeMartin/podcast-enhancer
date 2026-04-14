@@ -41,6 +41,7 @@ class RssImportController extends Controller
             'episodes' => ['required', 'array'],
             'episodes.*.name' => ['required', 'string'],
             'episodes.*.audio_url' => ['required', 'url'],
+            'episodes.*.image_url' => ['nullable', 'url'],
             'episodes.*.summary' => ['nullable', 'string'],
             'episodes.*.published_at' => ['nullable', 'date'],
         ]);
@@ -53,6 +54,7 @@ class RssImportController extends Controller
             $entry = $feed->entries()->create([
                 'name' => $episodeData['name'],
                 'audio_url' => $episodeData['audio_url'],
+                'image_url' => $episodeData['image_url'] ?? null,
                 'summary' => $episodeData['summary'] ? "<original_summary>{$episodeData['summary']}</original_summary>" : null,
                 'published_at' => $publishedAt,
             ]);

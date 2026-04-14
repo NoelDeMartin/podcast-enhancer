@@ -27,6 +27,10 @@ class EntryController extends Controller
             $validated['audio_url'] = $request->file('file')->store('entries');
         }
 
+        if ($request->hasFile('image_file')) {
+            $validated['image_url'] = $request->file('image_file')->store('images', 'public');
+        }
+
         $entry = Entry::create($validated);
 
         if ($entry->audio_url) {
@@ -82,7 +86,24 @@ class EntryController extends Controller
             $fileChanged = true;
         }
 
+        if ($request->hasFile('image_file')) {
+            if ($entry->image_url && ! filter_var($entry->image_url, FILTER_VALIDATE_URL)) {
+                Storage::disk('public')->delete($entry->image_url);
+            }
+            $validated['image_url'] = $request->file('image_file')->store('images', 'public');
+        } elseif ($request->boolean('delete_image_file') && $entry->image_url) {
+            if (! filter_var($entry->image_url, FILTER_VALIDATE_URL)) {
+                Storage::disk('public')->delete($entry->image_url);
+            }
+            $validated['image_url'] = null;
+        } elseif ($request->has('image_url') && $request->image_url !== $entry->image_url) {
+            if ($entry->image_url && ! filter_var($entry->image_url, FILTER_VALIDATE_URL)) {
+                Storage::disk('public')->delete($entry->image_url);
+            }
+        }
+
         unset($validated['delete_file']);
+        unset($validated['delete_image_file']);
 
         $entry->update($validated);
 
@@ -101,6 +122,10 @@ class EntryController extends Controller
 
         if ($entry->audio_url && ! filter_var($entry->audio_url, FILTER_VALIDATE_URL)) {
             Storage::delete($entry->audio_url);
+        }
+
+        if ($entry->image_url && ! filter_var($entry->image_url, FILTER_VALIDATE_URL)) {
+            Storage::disk('public')->delete($entry->image_url);
         }
 
         if ($entry->transcription_path) {

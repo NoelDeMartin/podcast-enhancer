@@ -19,6 +19,8 @@ class StoreEntryRequest extends FormRequest
             'published_at' => ['required', 'date'],
             'audio_url' => ['nullable', 'string'],
             'file' => ['nullable', 'file', 'mimes:mp3,mp4,m4a,ogg,wav,flac,aac,opus,wma'],
+            'image_url' => ['nullable', 'string'],
+            'image_file' => ['nullable', 'image', 'mimes:jpeg,png,jpg,gif,webp,svg'],
         ];
     }
 }

@@ -89,17 +89,26 @@ const entryForm = useForm({
     name: '',
     audio_url: '',
     file: null as File | null,
+    image_url: '',
+    image_file: null as File | null,
     published_at: formatDatetimeLocalForInput(new Date()),
 });
 
 const entrySource = ref<'url' | 'file'>('url');
+const entryImageSource = ref<'url' | 'file'>('url');
 
 const showEntryForm = ref(false);
 
 const submitEntry = () => {
     entryForm.submit(storeEntry(), {
         onSuccess: () => {
-            entryForm.reset('name', 'audio_url', 'file');
+            entryForm.reset(
+                'name',
+                'audio_url',
+                'file',
+                'image_url',
+                'image_file',
+            );
             entryForm.published_at = formatDatetimeLocalForInput(new Date());
             showEntryForm.value = false;
         },
@@ -277,9 +286,13 @@ const editEntryForm = useForm({
     audio_url: '',
     file: null as File | null,
     delete_file: false,
+    image_url: '',
+    image_file: null as File | null,
+    delete_image_file: false,
 });
 
 const editEntrySource = ref<'url' | 'file'>('url');
+const editEntryImageSource = ref<'url' | 'file'>('url');
 
 const isExternal = (url: string | null) => {
     if (!url) {
@@ -307,6 +320,13 @@ const startEditEntry = (entry: any) => {
     editEntryForm.audio_url = external ? entry.audio_url : '';
     editEntryForm.file = null;
     editEntryForm.delete_file = false;
+
+    const externalImage = isExternal(entry.image_url);
+    editEntryImageSource.value = externalImage ? 'url' : 'file';
+    editEntryForm.image_url = externalImage ? entry.image_url : '';
+    editEntryForm.image_file = null;
+    editEntryForm.delete_image_file = false;
+
     isEditDialogOpen.value = true;
 };
 
@@ -470,6 +490,74 @@ const submitEditEntry = () => {
                                                 class="text-sm text-red-500"
                                             >
                                                 {{ entryForm.errors.file }}
+                                            </div>
+                                        </div>
+                                        <div class="grid gap-2">
+                                            <Label for="entryImageSource"
+                                                >Image Source</Label
+                                            >
+                                            <Select v-model="entryImageSource">
+                                                <SelectTrigger>
+                                                    <SelectValue
+                                                        placeholder="Select source"
+                                                    />
+                                                </SelectTrigger>
+                                                <SelectContent>
+                                                    <SelectItem value="url"
+                                                        >Remote URL</SelectItem
+                                                    >
+                                                    <SelectItem value="file"
+                                                        >Upload File</SelectItem
+                                                    >
+                                                </SelectContent>
+                                            </Select>
+                                        </div>
+                                        <div
+                                            v-if="entryImageSource === 'url'"
+                                            class="grid gap-2"
+                                        >
+                                            <Label for="image_url"
+                                                >Image URL</Label
+                                            >
+                                            <Input
+                                                id="image_url"
+                                                v-model="entryForm.image_url"
+                                                placeholder="https://example.com/image.jpg"
+                                            />
+                                            <div
+                                                v-if="
+                                                    entryForm.errors.image_url
+                                                "
+                                                class="text-sm text-red-500"
+                                            >
+                                                {{ entryForm.errors.image_url }}
+                                            </div>
+                                        </div>
+                                        <div
+                                            v-if="entryImageSource === 'file'"
+                                            class="grid gap-2"
+                                        >
+                                            <Label for="image_file"
+                                                >Image File</Label
+                                            >
+                                            <Input
+                                                id="image_file"
+                                                type="file"
+                                                @input="
+                                                    entryForm.image_file =
+                                                        $event.target.files[0]
+                                                "
+                                                accept="image/*"
+                                            />
+                                            <div
+                                                v-if="
+                                                    entryForm.errors.image_file
+                                                "
+                                                class="text-sm text-red-500"
+                                            >
+                                                {{
+                                                    entryForm.errors.image_file
+                                                }}
                                             </div>
                                         </div>
                                     </div>
@@ -751,6 +839,108 @@ const submitEditEntry = () => {
                                     </Button>
                                 </div>
                             </div>
+                            <div class="grid gap-2">
+                                <Label for="editEntryImageSource"
+                                    >Image Source</Label
+                                >
+                                <Select v-model="editEntryImageSource">
+                                    <SelectTrigger>
+                                        <SelectValue
+                                            placeholder="Select source"
+                                        />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="url"
+                                            >Remote URL</SelectItem
+                                        >
+                                        <SelectItem value="file"
+                                            >Upload File</SelectItem
+                                        >
+                                    </SelectContent>
+                                </Select>
+                            </div>
+                            <div
+                                v-if="editEntryImageSource === 'url'"
+                                class="grid gap-2"
+                            >
+                                <Label for="edit-image_url">Image URL</Label>
+                                <Input
+                                    id="edit-image_url"
+                                    v-model="editEntryForm.image_url"
+                                    placeholder="https://example.com/image.jpg"
+                                />
+                                <div
+                                    v-if="editEntryForm.errors.image_url"
+                                    class="text-sm text-red-500"
+                                >
+                                    {{ editEntryForm.errors.image_url }}
+                                </div>
+                            </div>
+                            <div
+                                v-if="editEntryImageSource === 'file'"
+                                class="grid gap-2"
+                            >
+                                <Label for="edit-image_file">Image File</Label>
+                                <div
+                                    v-if="
+                                        !isExternal(editingEntry?.image_url) &&
+                                        editingEntry?.image_url &&
+                                        !editEntryForm.delete_image_file &&
+                                        !editEntryForm.image_file
+                                    "
+                                    class="flex items-center gap-4"
+                                >
+                                    <span class="text-sm text-gray-500"
+                                        >Current image attached</span
+                                    >
+                                    <Button
+                                        type="button"
+                                        variant="destructive"
+                                        size="sm"
+                                        @click="
+                                            editEntryForm.delete_image_file = true
+                                        "
+                                    >
+                                        Delete
+                                    </Button>
+                                </div>
+                                <div v-else>
+                                    <Input
+                                        id="edit-image_file"
+                                        type="file"
+                                        @input="
+                                            editEntryForm.image_file =
+                                                $event.target.files[0]
+                                        "
+                                        accept="image/*"
+                                    />
+                                    <div
+                                        v-if="editEntryForm.errors.image_file"
+                                        class="text-sm text-red-500"
+                                    >
+                                        {{ editEntryForm.errors.image_file }}
+                                    </div>
+                                    <Button
+                                        v-if="
+                                            editEntryForm.delete_image_file &&
+                                            !isExternal(
+                                                editingEntry?.image_url,
+                                            ) &&
+                                            editingEntry?.image_url
+                                        "
+                                        type="button"
+                                        variant="link"
+                                        size="sm"
+                                        class="mt-1 px-0 text-gray-500"
+                                        @click="
+                                            editEntryForm.delete_image_file = false;
+                                            editEntryForm.image_file = null;
+                                        "
+                                    >
+                                        Cancel deletion
+                                    </Button>
+                                </div>
+                            </div>
                         </div>
                         <DialogFooter>
                             <Button
@@ -882,7 +1072,8 @@ const submitEditEntry = () => {
                 <Table>
                     <TableHeader>
                         <TableRow>
-                            <TableHead class="w-[38%]">Name</TableHead>
+                            <TableHead class="w-[10%]">Image</TableHead>
+                            <TableHead class="w-[28%]">Name</TableHead>
                             <TableHead class="w-[12%]">Published</TableHead>
                             <TableHead class="w-[15%]">File</TableHead>
                             <TableHead class="w-[20%]">Details</TableHead>
@@ -892,6 +1083,28 @@ const submitEditEntry = () => {
                     <TableBody>
                         <template v-for="entry in feed.entries" :key="entry.id">
                             <TableRow>
+                                <TableCell>
+                                    <img
+                                        v-if="entry.image_url || feed.image_url"
+                                        :src="
+                                            isExternal(
+                                                entry.image_url ||
+                                                    feed.image_url,
+                                            )
+                                                ? entry.image_url ||
+                                                  feed.image_url
+                                                : `/storage/${entry.image_url || feed.image_url}`
+                                        "
+                                        alt="Entry image"
+                                        class="h-10 w-10 rounded object-cover"
+                                    />
+                                    <div
+                                        v-else
+                                        class="flex h-10 w-10 items-center justify-center rounded bg-gray-100 dark:bg-zinc-800"
+                                    >
+                                        <Rss class="h-5 w-5 text-gray-400" />
+                                    </div>
+                                </TableCell>
                                 <TableCell class="align-top font-medium">{{
                                     entry.name
                                 }}</TableCell>
@@ -1025,7 +1238,7 @@ const submitEditEntry = () => {
                             </TableRow>
                         </template>
                         <TableRow v-if="feed.entries.length === 0">
-                            <TableCell colspan="4" class="h-24 text-center">
+                            <TableCell colspan="6" class="h-24 text-center">
                                 No entries yet. Click "Add Entry" to create one.
                             </TableCell>
                         </TableRow>

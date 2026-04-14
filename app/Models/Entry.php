@@ -19,6 +19,7 @@ class Entry extends Model
         'feed_id',
         'name',
         'audio_url',
+        'image_url',
         'transcription_path',
         'summary',
         'chapters',

@@ -11,6 +11,9 @@
         <itunes:author>Podcasts Enhancer</itunes:author>
         <itunes:summary>{{ $feed->description ?? 'A podcast feed for ' . $feed->title . '. Subscribe in your podcast player to get the latest episodes.' }}</itunes:summary>
         <itunes:type>episodic</itunes:type>
+        @if($feed->image_url)
+            <itunes:image href="{{ filter_var($feed->image_url, FILTER_VALIDATE_URL) ? $feed->image_url : asset(Storage::disk('public')->url($feed->image_url)) }}"/>
+        @endif
 
         @foreach($entries as $entry)
             <item>
@@ -22,6 +25,12 @@
                 <pubDate>{{ $entry->published_at->toRfc2822String() }}</pubDate>
                 <itunes:summary>{{ $entry->summary ?? '' }}</itunes:summary>
                 <itunes:episodeType>full</itunes:episodeType>
+                @php
+                    $effectiveImageUrl = $entry->image_url ?: $feed->image_url;
+                @endphp
+                @if($effectiveImageUrl)
+                    <itunes:image href="{{ filter_var($effectiveImageUrl, FILTER_VALIDATE_URL) ? $effectiveImageUrl : asset(Storage::disk('public')->url($effectiveImageUrl)) }}"/>
+                @endif
                 @if($entry->audio_url)
                     @php
                         $isUrl = filter_var($entry->audio_url, FILTER_VALIDATE_URL);

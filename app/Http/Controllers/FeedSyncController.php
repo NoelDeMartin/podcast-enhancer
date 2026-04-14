@@ -32,6 +32,7 @@ class FeedSyncController extends Controller
                 'title' => $feedTitle,
                 'description' => $feedDescription,
                 'rss_url' => $request->rss_url,
+                'image_url' => $data['image_url'] ?? null,
             ]);
 
             $importedCount = 0;
@@ -41,6 +42,7 @@ class FeedSyncController extends Controller
                     $feed->entries()->create([
                         'name' => $episodeData['name'],
                         'audio_url' => $episodeData['audio_url'],
+                        'image_url' => $episodeData['image_url'] ?? null,
                         'summary' => $episodeData['summary'] ? '<original_summary>'.$episodeData['summary'].'</original_summary>' : null,
                         'published_at' => $episodeData['published_at'],
                     ]);
@@ -79,6 +81,7 @@ class FeedSyncController extends Controller
                     $feed->entries()->create([
                         'name' => $name,
                         'audio_url' => $audioUrl,
+                        'image_url' => $episodeData['image_url'] ?? null,
                         'summary' => $episodeData['summary'] ? '<original_summary>'.$episodeData['summary'].'</original_summary>' : null,
                         'published_at' => $episodeData['published_at'],
                     ]);

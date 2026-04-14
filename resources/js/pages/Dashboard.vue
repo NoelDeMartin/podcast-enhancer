@@ -30,6 +30,13 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from '@/components/ui/select';
+import {
     Table,
     TableBody,
     TableCell,
@@ -56,7 +63,11 @@ const breadcrumbs: BreadcrumbItem[] = [
 const form = useForm({
     title: '',
     description: '',
+    image_url: '',
+    image_file: null as File | null,
 });
+
+const feedImageSource = ref<'url' | 'file'>('url');
 
 const isDialogOpen = ref(false);
 
@@ -101,12 +112,32 @@ const editingFeed = ref<any>(null);
 const editFeedForm = useForm({
     title: '',
     description: '',
+    image_url: '',
+    image_file: null as File | null,
+    delete_image_file: false,
 });
+
+const editFeedImageSource = ref<'url' | 'file'>('url');
+
+const isExternal = (url: string | null) => {
+    if (!url) {
+        return false;
+    }
+
+    return url.startsWith('http://') || url.startsWith('https://');
+};
 
 const startEditFeed = (feed: any) => {
     editingFeed.value = feed;
     editFeedForm.title = feed.title;
     editFeedForm.description = feed.description ?? '';
+
+    const external = isExternal(feed.image_url);
+    editFeedImageSource.value = external ? 'url' : 'file';
+    editFeedForm.image_url = external ? feed.image_url : '';
+    editFeedForm.image_file = null;
+    editFeedForm.delete_image_file = false;
+
     isEditDialogOpen.value = true;
 };
 
@@ -290,6 +321,66 @@ const submitImportRss = () => {
                                             {{ form.errors.description }}
                                         </div>
                                     </div>
+                                    <div class="grid gap-2">
+                                        <Label for="feedImageSource"
+                                            >Image Source</Label
+                                        >
+                                        <Select v-model="feedImageSource">
+                                            <SelectTrigger>
+                                                <SelectValue
+                                                    placeholder="Select source"
+                                                />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                <SelectItem value="url"
+                                                    >Remote URL</SelectItem
+                                                >
+                                                <SelectItem value="file"
+                                                    >Upload File</SelectItem
+                                                >
+                                            </SelectContent>
+                                        </Select>
+                                    </div>
+                                    <div
+                                        v-if="feedImageSource === 'url'"
+                                        class="grid gap-2"
+                                    >
+                                        <Label for="image_url">Image URL</Label>
+                                        <Input
+                                            id="image_url"
+                                            v-model="form.image_url"
+                                            placeholder="https://example.com/image.jpg"
+                                        />
+                                        <div
+                                            v-if="form.errors.image_url"
+                                            class="text-sm text-red-500"
+                                        >
+                                            {{ form.errors.image_url }}
+                                        </div>
+                                    </div>
+                                    <div
+                                        v-if="feedImageSource === 'file'"
+                                        class="grid gap-2"
+                                    >
+                                        <Label for="image_file"
+                                            >Image File</Label
+                                        >
+                                        <Input
+                                            id="image_file"
+                                            type="file"
+                                            @input="
+                                                form.image_file =
+                                                    $event.target.files[0]
+                                            "
+                                            accept="image/*"
+                                        />
+                                        <div
+                                            v-if="form.errors.image_file"
+                                            class="text-sm text-red-500"
+                                        >
+                                            {{ form.errors.image_file }}
+                                        </div>
+                                    </div>
                                 </div>
                                 <DialogFooter>
                                     <Button
@@ -356,6 +447,108 @@ const submitImportRss = () => {
                                     class="text-sm text-red-500"
                                 >
                                     {{ editFeedForm.errors.description }}
+                                </div>
+                            </div>
+                            <div class="grid gap-2">
+                                <Label for="editFeedImageSource"
+                                    >Image Source</Label
+                                >
+                                <Select v-model="editFeedImageSource">
+                                    <SelectTrigger>
+                                        <SelectValue
+                                            placeholder="Select source"
+                                        />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="url"
+                                            >Remote URL</SelectItem
+                                        >
+                                        <SelectItem value="file"
+                                            >Upload File</SelectItem
+                                        >
+                                    </SelectContent>
+                                </Select>
+                            </div>
+                            <div
+                                v-if="editFeedImageSource === 'url'"
+                                class="grid gap-2"
+                            >
+                                <Label for="edit-image_url">Image URL</Label>
+                                <Input
+                                    id="edit-image_url"
+                                    v-model="editFeedForm.image_url"
+                                    placeholder="https://example.com/image.jpg"
+                                />
+                                <div
+                                    v-if="editFeedForm.errors.image_url"
+                                    class="text-sm text-red-500"
+                                >
+                                    {{ editFeedForm.errors.image_url }}
+                                </div>
+                            </div>
+                            <div
+                                v-if="editFeedImageSource === 'file'"
+                                class="grid gap-2"
+                            >
+                                <Label for="edit-image_file">Image File</Label>
+                                <div
+                                    v-if="
+                                        !isExternal(editingFeed?.image_url) &&
+                                        editingFeed?.image_url &&
+                                        !editFeedForm.delete_image_file &&
+                                        !editFeedForm.image_file
+                                    "
+                                    class="flex items-center gap-4"
+                                >
+                                    <span class="text-sm text-gray-500"
+                                        >Current image attached</span
+                                    >
+                                    <Button
+                                        type="button"
+                                        variant="destructive"
+                                        size="sm"
+                                        @click="
+                                            editFeedForm.delete_image_file = true
+                                        "
+                                    >
+                                        Delete
+                                    </Button>
+                                </div>
+                                <div v-else>
+                                    <Input
+                                        id="edit-image_file"
+                                        type="file"
+                                        @input="
+                                            editFeedForm.image_file =
+                                                $event.target.files[0]
+                                        "
+                                        accept="image/*"
+                                    />
+                                    <div
+                                        v-if="editFeedForm.errors.image_file"
+                                        class="text-sm text-red-500"
+                                    >
+                                        {{ editFeedForm.errors.image_file }}
+                                    </div>
+                                    <Button
+                                        v-if="
+                                            editFeedForm.delete_image_file &&
+                                            !isExternal(
+                                                editingFeed?.image_url,
+                                            ) &&
+                                            editingFeed?.image_url
+                                        "
+                                        type="button"
+                                        variant="link"
+                                        size="sm"
+                                        class="mt-1 px-0 text-gray-500"
+                                        @click="
+                                            editFeedForm.delete_image_file = false;
+                                            editFeedForm.image_file = null;
+                                        "
+                                    >
+                                        Cancel deletion
+                                    </Button>
                                 </div>
                             </div>
                         </div>
@@ -433,13 +626,32 @@ const submitImportRss = () => {
                 <Table>
                     <TableHeader>
                         <TableRow>
-                            <TableHead class="w-[50%]">Title</TableHead>
+                            <TableHead class="w-[10%]">Image</TableHead>
+                            <TableHead class="w-[40%]">Title</TableHead>
                             <TableHead>Entries</TableHead>
                             <TableHead class="text-right">Actions</TableHead>
                         </TableRow>
                     </TableHeader>
                     <TableBody>
                         <TableRow v-for="feed in feeds" :key="feed.id">
+                            <TableCell>
+                                <img
+                                    v-if="feed.image_url"
+                                    :src="
+                                        isExternal(feed.image_url)
+                                            ? feed.image_url
+                                            : `/storage/${feed.image_url}`
+                                    "
+                                    alt="Feed image"
+                                    class="h-10 w-10 rounded object-cover"
+                                />
+                                <div
+                                    v-else
+                                    class="flex h-10 w-10 items-center justify-center rounded bg-gray-100 dark:bg-zinc-800"
+                                >
+                                    <Rss class="h-5 w-5 text-gray-400" />
+                                </div>
+                            </TableCell>
                             <TableCell class="font-medium">
                                 <Link
                                     :href="show.url(feed.id)"
@@ -479,7 +691,7 @@ const submitImportRss = () => {
                             </TableCell>
                         </TableRow>
                         <TableRow v-if="feeds.length === 0">
-                            <TableCell colspan="3" class="h-24 text-center">
+                            <TableCell colspan="4" class="h-24 text-center">
                                 No feeds created yet.
                             </TableCell>
                         </TableRow>

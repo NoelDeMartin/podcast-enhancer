@@ -16,6 +16,7 @@ class Feed extends Model
         'title',
         'description',
         'rss_url',
+        'image_url',
     ];
 
     public function entries(): HasMany

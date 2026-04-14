@@ -16,6 +16,9 @@ class UpdateFeedRequest extends FormRequest
         return [
             'title' => ['required', 'string', 'max:255'],
             'description' => ['nullable', 'string'],
+            'image_url' => ['nullable', 'string'],
+            'image_file' => ['nullable', 'image', 'mimes:jpeg,png,jpg,gif,webp,svg'],
+            'delete_image_file' => ['nullable', 'boolean'],
         ];
     }
 }

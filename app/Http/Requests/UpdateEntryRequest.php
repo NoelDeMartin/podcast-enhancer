@@ -18,6 +18,9 @@ class UpdateEntryRequest extends FormRequest
             'audio_url' => ['nullable', 'string'],
             'file' => ['nullable', 'file', 'mimes:mp3,mp4,m4a,ogg,wav,flac,aac,opus,wma'],
             'delete_file' => ['nullable', 'boolean'],
+            'image_url' => ['nullable', 'string'],
+            'image_file' => ['nullable', 'image', 'mimes:jpeg,png,jpg,gif,webp,svg'],
+            'delete_image_file' => ['nullable', 'boolean'],
         ];
     }
 }

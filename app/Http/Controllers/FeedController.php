@@ -15,7 +15,11 @@ class FeedController extends Controller
 {
     public function store(StoreFeedRequest $request): RedirectResponse
     {
-        Feed::create($request->validated());
+        $validated = $request->validated();
+        if ($request->hasFile('image_file')) {
+            $validated['image_url'] = $request->file('image_file')->store('images', 'public');
+        }
+        Feed::create($validated);
 
         return redirect()->back()->with('success', 'Feed created successfully.');
     }
@@ -63,13 +67,36 @@ class FeedController extends Controller
 
     public function update(UpdateFeedRequest $request, Feed $feed): RedirectResponse
     {
-        $feed->update($request->validated());
+        $validated = $request->validated();
+
+        if ($request->hasFile('image_file')) {
+            if ($feed->image_url && ! filter_var($feed->image_url, FILTER_VALIDATE_URL)) {
+                Storage::disk('public')->delete($feed->image_url);
+            }
+            $validated['image_url'] = $request->file('image_file')->store('images', 'public');
+        } elseif ($request->boolean('delete_image_file') && $feed->image_url) {
+            if (! filter_var($feed->image_url, FILTER_VALIDATE_URL)) {
+                Storage::disk('public')->delete($feed->image_url);
+            }
+            $validated['image_url'] = null;
+        } elseif ($request->has('image_url') && $request->image_url !== $feed->image_url) {
+            if ($feed->image_url && ! filter_var($feed->image_url, FILTER_VALIDATE_URL)) {
+                Storage::disk('public')->delete($feed->image_url);
+            }
+        }
+        unset($validated['delete_image_file']);
+
+        $feed->update($validated);
 
         return redirect()->back()->with('success', 'Feed updated successfully.');
     }
 
     public function destroy(Feed $feed): RedirectResponse
     {
+        if ($feed->image_url && ! filter_var($feed->image_url, FILTER_VALIDATE_URL)) {
+            Storage::disk('public')->delete($feed->image_url);
+        }
+
         $feed->delete();
 
         return redirect()->route('dashboard')->with('success', 'Feed deleted successfully.');
