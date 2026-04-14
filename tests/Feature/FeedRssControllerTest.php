@@ -50,9 +50,13 @@ it('includes podcast chapters in rss when available', function () {
     $response = $this->get(route('feeds.rss', $feed));
 
     $response->assertSuccessful();
+    $response->assertSee('xmlns:psc="http://podlove.org/simple-chapters"', false);
     $response->assertSee('<li>00:00 - Intro</li>', false);
     $response->assertSee('<li>01:00 - Main Topic</li>', false);
     $response->assertSee('<content:encoded><![CDATA[', false);
+    $response->assertSee('<psc:chapters version="1.2">', false);
+    $response->assertSee('<psc:chapter start="00:00:00" title="Intro" />', false);
+    $response->assertSee('<psc:chapter start="00:01:00" title="Main Topic" />', false);
 });
 
 it('omits podcast chapters in rss when not available', function () {
@@ -71,5 +75,5 @@ it('omits podcast chapters in rss when not available', function () {
     $response = $this->get(route('feeds.rss', $feed));
 
     $response->assertSuccessful();
-    $response->assertDontSee('<podcast:chapters', false);
+    $response->assertDontSee('<psc:chapters', false);
 });

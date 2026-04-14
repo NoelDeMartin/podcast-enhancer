@@ -1,5 +1,5 @@
 <?= '<?xml version="1.0" encoding="UTF-8"?>'.PHP_EOL ?>
-<rss version="2.0" xmlns:itunes="http://www.itunes.com/dtds/podcast-1.0.dtd" xmlns:content="http://purl.org/rss/1.0/modules/content/">
+<rss version="2.0" xmlns:itunes="http://www.itunes.com/dtds/podcast-1.0.dtd" xmlns:content="http://purl.org/rss/1.0/modules/content/" xmlns:psc="http://podlove.org/simple-chapters">
     <script src="{{ asset('podcast-rss-style.js') }}" xmlns="http://www.w3.org/1999/xhtml"></script>
     <channel>
         <title>{{ $feed->title }}</title>
@@ -29,6 +29,13 @@
                         $length = $isUrl ? 0 : (Storage::exists($entry->audio_url) ? Storage::size($entry->audio_url) : 0);
                     @endphp
                     <enclosure url="{{ $url }}" type="audio/mpeg" length="{{ $length }}"/>
+                @endif
+                @if($entry->chapters)
+                    <psc:chapters version="1.2">
+                        @foreach($entry->chapters as $chapter)
+                            <psc:chapter start="{{ gmdate('H:i:s', (int) $chapter['startTime']) }}" title="{{ $chapter['title'] }}" />
+                        @endforeach
+                    </psc:chapters>
                 @endif
             </item>
         @endforeach
