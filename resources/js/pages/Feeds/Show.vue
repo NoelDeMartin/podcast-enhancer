@@ -278,8 +278,28 @@ function getBatchStatus(entry: any): BatchStatus {
     return 'pending';
 }
 
-const hasActiveJobs = computed(() =>
-    props.feed.entries.some((e: any) => getBatchStatus(e) === 'pending'),
+function getFeedSyncStatus(): BatchStatus {
+    const batch = props.feed.latest_job_batch?.job_batch;
+
+    if (!batch) {
+        return null;
+    }
+
+    if (batch.cancelled_at !== null) {
+        return 'failed';
+    }
+
+    if (batch.finished_at !== null) {
+        return 'completed';
+    }
+
+    return 'pending';
+}
+
+const hasActiveJobs = computed(
+    () =>
+        props.feed.entries.some((e: any) => getBatchStatus(e) === 'pending') ||
+        getFeedSyncStatus() === 'pending',
 );
 
 const { start: startPolling, stop: stopPolling } = usePoll(
@@ -316,6 +336,7 @@ const isExternal = (url: string | null) => {
 };
 
 const isSyncing = ref(false);
+const viewingSyncFailure = ref(false);
 const syncFeed = () => {
     isSyncing.value = true;
     useForm({}).post(syncFeedAction.url(props.feed.id), {
@@ -376,17 +397,37 @@ const submitEditEntry = () => {
                 </div>
 
                 <div class="flex items-center gap-2">
+                    <div
+                        v-if="getFeedSyncStatus() === 'failed'"
+                        class="flex items-center gap-1"
+                    >
+                        <button
+                            class="text-xs text-red-500 hover:underline"
+                            @click="viewingSyncFailure = true"
+                        >
+                            Sync Failed
+                        </button>
+                    </div>
+
                     <Button
                         v-if="feed.rss_url"
                         @click="syncFeed"
-                        :disabled="isSyncing"
+                        :disabled="
+                            isSyncing || getFeedSyncStatus() === 'pending'
+                        "
                     >
                         <Loader2
-                            v-if="isSyncing"
+                            v-if="
+                                isSyncing || getFeedSyncStatus() === 'pending'
+                            "
                             class="mr-2 h-4 w-4 animate-spin"
                         />
                         <RefreshCw v-else class="mr-2 h-4 w-4" />
-                        Synchronize
+                        {{
+                            getFeedSyncStatus() === 'pending'
+                                ? 'Synchronizing...'
+                                : 'Synchronize'
+                        }}
                     </Button>
                     <template v-else>
                         <Dialog v-model:open="showEntryForm">
@@ -985,6 +1026,32 @@ const submitEditEntry = () => {
                             class="text-xs leading-relaxed whitespace-pre-wrap text-red-800 dark:text-red-300"
                             >{{
                                 viewingFailure?.latest_job_batch?.job_batch
+                                    ?.failed_job_details?.[0]?.exception ??
+                                'No exception details available.'
+                            }}</pre
+                        >
+                    </div>
+                </DialogContent>
+            </Dialog>
+
+            <Dialog
+                :open="viewingSyncFailure"
+                @update:open="viewingSyncFailure = false"
+            >
+                <DialogContent class="max-w-2xl">
+                    <DialogHeader>
+                        <DialogTitle>Synchronization Failed</DialogTitle>
+                        <DialogDescription>
+                            {{ feed.title }}
+                        </DialogDescription>
+                    </DialogHeader>
+                    <div
+                        class="max-h-[60vh] overflow-y-auto rounded-md border bg-red-50 p-4 dark:bg-red-950/20"
+                    >
+                        <pre
+                            class="text-xs leading-relaxed whitespace-pre-wrap text-red-800 dark:text-red-300"
+                            >{{
+                                feed.latest_job_batch?.job_batch
                                     ?.failed_job_details?.[0]?.exception ??
                                 'No exception details available.'
                             }}</pre

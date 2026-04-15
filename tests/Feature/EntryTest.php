@@ -4,11 +4,13 @@ use App\Models\Entry;
 use App\Models\EntryJobBatch;
 use App\Models\Feed;
 use App\Models\User;
+use Illuminate\Foundation\Http\Middleware\PreventRequestForgery;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Bus;
 use Illuminate\Support\Facades\Storage;
 
 beforeEach(function () {
+    $this->withoutMiddleware(PreventRequestForgery::class);
     $this->user = User::factory()->create();
 });
 

@@ -1,12 +1,15 @@
 <?php
 
-namespace App\Http\Controllers\Concerns;
+namespace App\Concerns;
 
 use App\Jobs\PrepareTranscriptionJob;
 use App\Jobs\ProduceEntryJob;
 use App\Jobs\StitchTranscriptionsJob;
+use App\Jobs\SyncFeedJob;
 use App\Models\Entry;
 use App\Models\EntryJobBatch;
+use App\Models\Feed;
+use App\Models\FeedJobBatch;
 use Illuminate\Bus\Batch;
 use Illuminate\Support\Facades\Bus;
 use Illuminate\Support\Facades\Cache;
@@ -82,6 +85,20 @@ trait DispatchesBatches
 
         EntryJobBatch::forceCreate([
             'entry_id' => $entry->id,
+            'batch_id' => $batch->id,
+        ]);
+    }
+
+    protected function dispatchSyncBatch(Feed $feed): void
+    {
+        $batch = Bus::batch([
+            new SyncFeedJob($feed),
+        ])
+            ->name('Sync feed '.$feed->id)
+            ->dispatch();
+
+        FeedJobBatch::forceCreate([
+            'feed_id' => $feed->id,
             'batch_id' => $batch->id,
         ]);
     }

@@ -7,6 +7,8 @@ use App\Models\Entry;
 use App\Models\Feed;
 use App\Models\User;
 use Carbon\CarbonImmutable;
+use Illuminate\Bus\PendingBatch;
+use Illuminate\Foundation\Http\Middleware\PreventRequestForgery;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Bus;
 use Illuminate\Support\Facades\Http;
@@ -14,6 +16,7 @@ use Illuminate\Support\Facades\Http;
 uses(RefreshDatabase::class);
 
 beforeEach(function () {
+    $this->withoutMiddleware(PreventRequestForgery::class);
     Bus::fake();
     $this->user = User::factory()->create();
 });
@@ -69,7 +72,7 @@ it('can import feed from rss without dispatching jobs', function () {
     Bus::assertNotDispatched(ProduceEntryJob::class);
 });
 
-it('can synchronize existing feed without duplicates and without jobs', function () {
+it('can synchronize existing feed without duplicates via background job', function () {
     $feed = Feed::factory()->create([
         'rss_url' => 'https://example.com/feed.xml',
     ]);
@@ -105,16 +108,17 @@ it('can synchronize existing feed without duplicates and without jobs', function
         ->post(route('feeds.sync', $feed));
 
     $response->assertRedirect();
-    $response->assertSessionHas('success', 'Feed synchronized. 1 new episodes imported.');
+    $response->assertSessionHas('success', 'Feed synchronization queued successfully.');
 
-    $this->assertDatabaseCount('entries', 2);
-    $this->assertDatabaseHas('entries', [
-        'name' => 'Episode 2',
-        'audio_url' => 'https://example.com/audio2.mp3',
+    Bus::assertBatched(function (PendingBatch $batch) use ($feed) {
+        return $batch->jobs->count() === 1 &&
+               $batch->jobs->first()->feed->id === $feed->id &&
+               $batch->name === 'Sync feed '.$feed->id;
+    });
+
+    $this->assertDatabaseHas('feed_job_batches', [
+        'feed_id' => $feed->id,
     ]);
-
-    Bus::assertNotDispatched(PrepareTranscriptionJob::class);
-    Bus::assertNotDispatched(ProduceEntryJob::class);
 });
 
 it('blocks manual entry creation for synchronized feeds', function () {

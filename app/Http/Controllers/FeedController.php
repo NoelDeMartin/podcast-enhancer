@@ -26,7 +26,7 @@ class FeedController extends Controller
 
     public function show(Feed $feed): Response
     {
-        $feed->load('entries.latestJobBatch');
+        $feed->load(['entries.latestJobBatch', 'latestJobBatch']);
 
         $this->loadFailedJobDetails($feed);
 
@@ -44,6 +44,10 @@ class FeedController extends Controller
         $jobBatches = $feed->entries
             ->pluck('latestJobBatch.jobBatch')
             ->filter();
+
+        if ($feed->latestJobBatch?->jobBatch) {
+            $jobBatches->push($feed->latestJobBatch->jobBatch);
+        }
 
         $failedJobIds = $jobBatches
             ->flatMap(fn ($batch) => $batch->failed_job_ids ?? [])

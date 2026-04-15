@@ -2,13 +2,15 @@
 
 namespace App\Http\Controllers;
 
+use App\Concerns\DispatchesBatches;
+use App\Concerns\FetchesRssFeeds;
 use App\Models\Feed;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 
 class FeedSyncController extends Controller
 {
-    use Concerns\FetchesRssFeeds;
+    use DispatchesBatches, FetchesRssFeeds;
 
     public function store(Request $request): RedirectResponse
     {
@@ -65,35 +67,8 @@ class FeedSyncController extends Controller
             abort(400, 'This feed does not have an RSS URL configured for synchronization.');
         }
 
-        try {
-            $data = $this->fetchAndParseRss($feed->rss_url);
+        $this->dispatchSyncBatch($feed);
 
-            $existingAudioUrls = $feed->entries()->pluck('audio_url')->filter()->toArray();
-            $existingNames = $feed->entries()->pluck('name')->toArray();
-
-            $importedCount = 0;
-
-            foreach ($data['episodes'] as $episodeData) {
-                $audioUrl = $episodeData['audio_url'];
-                $name = $episodeData['name'];
-
-                if ($audioUrl && ! in_array($audioUrl, $existingAudioUrls) && ! in_array($name, $existingNames)) {
-                    $feed->entries()->create([
-                        'name' => $name,
-                        'audio_url' => $audioUrl,
-                        'image_url' => $episodeData['image_url'] ?? null,
-                        'summary' => $episodeData['summary'] ? '<original_summary>'.$episodeData['summary'].'</original_summary>' : null,
-                        'published_at' => $episodeData['published_at'],
-                    ]);
-                    $existingAudioUrls[] = $audioUrl;
-                    $existingNames[] = $name;
-                    $importedCount++;
-                }
-            }
-
-            return redirect()->back()->with('success', "Feed synchronized. {$importedCount} new episodes imported.");
-        } catch (\Exception $e) {
-            return redirect()->back()->withErrors(['error' => $e->getMessage() === 'Failed to fetch RSS feed.' ? 'Failed to fetch RSS feed.' : 'Invalid RSS feed format.']);
-        }
+        return redirect()->back()->with('success', 'Feed synchronization queued successfully.');
     }
 }

@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Concerns;
+namespace App\Concerns;
 
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\Http;

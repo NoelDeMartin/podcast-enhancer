@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Concerns\DispatchesBatches;
 use App\Http\Requests\StoreEntryRequest;
 use App\Http\Requests\UpdateEntryRequest;
 use App\Models\Entry;
@@ -15,7 +16,7 @@ use Inertia\Response;
 
 class EntryController extends Controller
 {
-    use Concerns\DispatchesBatches;
+    use DispatchesBatches;
 
     public function show(Feed $feed, Entry $entry): Response
     {

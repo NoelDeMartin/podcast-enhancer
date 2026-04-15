@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Concerns\DispatchesBatches;
+use App\Concerns\FetchesRssFeeds;
 use App\Models\Feed;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
@@ -9,8 +11,8 @@ use Illuminate\Http\Request;
 
 class RssImportController extends Controller
 {
-    use Concerns\DispatchesBatches;
-    use Concerns\FetchesRssFeeds;
+    use DispatchesBatches;
+    use FetchesRssFeeds;
 
     public function fetch(Request $request): JsonResponse
     {

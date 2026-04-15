@@ -1,6 +1,6 @@
 <?php
 
-use App\Http\Controllers\Concerns\DispatchesBatches;
+use App\Concerns\DispatchesBatches;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Storage;
 
