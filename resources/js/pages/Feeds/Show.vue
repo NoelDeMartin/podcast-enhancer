@@ -1178,17 +1178,13 @@ const submitEditEntry = () => {
                                         >
                                             Failed
                                         </button>
-                                        <Link
+                                        <button
+                                            type="button"
                                             class="text-blue-600 hover:underline dark:text-blue-400"
-                                            :href="
-                                                showEntryAction.url([
-                                                    feed.id,
-                                                    entry.id,
-                                                ])
-                                            "
+                                            @click="viewingEntry = entry"
                                         >
                                             View
-                                        </Link>
+                                        </button>
                                     </div>
                                 </TableCell>
                                 <TableCell class="text-right align-top">
