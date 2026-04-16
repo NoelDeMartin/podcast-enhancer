@@ -43,7 +43,7 @@ class SyncFeedJob implements ShouldQueue
                     'name' => $name,
                     'audio_url' => $audioUrl,
                     'image_url' => $episodeData['image_url'] ?? null,
-                    'summary' => $episodeData['summary'] ? '<original_summary>'.$episodeData['summary'].'</original_summary>' : null,
+                    'original_summary' => $episodeData['summary'] ?? null,
                     'published_at' => $episodeData['published_at'],
                 ]);
                 $existingAudioUrls[] = $audioUrl;

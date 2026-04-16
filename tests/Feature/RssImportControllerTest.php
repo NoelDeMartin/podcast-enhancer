@@ -79,7 +79,7 @@ it('can import selected episodes', function () {
         'feed_id' => $feed->id,
         'name' => 'Episode 1',
         'audio_url' => 'https://example.com/audio1.mp3',
-        'summary' => '<original_summary>Summary 1</original_summary>',
+        'original_summary' => 'Summary 1',
     ]);
 
     $entry = Entry::where('feed_id', $feed->id)->where('name', 'Episode 1')->first();

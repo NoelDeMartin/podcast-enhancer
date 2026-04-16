@@ -22,6 +22,7 @@ class Entry extends Model
         'image_url',
         'transcription_path',
         'summary',
+        'original_summary',
         'chapters',
         'published_at',
     ];
@@ -38,18 +39,30 @@ class Entry extends Model
     {
         return Attribute::make(
             get: function () {
-                $description = $this->summary ?? '';
+                $aiSummary = $this->summary ?? '';
+                $originalSummary = $this->original_summary ?? '';
+
+                $showNotesUrl = route('entries.show', [$this->feed_id, $this->id]);
+                $appUrl = url('/');
+
+                $html = $aiSummary ? '<p>'.nl2br(e($aiSummary))."</p>\n\n" : '';
+                $html .= "<p>🧙 Episode enhanced by <a href=\"{$appUrl}\">Podcasts Enhancer</a></p>";
+                $html .= "<p>👉 <a href=\"{$showNotesUrl}\">Read episode transcription</a></p>\n\n";
 
                 if ($this->chapters) {
-                    $description .= "\n<ul>\n";
+                    $html .= "\n\n<h2>Timestamps</h2>\n<ul>\n";
                     foreach ($this->chapters as $chapter) {
                         $time = gmdate($chapter['startTime'] >= 3600 ? 'H:i:s' : 'i:s', (int) $chapter['startTime']);
-                        $description .= "<li>{$time} - {$chapter['title']}</li>\n";
+                        $html .= '    <li>'.$time.' - '.e($chapter['title'])."</li>\n";
                     }
-                    $description .= "</ul>\n";
+                    $html .= '</ul>';
                 }
 
-                return trim($description);
+                if ($originalSummary) {
+                    $html .= "\n\n<h2>Original Description</h2>\n\n<p>".nl2br(e($originalSummary)).'</p>';
+                }
+
+                return trim($html);
             },
         );
     }

@@ -313,3 +313,45 @@ it('can view an entry', function () {
             ->has('entry')
         );
 });
+
+it('generates the correct rss description with AI summary and original description', function () {
+    $feed = Feed::factory()->create();
+    $entry = Entry::factory()->create([
+        'feed_id' => $feed->id,
+        'summary' => 'This is the AI summary.',
+        'original_summary' => 'This is the original summary.',
+        'chapters' => [
+            ['title' => 'Intro', 'startTime' => 0],
+            ['title' => 'Main Topic', 'startTime' => 30],
+        ],
+    ]);
+
+    $showNotesUrl = route('entries.show', [$feed->id, $entry->id]);
+    $appUrl = url('/');
+
+    $description = $entry->rss_description;
+
+    expect($description)->toContain('<p>This is the AI summary.</p>')
+        ->and($description)->toContain("<a href=\"{$showNotesUrl}\">Read episode transcription</a>")
+        ->and($description)->toContain("Episode enhanced by <a href=\"{$appUrl}\">Podcasts Enhancer</a>")
+        ->and($description)->toContain('<h2>Timestamps</h2>')
+        ->and($description)->toContain('<li>00:00 - Intro</li>')
+        ->and($description)->toContain('<li>00:30 - Main Topic</li>')
+        ->and($description)->toContain('<h2>Original Description</h2>')
+        ->and($description)->toContain('<p>This is the original summary.</p>');
+});
+
+it('generates the correct rss description when original summary is missing', function () {
+    $feed = Feed::factory()->create();
+    $entry = Entry::factory()->create([
+        'feed_id' => $feed->id,
+        'summary' => 'This is just an AI summary.',
+        'chapters' => [],
+    ]);
+
+    $description = $entry->rss_description;
+
+    expect($description)->toContain('<p>This is just an AI summary.</p>')
+        ->and($description)->not()->toContain('<h2>Original Description</h2>')
+        ->and($description)->not()->toContain('<h2>Timestamps</h2>');
+});

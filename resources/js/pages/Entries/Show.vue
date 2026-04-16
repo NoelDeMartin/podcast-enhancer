@@ -162,10 +162,23 @@ function parsedTranscription(entry: any): any[] | null {
                     v-if="entry.summary"
                     class="rounded-xl border bg-white p-6 dark:bg-zinc-950"
                 >
-                    <h3 class="mb-4 text-lg font-semibold">Summary</h3>
+                    <h3 class="mb-4 text-lg font-semibold">AI Summary</h3>
                     <div
                         class="text-sm leading-relaxed text-muted-foreground [&_a]:text-blue-600 dark:[&_a]:text-blue-400 [&_a:hover]:underline [&_ol]:list-decimal [&_ol]:pl-5 [&_p]:mb-4 [&_ul]:list-disc [&_ul]:pl-5"
                         v-html="formatSummary(entry.summary)"
+                    ></div>
+                </div>
+
+                <div
+                    v-if="entry.original_summary"
+                    class="rounded-xl border bg-white p-6 dark:bg-zinc-950"
+                >
+                    <h3 class="mb-4 text-lg font-semibold">
+                        Original Description
+                    </h3>
+                    <div
+                        class="text-sm leading-relaxed text-muted-foreground [&_a]:text-blue-600 dark:[&_a]:text-blue-400 [&_a:hover]:underline [&_ol]:list-decimal [&_ol]:pl-5 [&_p]:mb-4 [&_ul]:list-disc [&_ul]:pl-5"
+                        v-html="formatSummary(entry.original_summary)"
                     ></div>
                 </div>
 

@@ -57,7 +57,7 @@ class RssImportController extends Controller
                 'name' => $episodeData['name'],
                 'audio_url' => $episodeData['audio_url'],
                 'image_url' => $episodeData['image_url'] ?? null,
-                'summary' => $episodeData['summary'] ? "<original_summary>{$episodeData['summary']}</original_summary>" : null,
+                'original_summary' => $episodeData['summary'] ?? null,
                 'published_at' => $publishedAt,
             ]);
 

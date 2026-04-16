@@ -24,8 +24,9 @@ it('generates an rss feed for a feed', function () {
 
     $response->assertSee('<title>My Podcast</title>', false);
     $response->assertSee('<title>Episode 1</title>', false);
-    $response->assertSee('<description><![CDATA[This is the first episode summary.]]></description>', false);
-    $response->assertSee('<content:encoded><![CDATA[This is the first episode summary.]]></content:encoded>', false);
+    $response->assertSee('<description><![CDATA[<p>This is the first episode summary.</p>', false);
+    $response->assertSee('Read episode transcription</a>', false);
+    $response->assertSee('Episode enhanced by <a href="'.url('/').'">Podcasts Enhancer</a>', false);
     $response->assertSee('<pubDate>'.$entry->published_at->toRfc2822String().'</pubDate>', false);
     $response->assertSee(route('entries.file', $entry), false);
     $response->assertSee('length="13"', false); // "dummy content" is 13 bytes

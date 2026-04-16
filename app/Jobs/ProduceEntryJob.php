@@ -52,20 +52,14 @@ class ProduceEntryJob implements ShouldQueue
 
         $prompt = $transcription;
 
-        if (preg_match('/(<original_summary>.*?<\/original_summary>)/s', $this->entry->summary ?? '', $matches)) {
-            $prompt = $matches[1]."\n\n".$transcription;
+        if ($this->entry->original_summary) {
+            $prompt = "ORIGINAL EPISODE SUMMARY:\n{$this->entry->original_summary}\n\nTRANSCRIPT:\n".$transcription;
         }
 
         $response = (new PodcastEditorAgent)->prompt($prompt, timeout: 300);
 
-        $summary = $response['summary'];
-
-        if (preg_match('/(<original_summary>.*?<\/original_summary>)/s', $this->entry->summary ?? '', $matches)) {
-            $summary = $matches[1]."\n\n[Auto-generated summary]\n\n".$summary;
-        }
-
         $this->entry->update([
-            'summary' => $summary,
+            'summary' => $response['summary'],
             'chapters' => $response['chapters'],
         ]);
 

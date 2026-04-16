@@ -43,7 +43,7 @@ it('processes the transcript and saves summary and chapters', function () {
     PodcastEditorAgent::assertPrompted('[0] Welcome to the show. Today we discuss AI.');
 });
 
-it('appends AI summary after original summary if tag is present', function () {
+it('uses original_summary in the prompt if present', function () {
     Storage::fake('local');
 
     $segments = [
@@ -61,15 +61,16 @@ it('appends AI summary after original summary if tag is present', function () {
 
     $entry = Entry::factory()->create([
         'transcription_path' => 'transcriptions/fake.json',
-        'summary' => '<original_summary>Original Summary.</original_summary>',
+        'original_summary' => 'Original Summary.',
     ]);
 
     (new ProduceEntryJob($entry))->handle();
 
     $entry->refresh();
 
-    expect($entry->summary)->toBe("<original_summary>Original Summary.</original_summary>\n\n[Auto-generated summary]\n\nAI Summary.");
-    PodcastEditorAgent::assertPrompted("<original_summary>Original Summary.</original_summary>\n\n[0] Hello.");
+    expect($entry->summary)->toBe('AI Summary.')
+        ->and($entry->original_summary)->toBe('Original Summary.');
+    PodcastEditorAgent::assertPrompted("ORIGINAL EPISODE SUMMARY:\nOriginal Summary.\n\nTRANSCRIPT:\n[0] Hello.");
 });
 
 it('does nothing when the entry has no transcription', function () {

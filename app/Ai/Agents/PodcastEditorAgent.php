@@ -19,7 +19,7 @@ class PodcastEditorAgent implements Agent, HasStructuredOutput
     {
         return <<<'PROMPT'
 You are an expert podcast producer.
-You will be provided with a raw podcast transcript, and possibly an existing episode summary wrapped in <original_summary>...</original_summary>.
+You will be provided with a raw podcast transcript, and possibly an existing episode summary as context.
 
 The transcript is formatted line-by-line as `[timestamp_in_seconds] spoken text`.
 Timestamps are whole seconds and always come from the transcript itself.
@@ -35,7 +35,7 @@ CRITICAL RULES:
 - Do NOT guess timestamps. If you are unsure, choose the closest earlier timestamp that is clearly relevant.
 - Create enough chapters so no single chapter spans an excessively large portion of the episode.
 - Use the same language as the transcription for both the summary and the chapters.
-- If the <original_summary> includes chapter timestamps, generate chapters that match those chapters exactly.
+- If the original summary includes chapter timestamps, generate chapters that match those chapters exactly.
 - If you detect some sponsored section or advertisement, create a chapter for it that starts with "Sponsor: " in the title.
 PROMPT;
     }

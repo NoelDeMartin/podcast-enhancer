@@ -23,7 +23,7 @@
                 <link>{{ $entry->audio_url ? route('entries.file', $entry) : '' }}</link>
                 <guid isPermaLink="false">{{ $entry->id }}</guid>
                 <pubDate>{{ $entry->published_at->toRfc2822String() }}</pubDate>
-                <itunes:summary>{{ $entry->summary ?? '' }}</itunes:summary>
+                <itunes:summary>{{ strip_tags($entry->original_summary ?? $entry->summary ?? '') }}</itunes:summary>
                 <itunes:episodeType>full</itunes:episodeType>
                 @php
                     $effectiveImageUrl = $entry->image_url ?: $feed->image_url;
