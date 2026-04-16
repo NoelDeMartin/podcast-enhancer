@@ -2,21 +2,21 @@
 
 namespace App\Jobs;
 
-use App\Ai\RateLimitDelay;
 use App\Models\Entry;
 use Illuminate\Bus\Batchable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
+use Illuminate\Queue\Attributes\Backoff;
 use Illuminate\Queue\Attributes\Timeout;
 use Illuminate\Queue\Attributes\Tries;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
-use Laravel\Ai\Exceptions\RateLimitedException;
 use Laravel\Ai\Transcription;
 
 #[Timeout(300)]
-#[Tries(3)]
+#[Tries(8)]
+#[Backoff([60, 120, 240, 480, 960, 1920, 3600])]
 class TranscribeAudioJob implements ShouldQueue
 {
     use Batchable, InteractsWithQueue, Queueable;
@@ -62,28 +62,10 @@ class TranscribeAudioJob implements ShouldQueue
             'batch_id' => $this->batchId,
         ]);
 
-        try {
-            $transcript = Transcription::fromStorage($this->chunkPath)
-                ->diarize()
-                ->timeout(300)
-                ->generate();
-        } catch (RateLimitedException $exception) {
-            $delaySeconds = RateLimitDelay::forException($exception, $this->attempts());
-
-            Log::warning(static::class.' rate limited (releasing job)', [
-                'entry_id' => $this->entry->id,
-                'chunk_path' => $this->chunkPath,
-                'chunk_index' => $this->chunkIndex,
-                'offset_seconds' => $this->offsetSeconds,
-                'batch_id' => $this->batchId,
-                'delay_seconds' => $delaySeconds,
-                'exception_message' => $exception->getMessage(),
-            ]);
-
-            $this->release($delaySeconds);
-
-            return;
-        }
+        $transcript = Transcription::fromStorage($this->chunkPath)
+            ->diarize()
+            ->timeout(300)
+            ->generate();
 
         $segments = collect($transcript->segments)->map(function ($segment) {
             $data = $segment->toArray();
