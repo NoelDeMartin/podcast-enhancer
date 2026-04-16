@@ -50,5 +50,7 @@ class SyncFeedJob implements ShouldQueue
                 $existingNames[] = $name;
             }
         }
+
+        $this->feed->update(['last_synced_at' => now()]);
     }
 }

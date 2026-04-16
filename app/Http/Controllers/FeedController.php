@@ -90,6 +90,10 @@ class FeedController extends Controller
         }
         unset($validated['delete_image_file']);
 
+        if (isset($validated['sync_frequency']) && (int) $validated['sync_frequency'] === 0) {
+            $validated['sync_frequency'] = null;
+        }
+
         $feed->update($validated);
 
         return redirect()->back()->with('success', 'Feed updated successfully.');

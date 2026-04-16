@@ -115,6 +115,7 @@ const editFeedForm = useForm({
     image_url: '',
     image_file: null as File | null,
     delete_image_file: false,
+    sync_frequency: '0',
 });
 
 const editFeedImageSource = ref<'url' | 'file'>('url');
@@ -131,6 +132,7 @@ const startEditFeed = (feed: any) => {
     editingFeed.value = feed;
     editFeedForm.title = feed.title;
     editFeedForm.description = feed.description ?? '';
+    editFeedForm.sync_frequency = (feed.sync_frequency ?? 0).toString();
 
     const external = isExternal(feed.image_url);
     editFeedImageSource.value = external ? 'url' : 'file';
@@ -155,6 +157,7 @@ const importRssForm = useForm({
     rss_url: '',
     title: '',
     description: '',
+    sync_frequency: '0',
 });
 
 const submitImportRss = () => {
@@ -248,6 +251,54 @@ const submitImportRss = () => {
                                         >
                                             {{
                                                 importRssForm.errors.description
+                                            }}
+                                        </div>
+                                    </div>
+                                    <div class="grid gap-2">
+                                        <Label for="sync_frequency"
+                                            >Sync Frequency</Label
+                                        >
+                                        <Select
+                                            v-model="
+                                                importRssForm.sync_frequency
+                                            "
+                                        >
+                                            <SelectTrigger id="sync_frequency">
+                                                <SelectValue
+                                                    placeholder="Select frequency"
+                                                />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                <SelectItem value="0"
+                                                    >Manual only</SelectItem
+                                                >
+                                                <SelectItem value="3600"
+                                                    >Every hour</SelectItem
+                                                >
+                                                <SelectItem value="21600"
+                                                    >Every 6 hours</SelectItem
+                                                >
+                                                <SelectItem value="43200"
+                                                    >Every 12 hours</SelectItem
+                                                >
+                                                <SelectItem value="86400"
+                                                    >Daily</SelectItem
+                                                >
+                                                <SelectItem value="604800"
+                                                    >Weekly</SelectItem
+                                                >
+                                            </SelectContent>
+                                        </Select>
+                                        <div
+                                            v-if="
+                                                importRssForm.errors
+                                                    .sync_frequency
+                                            "
+                                            class="text-sm text-red-500"
+                                        >
+                                            {{
+                                                importRssForm.errors
+                                                    .sync_frequency
                                             }}
                                         </div>
                                     </div>
@@ -447,6 +498,44 @@ const submitImportRss = () => {
                                     class="text-sm text-red-500"
                                 >
                                     {{ editFeedForm.errors.description }}
+                                </div>
+                            </div>
+                            <div v-if="editingFeed?.rss_url" class="grid gap-2">
+                                <Label for="edit-sync_frequency"
+                                    >Sync Frequency</Label
+                                >
+                                <Select v-model="editFeedForm.sync_frequency">
+                                    <SelectTrigger id="edit-sync_frequency">
+                                        <SelectValue
+                                            placeholder="Select frequency"
+                                        />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="0"
+                                            >Manual only</SelectItem
+                                        >
+                                        <SelectItem value="3600"
+                                            >Every hour</SelectItem
+                                        >
+                                        <SelectItem value="21600"
+                                            >Every 6 hours</SelectItem
+                                        >
+                                        <SelectItem value="43200"
+                                            >Every 12 hours</SelectItem
+                                        >
+                                        <SelectItem value="86400"
+                                            >Daily</SelectItem
+                                        >
+                                        <SelectItem value="604800"
+                                            >Weekly</SelectItem
+                                        >
+                                    </SelectContent>
+                                </Select>
+                                <div
+                                    v-if="editFeedForm.errors.sync_frequency"
+                                    class="text-sm text-red-500"
+                                >
+                                    {{ editFeedForm.errors.sync_frequency }}
                                 </div>
                             </div>
                             <div class="grid gap-2">

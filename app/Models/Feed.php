@@ -18,7 +18,21 @@ class Feed extends Model
         'description',
         'rss_url',
         'image_url',
+        'last_synced_at',
+        'sync_frequency',
     ];
+
+    /**
+     * Get the attributes that should be cast.
+     *
+     * @return array<string, string>
+     */
+    protected function casts(): array
+    {
+        return [
+            'last_synced_at' => 'datetime',
+        ];
+    }
 
     public function entries(): HasMany
     {

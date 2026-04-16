@@ -56,6 +56,8 @@ it('can import feed from rss without dispatching jobs', function () {
     ]);
 
     $feed = Feed::where('rss_url', 'https://example.com/feed.xml')->first();
+    expect($feed->last_synced_at)->not->toBeNull();
+    expect($feed->last_synced_at->isToday())->toBeTrue();
 
     $this->assertDatabaseHas('entries', [
         'feed_id' => $feed->id,
