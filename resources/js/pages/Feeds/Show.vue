@@ -1069,7 +1069,9 @@ const submitEditEntry = () => {
                     </DialogHeader>
                     <div class="max-h-[60vh] space-y-4 overflow-y-auto">
                         <div v-if="viewingEntry?.summary">
-                            <h4 class="mb-2 text-sm font-semibold">Summary</h4>
+                            <h4 class="mb-2 text-sm font-semibold">
+                                AI Summary
+                            </h4>
                             <div
                                 class="text-sm leading-relaxed text-muted-foreground [&_a]:text-blue-600 dark:[&_a]:text-blue-400 [&_a:hover]:underline [&_ol]:list-decimal [&_ol]:pl-5 [&_p]:mb-4 [&_ul]:list-disc [&_ul]:pl-5"
                                 v-html="formatSummary(viewingEntry.summary)"
@@ -1079,6 +1081,26 @@ const submitEditEntry = () => {
                         <Separator
                             v-if="
                                 viewingEntry?.summary &&
+                                viewingEntry?.original_summary
+                            "
+                        />
+
+                        <div v-if="viewingEntry?.original_summary">
+                            <h4 class="mb-2 text-sm font-semibold">
+                                Original Description
+                            </h4>
+                            <div
+                                class="text-sm leading-relaxed text-muted-foreground [&_a]:text-blue-600 dark:[&_a]:text-blue-400 [&_a:hover]:underline [&_ol]:list-decimal [&_ol]:pl-5 [&_p]:mb-4 [&_ul]:list-disc [&_ul]:pl-5"
+                                v-html="
+                                    formatSummary(viewingEntry.original_summary)
+                                "
+                            ></div>
+                        </div>
+
+                        <Separator
+                            v-if="
+                                (viewingEntry?.summary ||
+                                    viewingEntry?.original_summary) &&
                                 viewingEntry?.chapters?.length
                             "
                         />
@@ -1110,6 +1132,7 @@ const submitEditEntry = () => {
                         <Separator
                             v-if="
                                 (viewingEntry?.summary ||
+                                    viewingEntry?.original_summary ||
                                     viewingEntry?.chapters?.length) &&
                                 parsedTranscription(viewingEntry)
                             "
@@ -1241,6 +1264,7 @@ const submitEditEntry = () => {
                                         <button
                                             type="button"
                                             class="text-blue-600 hover:underline dark:text-blue-400"
+                                            data-test="view-details"
                                             @click="viewingEntry = entry"
                                         >
                                             View

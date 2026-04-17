@@ -74,13 +74,37 @@ it('can view an entry page', function () {
         'feed_id' => $feed->id,
         'name' => 'My Awesome Entry',
         'summary' => 'This is a great summary.',
+        'original_summary' => 'This is the original description.',
         'transcription_path' => null,
     ]);
 
     $this->actingAs($user);
 
     visit('/feeds/'.$feed->id.'/entries/'.$entry->id)
-        ->assertSee('My Awesome Entry')
+        ->waitForText('My Awesome Entry')
+        ->assertSee('AI Summary')
         ->assertSee('This is a great summary.')
+        ->waitForText('Original Description')
+        ->assertSee('This is the original description.')
         ->assertSee('Tech News');
+});
+
+it('can view entry details in a dialog on the feed page', function () {
+    $user = User::factory()->create();
+    $feed = Feed::factory()->create(['title' => 'Tech News']);
+    $entry = Entry::factory()->create([
+        'feed_id' => $feed->id,
+        'name' => 'Detailed Entry',
+        'summary' => 'AI generated summary.',
+        'original_summary' => 'This is the original description.',
+    ]);
+
+    $this->actingAs($user);
+
+    visit('/feeds/'.$feed->id)
+        ->waitForText('Detailed Entry')
+        ->click('[data-test="view-details"]')
+        ->waitForText('Summary')
+        ->waitForText('Original Description')
+        ->assertSee('This is the original description.');
 });
