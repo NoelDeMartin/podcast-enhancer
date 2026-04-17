@@ -16,7 +16,6 @@ import {
     store as storeEntry,
     destroy as destroyEntry,
     update as updateEntryAction,
-    file as getEntryFile,
     produce as produceEntry,
     show as showEntryAction,
 } from '@/actions/App/Http/Controllers/EntryController';
@@ -1164,15 +1163,13 @@ const submitEditEntry = () => {
                             <TableRow>
                                 <TableCell>
                                     <img
-                                        v-if="entry.image_url || feed.image_url"
+                                        v-if="
+                                            entry.absolute_image_url ||
+                                            feed.absolute_image_url
+                                        "
                                         :src="
-                                            isExternal(
-                                                entry.image_url ||
-                                                    feed.image_url,
-                                            )
-                                                ? entry.image_url ||
-                                                  feed.image_url
-                                                : `/storage/${entry.image_url || feed.image_url}`
+                                            entry.absolute_image_url ||
+                                            feed.absolute_image_url
                                         "
                                         alt="Entry image"
                                         class="h-10 w-10 rounded object-cover"
@@ -1204,12 +1201,8 @@ const submitEditEntry = () => {
                                 </TableCell>
                                 <TableCell class="align-top">
                                     <a
-                                        v-if="entry.audio_url"
-                                        :href="
-                                            entry.audio_url.startsWith('http')
-                                                ? entry.audio_url
-                                                : getEntryFile.url(entry.id)
-                                        "
+                                        v-if="entry.absolute_audio_url"
+                                        :href="entry.absolute_audio_url"
                                         target="_blank"
                                         class="text-blue-600 hover:underline dark:text-blue-400"
                                     >

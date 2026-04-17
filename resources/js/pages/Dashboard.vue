@@ -725,12 +725,8 @@ const submitImportRss = () => {
                         <TableRow v-for="feed in feeds" :key="feed.id">
                             <TableCell>
                                 <img
-                                    v-if="feed.image_url"
-                                    :src="
-                                        isExternal(feed.image_url)
-                                            ? feed.image_url
-                                            : `/storage/${feed.image_url}`
-                                    "
+                                    v-if="feed.absolute_image_url"
+                                    :src="feed.absolute_image_url"
                                     alt="Feed image"
                                     class="h-10 w-10 rounded object-cover"
                                 />

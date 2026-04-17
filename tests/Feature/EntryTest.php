@@ -15,7 +15,7 @@ beforeEach(function () {
 });
 
 it('can store an entry with an uploaded file', function () {
-    Storage::fake('local');
+    Storage::fake('public');
     Bus::fake();
     $feed = Feed::factory()->create();
 
@@ -36,7 +36,7 @@ it('can store an entry with an uploaded file', function () {
     expect($entry->audio_url)->not->toBeNull();
     expect($entry->published_at)->not->toBeNull();
 
-    Storage::disk('local')->assertExists($entry->audio_url);
+    Storage::disk('public')->assertExists($entry->audio_url);
     Bus::assertBatched(fn ($batch) => $batch->name === 'Process entry '.$entry->id);
 });
 
@@ -103,10 +103,11 @@ it('does not dispatch a transcription batch when storing entry without a file', 
 
 it('can update an entry and replace the file', function () {
     Storage::fake('local');
+    Storage::fake('public');
     Bus::fake();
     $feed = Feed::factory()->create();
     $oldFile = UploadedFile::fake()->create('old.mp3', 1024);
-    $oldPath = $oldFile->store('entries', 'local');
+    $oldPath = $oldFile->store('entries', 'public');
 
     $entry = Entry::factory()->create([
         'feed_id' => $feed->id,
@@ -130,18 +131,19 @@ it('can update an entry and replace the file', function () {
     expect($entry->audio_url)->not->toBeNull();
     expect($entry->transcription_path)->toBeNull();
 
-    Storage::disk('local')->assertMissing($oldPath);
+    Storage::disk('public')->assertMissing($oldPath);
     Storage::disk('local')->assertMissing('transcriptions/old.txt');
-    Storage::disk('local')->assertExists($entry->audio_url);
+    Storage::disk('public')->assertExists($entry->audio_url);
     Bus::assertBatched(fn ($batch) => $batch->name === 'Process entry '.$entry->id);
 });
 
 it('clears transcription, summary, and chapters when deleting a file', function () {
     Storage::fake('local');
+    Storage::fake('public');
     Bus::fake();
     $feed = Feed::factory()->create();
     $oldFile = UploadedFile::fake()->create('old.mp3', 1024);
-    $oldPath = $oldFile->store('entries', 'local');
+    $oldPath = $oldFile->store('entries', 'public');
 
     $entry = Entry::factory()->create([
         'feed_id' => $feed->id,
@@ -168,11 +170,11 @@ it('clears transcription, summary, and chapters when deleting a file', function 
 });
 
 it('can delete a file when updating an entry', function () {
-    Storage::fake('local');
+    Storage::fake('public');
     Bus::fake();
     $feed = Feed::factory()->create();
     $oldFile = UploadedFile::fake()->create('old.mp3', 1024);
-    $oldPath = $oldFile->store('entries', 'local');
+    $oldPath = $oldFile->store('entries', 'public');
 
     $entry = Entry::factory()->create([
         'feed_id' => $feed->id,
@@ -192,15 +194,15 @@ it('can delete a file when updating an entry', function () {
     expect($entry->name)->toBe('Updated Entry');
     expect($entry->audio_url)->toBeNull();
 
-    Storage::disk('local')->assertMissing($oldPath);
+    Storage::disk('public')->assertMissing($oldPath);
 });
 
 it('records the job batch on the entry when dispatching transcription', function () {
-    Storage::fake('local');
+    Storage::fake('public');
     Bus::fake();
     $feed = Feed::factory()->create();
     $file = UploadedFile::fake()->create('audio.mp3', 1024);
-    $path = $file->store('entries', 'local');
+    $path = $file->store('entries', 'public');
 
     $entry = Entry::factory()->create([
         'feed_id' => $feed->id,
@@ -215,11 +217,11 @@ it('records the job batch on the entry when dispatching transcription', function
 });
 
 it('accumulates a new batch record each time transcription is triggered', function () {
-    Storage::fake('local');
+    Storage::fake('public');
     Bus::fake();
     $feed = Feed::factory()->create();
     $file = UploadedFile::fake()->create('audio.mp3', 1024);
-    $path = $file->store('entries', 'local');
+    $path = $file->store('entries', 'public');
 
     $entry = Entry::factory()->create([
         'feed_id' => $feed->id,
@@ -246,6 +248,7 @@ it('returns 422 when regenerating transcription for entry without a file', funct
 
 it('can regenerate chapters and summary from an existing transcription', function () {
     Storage::fake('local');
+    Storage::fake('public');
     Bus::fake();
     $feed = Feed::factory()->create();
 
@@ -281,9 +284,10 @@ it('returns 422 when regenerating chapters and summary without a transcription',
 
 it('deletes the file when an entry is destroyed', function () {
     Storage::fake('local');
+    Storage::fake('public');
     $feed = Feed::factory()->create();
     $file = UploadedFile::fake()->create('audio.mp3', 1024);
-    $path = $file->store('entries', 'local');
+    $path = $file->store('entries', 'public');
 
     $entry = Entry::factory()->create([
         'feed_id' => $feed->id,
@@ -296,7 +300,7 @@ it('deletes the file when an entry is destroyed', function () {
     $response->assertRedirect();
 
     $this->assertDatabaseMissing('entries', ['id' => $entry->id]);
-    Storage::disk('local')->assertMissing($path);
+    Storage::disk('public')->assertMissing($path);
 });
 
 it('can view an entry', function () {

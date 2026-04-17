@@ -61,7 +61,7 @@ class EntryController extends Controller
         }
 
         if ($request->hasFile('file')) {
-            $validated['audio_url'] = $request->file('file')->store('entries');
+            $validated['audio_url'] = $request->file('file')->store('entries', 'public');
         }
 
         if ($request->hasFile('image_file')) {
@@ -88,20 +88,20 @@ class EntryController extends Controller
         $fileChanged = false;
 
         if ($request->hasFile('file')) {
-            if ($entry->audio_url && ! filter_var($entry->audio_url, FILTER_VALIDATE_URL)) {
-                Storage::delete($entry->audio_url);
+            if ($entry->audio_url && ! $entry->audio_is_external) {
+                Storage::disk('public')->delete($entry->audio_url);
             }
             if ($entry->transcription_path) {
                 Storage::delete($entry->transcription_path);
                 $validated['transcription_path'] = null;
             }
-            $validated['audio_url'] = $request->file('file')->store('entries');
+            $validated['audio_url'] = $request->file('file')->store('entries', 'public');
             $validated['summary'] = null;
             $validated['chapters'] = null;
             $fileChanged = true;
         } elseif ($request->boolean('delete_file') && $entry->audio_url) {
-            if (! filter_var($entry->audio_url, FILTER_VALIDATE_URL)) {
-                Storage::delete($entry->audio_url);
+            if (! $entry->audio_is_external) {
+                Storage::disk('public')->delete($entry->audio_url);
             }
             if ($entry->transcription_path) {
                 Storage::delete($entry->transcription_path);
@@ -111,8 +111,8 @@ class EntryController extends Controller
             $validated['summary'] = null;
             $validated['chapters'] = null;
         } elseif ($request->has('audio_url') && $request->audio_url !== $entry->audio_url) {
-            if ($entry->audio_url && ! filter_var($entry->audio_url, FILTER_VALIDATE_URL)) {
-                Storage::delete($entry->audio_url);
+            if ($entry->audio_url && ! $entry->audio_is_external) {
+                Storage::disk('public')->delete($entry->audio_url);
             }
             if ($entry->transcription_path) {
                 Storage::delete($entry->transcription_path);
@@ -124,17 +124,17 @@ class EntryController extends Controller
         }
 
         if ($request->hasFile('image_file')) {
-            if ($entry->image_url && ! filter_var($entry->image_url, FILTER_VALIDATE_URL)) {
+            if ($entry->image_url && ! $entry->image_is_external) {
                 Storage::disk('public')->delete($entry->image_url);
             }
             $validated['image_url'] = $request->file('image_file')->store('images', 'public');
         } elseif ($request->boolean('delete_image_file') && $entry->image_url) {
-            if (! filter_var($entry->image_url, FILTER_VALIDATE_URL)) {
+            if (! $entry->image_is_external) {
                 Storage::disk('public')->delete($entry->image_url);
             }
             $validated['image_url'] = null;
         } elseif ($request->has('image_url') && $request->image_url !== $entry->image_url) {
-            if ($entry->image_url && ! filter_var($entry->image_url, FILTER_VALIDATE_URL)) {
+            if ($entry->image_url && ! $entry->image_is_external) {
                 Storage::disk('public')->delete($entry->image_url);
             }
         }
@@ -157,11 +157,11 @@ class EntryController extends Controller
             abort(403, 'Entries in a synchronized feed cannot be deleted manually.');
         }
 
-        if ($entry->audio_url && ! filter_var($entry->audio_url, FILTER_VALIDATE_URL)) {
-            Storage::delete($entry->audio_url);
+        if ($entry->audio_url && ! $entry->audio_is_external) {
+            Storage::disk('public')->delete($entry->audio_url);
         }
 
-        if ($entry->image_url && ! filter_var($entry->image_url, FILTER_VALIDATE_URL)) {
+        if ($entry->image_url && ! $entry->image_is_external) {
             Storage::disk('public')->delete($entry->image_url);
         }
 
@@ -195,18 +195,5 @@ class EntryController extends Controller
         return redirect()->back()->with('success', $reuseTranscript
             ? 'Chapters and summary regeneration queued successfully.'
             : 'Transcription queued successfully.');
-    }
-
-    public function file(Entry $entry)
-    {
-        if (! $entry->audio_url) {
-            abort(404);
-        }
-
-        if (filter_var($entry->audio_url, FILTER_VALIDATE_URL)) {
-            return redirect()->away($entry->audio_url);
-        }
-
-        return Storage::response($entry->audio_url);
     }
 }

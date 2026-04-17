@@ -12,7 +12,7 @@
         <itunes:summary>{{ $feed->description ?? 'A podcast feed for ' . $feed->title . '. Subscribe in your podcast player to get the latest episodes.' }}</itunes:summary>
         <itunes:type>episodic</itunes:type>
         @if($feed->image_url)
-            <itunes:image href="{{ filter_var($feed->image_url, FILTER_VALIDATE_URL) ? $feed->image_url : asset(Storage::disk('public')->url($feed->image_url)) }}"/>
+            <itunes:image href="{{ $feed->absolute_image_url }}"/>
         @endif
 
         @foreach($entries as $entry)
@@ -20,24 +20,19 @@
                 <title>{{ $entry->name }}</title>
                 <description><![CDATA[{!! $entry->rss_description !!}]]></description>
                 <content:encoded><![CDATA[{!! $entry->rss_description !!}]]></content:encoded>
-                <link>{{ $entry->audio_url ? route('entries.file', $entry) : '' }}</link>
+                <link>{{ $entry->absolute_audio_url }}</link>
                 <guid isPermaLink="false">{{ $entry->id }}</guid>
                 <pubDate>{{ $entry->published_at->toRfc2822String() }}</pubDate>
                 <itunes:summary>{{ strip_tags($entry->original_summary ?? $entry->summary ?? '') }}</itunes:summary>
                 <itunes:episodeType>full</itunes:episodeType>
                 @php
-                    $effectiveImageUrl = $entry->image_url ?: $feed->image_url;
+                    $effectiveImageUrl = $entry->absolute_image_url ?: $feed->absolute_image_url;
                 @endphp
                 @if($effectiveImageUrl)
-                    <itunes:image href="{{ filter_var($effectiveImageUrl, FILTER_VALIDATE_URL) ? $effectiveImageUrl : asset(Storage::disk('public')->url($effectiveImageUrl)) }}"/>
+                    <itunes:image href="{{ $effectiveImageUrl }}"/>
                 @endif
                 @if($entry->audio_url)
-                    @php
-                        $isUrl = filter_var($entry->audio_url, FILTER_VALIDATE_URL);
-                        $url = $isUrl ? $entry->audio_url : route('entries.file', $entry);
-                        $length = $isUrl ? 0 : (Storage::exists($entry->audio_url) ? Storage::size($entry->audio_url) : 0);
-                    @endphp
-                    <enclosure url="{{ $url }}" type="audio/mpeg" length="{{ $length }}"/>
+                    <enclosure url="{{ $entry->absolute_audio_url }}" type="audio/mpeg" length="{{ $entry->audio_file_size }}"/>
                 @endif
                 @if($entry->chapters)
                     <psc:chapters version="1.2">

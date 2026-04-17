@@ -5,7 +5,7 @@ use App\Models\Feed;
 use Illuminate\Support\Facades\Storage;
 
 it('generates an rss feed for a feed', function () {
-    Storage::fake('local');
+    Storage::fake('public');
 
     $feed = Feed::factory()->create(['title' => 'My Podcast']);
     $entry = Entry::factory()->create([
@@ -15,7 +15,7 @@ it('generates an rss feed for a feed', function () {
         'audio_url' => 'entries/audio.mp3',
     ]);
 
-    Storage::put('entries/audio.mp3', 'dummy content');
+    Storage::disk('public')->put('entries/audio.mp3', 'dummy content');
 
     $response = $this->get(route('feeds.rss', $feed));
 
@@ -28,12 +28,12 @@ it('generates an rss feed for a feed', function () {
     $response->assertSee('Read episode transcription</a>', false);
     $response->assertSee('Episode enhanced by <a href="'.url('/').'">Podcasts Enhancer</a>', false);
     $response->assertSee('<pubDate>'.$entry->published_at->toRfc2822String().'</pubDate>', false);
-    $response->assertSee(route('entries.file', $entry), false);
+    $response->assertSee(asset(Storage::disk('public')->url($entry->audio_url)), false);
     $response->assertSee('length="13"', false); // "dummy content" is 13 bytes
 });
 
 it('includes podcast chapters in rss when available', function () {
-    Storage::fake('local');
+    Storage::fake('public');
 
     $feed = Feed::factory()->create(['title' => 'My Podcast']);
     $entry = Entry::factory()->create([
@@ -46,7 +46,7 @@ it('includes podcast chapters in rss when available', function () {
         ],
     ]);
 
-    Storage::put('entries/audio.mp3', 'dummy content');
+    Storage::disk('public')->put('entries/audio.mp3', 'dummy content');
 
     $response = $this->get(route('feeds.rss', $feed));
 
@@ -61,7 +61,7 @@ it('includes podcast chapters in rss when available', function () {
 });
 
 it('omits podcast chapters in rss when not available', function () {
-    Storage::fake('local');
+    Storage::fake('public');
 
     $feed = Feed::factory()->create(['title' => 'My Podcast']);
     Entry::factory()->create([
@@ -71,7 +71,7 @@ it('omits podcast chapters in rss when not available', function () {
         'chapters' => null,
     ]);
 
-    Storage::put('entries/audio.mp3', 'dummy content');
+    Storage::disk('public')->put('entries/audio.mp3', 'dummy content');
 
     $response = $this->get(route('feeds.rss', $feed));
 

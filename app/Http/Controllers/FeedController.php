@@ -74,17 +74,17 @@ class FeedController extends Controller
         $validated = $request->validated();
 
         if ($request->hasFile('image_file')) {
-            if ($feed->image_url && ! filter_var($feed->image_url, FILTER_VALIDATE_URL)) {
+            if ($feed->image_url && ! $feed->image_is_external) {
                 Storage::disk('public')->delete($feed->image_url);
             }
             $validated['image_url'] = $request->file('image_file')->store('images', 'public');
         } elseif ($request->boolean('delete_image_file') && $feed->image_url) {
-            if (! filter_var($feed->image_url, FILTER_VALIDATE_URL)) {
+            if (! $feed->image_is_external) {
                 Storage::disk('public')->delete($feed->image_url);
             }
             $validated['image_url'] = null;
         } elseif ($request->has('image_url') && $request->image_url !== $feed->image_url) {
-            if ($feed->image_url && ! filter_var($feed->image_url, FILTER_VALIDATE_URL)) {
+            if ($feed->image_url && ! $feed->image_is_external) {
                 Storage::disk('public')->delete($feed->image_url);
             }
         }
@@ -101,7 +101,7 @@ class FeedController extends Controller
 
     public function destroy(Feed $feed): RedirectResponse
     {
-        if ($feed->image_url && ! filter_var($feed->image_url, FILTER_VALIDATE_URL)) {
+        if ($feed->image_url && ! $feed->image_is_external) {
             Storage::disk('public')->delete($feed->image_url);
         }
 

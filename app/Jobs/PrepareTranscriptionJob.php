@@ -50,7 +50,7 @@ class PrepareTranscriptionJob implements ShouldQueue
         $extension = pathinfo(parse_url($this->entry->audio_url, PHP_URL_PATH), PATHINFO_EXTENSION) ?: 'mp3';
         $tmpPath = "tmp/batch-{$this->batch()->id}/audio.{$extension}";
 
-        if (filter_var($this->entry->audio_url, FILTER_VALIDATE_URL)) {
+        if ($this->entry->audio_is_external) {
             Log::info(static::class.' downloading audio', [
                 'entry_id' => $this->entry->id,
                 'audio_url' => $this->entry->audio_url,
@@ -61,13 +61,13 @@ class PrepareTranscriptionJob implements ShouldQueue
 
             Storage::writeStream($tmpPath, $response->resource());
         } else {
-            Log::info(static::class.' copying audio', [
+            Log::info(static::class.' copying audio from public disk', [
                 'entry_id' => $this->entry->id,
                 'audio_url' => $this->entry->audio_url,
                 'tmp_path' => $tmpPath,
                 'batch_id' => $this->batchId,
             ]);
-            Storage::copy($this->entry->audio_url, $tmpPath);
+            Storage::writeStream($tmpPath, Storage::disk('public')->readStream($this->entry->audio_url));
         }
 
         $media = FFMpeg::fromDisk(config('filesystems.default'))->open($tmpPath);

@@ -3,7 +3,6 @@ import { Head } from '@inertiajs/vue3';
 import DOMPurify from 'dompurify';
 import linkifyHtml from 'linkify-html';
 import { Clock, ExternalLink } from 'lucide-vue-next';
-import { file as getEntryFile } from '@/actions/App/Http/Controllers/EntryController';
 import { show as showFeedAction } from '@/actions/App/Http/Controllers/FeedController';
 import { Badge } from '@/components/ui/badge';
 import AppLayout from '@/layouts/AppLayout.vue';
@@ -76,13 +75,13 @@ function parsedTranscription(entry: any): any[] | null {
             <div class="flex flex-col gap-2">
                 <div class="flex items-center gap-4">
                     <img
-                        v-if="entry.image_url || entry.feed.image_url"
+                        v-if="
+                            entry.absolute_image_url ||
+                            entry.feed.absolute_image_url
+                        "
                         :src="
-                            (
-                                entry.image_url || entry.feed.image_url
-                            ).startsWith('http')
-                                ? entry.image_url || entry.feed.image_url
-                                : `/storage/${entry.image_url || entry.feed.image_url}`
+                            entry.absolute_image_url ||
+                            entry.feed.absolute_image_url
                         "
                         alt="Entry image"
                         class="h-16 w-16 rounded object-cover shadow-sm"
@@ -107,26 +106,18 @@ function parsedTranscription(entry: any): any[] | null {
             </div>
 
             <div
-                v-if="entry.audio_url"
+                v-if="entry.absolute_audio_url"
                 class="flex items-center justify-between rounded-xl border bg-white p-4 dark:bg-zinc-950"
             >
                 <audio
                     controls
                     class="w-full max-w-2xl"
-                    :src="
-                        entry.audio_url.startsWith('http')
-                            ? entry.audio_url
-                            : getEntryFile.url(entry.id)
-                    "
+                    :src="entry.absolute_audio_url"
                 >
                     Your browser does not support the audio element.
                 </audio>
                 <a
-                    :href="
-                        entry.audio_url.startsWith('http')
-                            ? entry.audio_url
-                            : getEntryFile.url(entry.id)
-                    "
+                    :href="entry.absolute_audio_url"
                     target="_blank"
                     class="ml-4 flex shrink-0 items-center text-sm text-blue-600 hover:underline dark:text-blue-400"
                 >

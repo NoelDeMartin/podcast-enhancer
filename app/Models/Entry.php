@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Support\Facades\Storage;
 
 class Entry extends Model
 {
@@ -27,12 +28,61 @@ class Entry extends Model
         'published_at',
     ];
 
+    protected $appends = [
+        'absolute_audio_url',
+        'absolute_image_url',
+        'audio_is_external',
+        'image_is_external',
+        'audio_file_size',
+    ];
+
     protected function casts(): array
     {
         return [
             'chapters' => 'json',
             'published_at' => 'datetime',
         ];
+    }
+
+    protected function absoluteAudioUrl(): Attribute
+    {
+        return Attribute::make(
+            get: fn () => $this->audio_url && ! $this->audio_is_external
+                ? asset(Storage::disk('public')->url($this->audio_url))
+                : $this->audio_url,
+        );
+    }
+
+    protected function absoluteImageUrl(): Attribute
+    {
+        return Attribute::make(
+            get: fn () => $this->image_url && ! $this->image_is_external
+                ? asset(Storage::disk('public')->url($this->image_url))
+                : $this->image_url,
+        );
+    }
+
+    protected function audioIsExternal(): Attribute
+    {
+        return Attribute::make(
+            get: fn () => $this->audio_url && filter_var($this->audio_url, FILTER_VALIDATE_URL),
+        );
+    }
+
+    protected function imageIsExternal(): Attribute
+    {
+        return Attribute::make(
+            get: fn () => $this->image_url && filter_var($this->image_url, FILTER_VALIDATE_URL),
+        );
+    }
+
+    protected function audioFileSize(): Attribute
+    {
+        return Attribute::make(
+            get: fn () => $this->audio_url && ! $this->audio_is_external && Storage::disk('public')->exists($this->audio_url)
+                ? Storage::disk('public')->size($this->audio_url)
+                : 0,
+        );
     }
 
     protected function rssDescription(): Attribute
