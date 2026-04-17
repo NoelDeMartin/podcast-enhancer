@@ -12,10 +12,10 @@ it('generates an rss feed for a feed', function () {
         'feed_id' => $feed->id,
         'name' => 'Episode 1',
         'summary' => 'This is the first episode summary.',
-        'audio_url' => 'entries/audio.mp3',
+        'audio_url' => 'audios/audio.mp3',
     ]);
 
-    Storage::disk('public')->put('entries/audio.mp3', 'dummy content');
+    Storage::disk('public')->put('audios/audio.mp3', 'dummy content');
 
     $response = $this->get(route('feeds.rss', $feed));
 
@@ -39,14 +39,14 @@ it('includes podcast chapters in rss when available', function () {
     $entry = Entry::factory()->create([
         'feed_id' => $feed->id,
         'name' => 'Episode With Chapters',
-        'audio_url' => 'entries/audio.mp3',
+        'audio_url' => 'audios/audio.mp3',
         'chapters' => [
             ['title' => 'Intro', 'startTime' => 0],
             ['title' => 'Main Topic', 'startTime' => 60],
         ],
     ]);
 
-    Storage::disk('public')->put('entries/audio.mp3', 'dummy content');
+    Storage::disk('public')->put('audios/audio.mp3', 'dummy content');
 
     $response = $this->get(route('feeds.rss', $feed));
 
@@ -67,11 +67,11 @@ it('omits podcast chapters in rss when not available', function () {
     Entry::factory()->create([
         'feed_id' => $feed->id,
         'name' => 'Episode Without Chapters',
-        'audio_url' => 'entries/audio.mp3',
+        'audio_url' => 'audios/audio.mp3',
         'chapters' => null,
     ]);
 
-    Storage::disk('public')->put('entries/audio.mp3', 'dummy content');
+    Storage::disk('public')->put('audios/audio.mp3', 'dummy content');
 
     $response = $this->get(route('feeds.rss', $feed));
 

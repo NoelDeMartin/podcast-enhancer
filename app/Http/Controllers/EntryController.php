@@ -61,7 +61,7 @@ class EntryController extends Controller
         }
 
         if ($request->hasFile('file')) {
-            $validated['audio_url'] = $request->file('file')->store('entries', 'public');
+            $validated['audio_url'] = $request->file('file')->store('audios', 'public');
         }
 
         if ($request->hasFile('image_file')) {
@@ -95,7 +95,7 @@ class EntryController extends Controller
                 Storage::delete($entry->transcription_path);
                 $validated['transcription_path'] = null;
             }
-            $validated['audio_url'] = $request->file('file')->store('entries', 'public');
+            $validated['audio_url'] = $request->file('file')->store('audios', 'public');
             $validated['summary'] = null;
             $validated['chapters'] = null;
             $fileChanged = true;

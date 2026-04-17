@@ -107,7 +107,7 @@ it('can update an entry and replace the file', function () {
     Bus::fake();
     $feed = Feed::factory()->create();
     $oldFile = UploadedFile::fake()->create('old.mp3', 1024);
-    $oldPath = $oldFile->store('entries', 'public');
+    $oldPath = $oldFile->store('audios', 'public');
 
     $entry = Entry::factory()->create([
         'feed_id' => $feed->id,
@@ -143,7 +143,7 @@ it('clears transcription, summary, and chapters when deleting a file', function 
     Bus::fake();
     $feed = Feed::factory()->create();
     $oldFile = UploadedFile::fake()->create('old.mp3', 1024);
-    $oldPath = $oldFile->store('entries', 'public');
+    $oldPath = $oldFile->store('audios', 'public');
 
     $entry = Entry::factory()->create([
         'feed_id' => $feed->id,
@@ -174,7 +174,7 @@ it('can delete a file when updating an entry', function () {
     Bus::fake();
     $feed = Feed::factory()->create();
     $oldFile = UploadedFile::fake()->create('old.mp3', 1024);
-    $oldPath = $oldFile->store('entries', 'public');
+    $oldPath = $oldFile->store('audios', 'public');
 
     $entry = Entry::factory()->create([
         'feed_id' => $feed->id,
@@ -202,7 +202,7 @@ it('records the job batch on the entry when dispatching transcription', function
     Bus::fake();
     $feed = Feed::factory()->create();
     $file = UploadedFile::fake()->create('audio.mp3', 1024);
-    $path = $file->store('entries', 'public');
+    $path = $file->store('audios', 'public');
 
     $entry = Entry::factory()->create([
         'feed_id' => $feed->id,
@@ -221,7 +221,7 @@ it('accumulates a new batch record each time transcription is triggered', functi
     Bus::fake();
     $feed = Feed::factory()->create();
     $file = UploadedFile::fake()->create('audio.mp3', 1024);
-    $path = $file->store('entries', 'public');
+    $path = $file->store('audios', 'public');
 
     $entry = Entry::factory()->create([
         'feed_id' => $feed->id,
@@ -254,7 +254,7 @@ it('can regenerate chapters and summary from an existing transcription', functio
 
     $entry = Entry::factory()->create([
         'feed_id' => $feed->id,
-        'audio_url' => 'entries/audio.mp3',
+        'audio_url' => 'audios/audio.mp3',
         'transcription_path' => 'transcriptions/example.json',
     ]);
 
@@ -269,7 +269,7 @@ it('can regenerate chapters and summary from an existing transcription', functio
 
 it('returns 422 when regenerating chapters and summary without a transcription', function () {
     $entry = Entry::factory()->create([
-        'audio_url' => 'entries/audio.mp3',
+        'audio_url' => 'audios/audio.mp3',
         'transcription_path' => null,
     ]);
 
@@ -287,7 +287,7 @@ it('deletes the file when an entry is destroyed', function () {
     Storage::fake('public');
     $feed = Feed::factory()->create();
     $file = UploadedFile::fake()->create('audio.mp3', 1024);
-    $path = $file->store('entries', 'public');
+    $path = $file->store('audios', 'public');
 
     $entry = Entry::factory()->create([
         'feed_id' => $feed->id,
