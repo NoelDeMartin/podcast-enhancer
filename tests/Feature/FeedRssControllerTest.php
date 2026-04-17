@@ -26,7 +26,7 @@ it('generates an rss feed for a feed', function () {
     $response->assertSee('<title>Episode 1</title>', false);
     $response->assertSee('<description><![CDATA[<p>This is the first episode summary.</p>', false);
     $response->assertSee('Read episode transcription</a>', false);
-    $response->assertSee('Episode enhanced by <a href="'.url('/').'">Podcasts Enhancer</a>', false);
+    $response->assertSee('Enhanced by <a href="'.url('/').'">Podcasts Enhancer</a>', false);
     $response->assertSee('<pubDate>'.$entry->published_at->toRfc2822String().'</pubDate>', false);
     $response->assertSee(asset(Storage::disk('public')->url($entry->audio_url)), false);
     $response->assertSee('length="13"', false); // "dummy content" is 13 bytes

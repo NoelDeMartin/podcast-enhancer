@@ -96,7 +96,7 @@ class Entry extends Model
                 $appUrl = url('/');
 
                 $html = $aiSummary ? '<p>'.nl2br(e($aiSummary))."</p>\n\n" : '';
-                $html .= "<p>🧙 Episode enhanced by <a href=\"{$appUrl}\">Podcasts Enhancer</a></p>";
+                $html .= "<p>🧙 Enhanced by <a href=\"{$appUrl}\">Podcasts Enhancer</a></p>";
                 $html .= "<p>👉 <a href=\"{$showNotesUrl}\">Read episode transcription</a></p>\n\n";
 
                 if ($this->chapters) {

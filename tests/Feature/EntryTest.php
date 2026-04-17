@@ -337,7 +337,7 @@ it('generates the correct rss description with AI summary and original descripti
 
     expect($description)->toContain('<p>This is the AI summary.</p>')
         ->and($description)->toContain("<a href=\"{$showNotesUrl}\">Read episode transcription</a>")
-        ->and($description)->toContain("Episode enhanced by <a href=\"{$appUrl}\">Podcasts Enhancer</a>")
+        ->and($description)->toContain("Enhanced by <a href=\"{$appUrl}\">Podcasts Enhancer</a>")
         ->and($description)->toContain('<h2>Timestamps</h2>')
         ->and($description)->toContain('<li>00:00 - Intro</li>')
         ->and($description)->toContain('<li>00:30 - Main Topic</li>')
