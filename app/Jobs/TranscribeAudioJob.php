@@ -76,11 +76,13 @@ class TranscribeAudioJob implements ShouldQueue
         });
 
         Storage::put(
-            "tmp/batch-{$this->batch()->id}/transcriptions/chunk_{$this->chunkIndex}.json",
+            "tmp/batch-{$this->batchId}/transcriptions/chunk_{$this->chunkIndex}.json",
             json_encode($segments->toArray())
         );
 
-        Log::info(static::class." finished (saved transcription chunk #{$this->chunkIndex})", [
+        Storage::delete($this->chunkPath);
+
+        Log::info(static::class." finished (saved transcription chunk #{$this->chunkIndex} and deleted chunk file)", [
             'entry_id' => $this->entry->id,
             'chunk_path' => $this->chunkPath,
             'chunk_index' => $this->chunkIndex,

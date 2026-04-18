@@ -48,7 +48,7 @@ class PrepareTranscriptionJob implements ShouldQueue
         ]);
 
         $extension = pathinfo(parse_url($this->entry->audio_url, PHP_URL_PATH), PATHINFO_EXTENSION) ?: 'mp3';
-        $tmpPath = "tmp/batch-{$this->batch()->id}/audio.{$extension}";
+        $tmpPath = "tmp/batch-{$this->batchId}/audio.{$extension}";
 
         if ($this->entry->audio_is_external) {
             Log::info(static::class.' downloading audio', [
@@ -87,28 +87,22 @@ class PrepareTranscriptionJob implements ShouldQueue
             'batch_id' => $this->batchId,
         ]);
 
-        $jobs = [];
-        for ($i = 0; $i < $chunksCount; $i++) {
-            $startTime = $i * $chunkDuration;
-
-            $jobs[] = new SplitAudioJob(
+        if ($chunksCount > 0 && $batch = $this->batch()) {
+            $batch->add(new SplitAudioJob(
                 $this->entry,
                 $tmpPath,
-                $i,
-                (int) $startTime,
+                0,
+                0,
                 $chunkDuration,
-                $overlap
-            );
+                $overlap,
+                $chunksCount
+            ));
         }
 
-        if (count($jobs) > 0) {
-            $this->batch()->add($jobs);
-        }
-
-        Log::info(static::class.' finished (queued SplitAudioJob chunks)', [
+        Log::info(static::class.' finished (queued first SplitAudioJob chunk)', [
             'entry_id' => $this->entry->id,
             'audio_path' => $tmpPath,
-            'chunks_count' => count($jobs),
+            'chunks_count' => $chunksCount,
             'batch_id' => $this->batchId,
         ]);
     }

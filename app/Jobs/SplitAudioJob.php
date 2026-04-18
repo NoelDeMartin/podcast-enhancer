@@ -25,6 +25,7 @@ class SplitAudioJob implements ShouldQueue
         public int $startTime,
         public int $chunkDuration,
         public int $overlap,
+        public int $chunksCount,
     ) {}
 
     public function handle(): void
@@ -58,7 +59,7 @@ class SplitAudioJob implements ShouldQueue
         ]);
 
         $extension = pathinfo($this->audioPath, PATHINFO_EXTENSION);
-        $chunkFile = "tmp/batch-{$this->batch()->id}/chunks/chunk_{$this->chunkIndex}.{$extension}";
+        $chunkFile = "tmp/batch-{$this->batchId}/chunks/chunk_{$this->chunkIndex}.{$extension}";
 
         Log::info(static::class.' exporting chunk', [
             'entry_id' => $this->entry->id,
@@ -76,12 +77,32 @@ class SplitAudioJob implements ShouldQueue
             ->toDisk(config('filesystems.default'))
             ->save($chunkFile);
 
-        $this->batch()->add(new TranscribeAudioJob(
-            $this->entry,
-            $chunkFile,
-            $this->chunkIndex,
-            (int) $this->startTime
-        ));
+        if ($batch = $this->batch()) {
+            $batch->add(new TranscribeAudioJob(
+                $this->entry,
+                $chunkFile,
+                $this->chunkIndex,
+                (int) $this->startTime
+            ));
+
+            if ($this->chunkIndex + 1 < $this->chunksCount) {
+                $batch->add(new SplitAudioJob(
+                    $this->entry,
+                    $this->audioPath,
+                    $this->chunkIndex + 1,
+                    ($this->chunkIndex + 1) * $this->chunkDuration,
+                    $this->chunkDuration,
+                    $this->overlap,
+                    $this->chunksCount
+                ));
+            } else {
+                Storage::delete($this->audioPath);
+                Log::info(static::class.' deleted original audio after all splits', [
+                    'audio_path' => $this->audioPath,
+                    'batch_id' => $this->batchId,
+                ]);
+            }
+        }
 
         Log::info(static::class." finished (queued TranscribeAudioJob chunk #{$this->chunkIndex})", [
             'entry_id' => $this->entry->id,

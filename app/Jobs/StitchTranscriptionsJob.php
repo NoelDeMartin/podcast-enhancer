@@ -60,8 +60,13 @@ class StitchTranscriptionsJob implements ShouldQueue
             return (int) ($matches[1] ?? 0);
         });
 
-        $allSegments = [];
+        $path = "transcriptions/{$this->entry->id}.json";
         $chunkSize = 1800;
+
+        $tempFile = tempnam(sys_get_temp_dir(), 'stitch');
+        $fp = fopen($tempFile, 'w');
+        fwrite($fp, '[');
+        $first = true;
 
         foreach ($files as $file) {
             preg_match('/chunk_(\d+)\.json/', $file, $matches);
@@ -73,15 +78,20 @@ class StitchTranscriptionsJob implements ShouldQueue
 
             foreach ($segments as $segment) {
                 // For all but the last chunk, only take segments starting in the window
-                // For the last chunk, windowEnd doesn't matter much but let's be consistent
                 if ($segment['start_seconds'] >= $windowStart && $segment['start_seconds'] < $windowEnd) {
-                    $allSegments[] = $segment;
+                    if (! $first) {
+                        fwrite($fp, ',');
+                    }
+                    fwrite($fp, json_encode($segment));
+                    $first = false;
                 }
             }
         }
+        fwrite($fp, ']');
+        fclose($fp);
 
-        $path = "transcriptions/{$this->entry->id}.json";
-        Storage::put($path, json_encode($allSegments));
+        Storage::put($path, fopen($tempFile, 'r'));
+        unlink($tempFile);
 
         $this->entry->update(['transcription_path' => $path]);
 

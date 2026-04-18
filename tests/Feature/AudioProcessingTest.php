@@ -64,6 +64,7 @@ it('prepare transcription job downloads file and adds next job', function () {
         return $job->entry->is($entry)
             && $job->audioPath === $tmpPath
             && $job->chunkIndex === 0
-            && $job->startTime === 0;
+            && $job->startTime === 0
+            && $job->chunksCount === 1;
     });
 });
