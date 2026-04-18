@@ -51,7 +51,7 @@ class PrepareTranscriptionJob implements ShouldQueue
         $tmpPath = "tmp/batch-{$this->batchId}/audio.{$extension}";
 
         if ($this->entry->audio_is_external) {
-            Log::info(static::class.' downloading audio', [
+            Log::info(static::class.' downloading audio to local disk', [
                 'entry_id' => $this->entry->id,
                 'audio_url' => $this->entry->audio_url,
                 'tmp_path' => $tmpPath,
@@ -59,18 +59,18 @@ class PrepareTranscriptionJob implements ShouldQueue
             ]);
             $response = Http::timeout(300)->get($this->entry->audio_url);
 
-            Storage::writeStream($tmpPath, $response->resource());
+            Storage::disk('local')->writeStream($tmpPath, $response->resource());
         } else {
-            Log::info(static::class.' copying audio from public disk', [
+            Log::info(static::class.' copying audio to local disk', [
                 'entry_id' => $this->entry->id,
                 'audio_url' => $this->entry->audio_url,
                 'tmp_path' => $tmpPath,
                 'batch_id' => $this->batchId,
             ]);
-            Storage::writeStream($tmpPath, Storage::disk('public')->readStream($this->entry->audio_url));
+            Storage::disk('local')->writeStream($tmpPath, Storage::disk('public')->readStream($this->entry->audio_url));
         }
 
-        $media = FFMpeg::fromDisk(config('filesystems.default'))->open($tmpPath);
+        $media = FFMpeg::fromDisk('local')->open($tmpPath);
         $durationInSeconds = $media->getDurationInSeconds();
         $chunkDuration = 1800; // 30 minutes
         $overlap = 30;
@@ -99,7 +99,7 @@ class PrepareTranscriptionJob implements ShouldQueue
             ));
         }
 
-        Log::info(static::class.' finished (queued first SplitAudioJob chunk)', [
+        Log::info(static::class.' finished (queued first SplitAudioJob chunk #1 of '.$chunksCount.')', [
             'entry_id' => $this->entry->id,
             'audio_path' => $tmpPath,
             'chunks_count' => $chunksCount,

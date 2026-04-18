@@ -38,7 +38,8 @@ it('dispatches the correct initial batch', function () {
 it('prepare transcription job downloads file and adds next job', function () {
     config()->set('queue.default', 'database');
     Queue::fake();
-    Storage::fake();
+    Storage::fake('local');
+    Storage::fake('public');
     Http::fake([
         'https://example.com/audio.mp3' => Http::response('fake-audio-content', 200),
     ]);
@@ -49,7 +50,16 @@ it('prepare transcription job downloads file and adds next job', function () {
 
     $batch = Bus::batch([])->dispatch();
 
-    FFMpeg::shouldReceive('fromDisk->open->getDurationInSeconds')
+    FFMpeg::shouldReceive('fromDisk')
+        ->with('local')
+        ->once()
+        ->andReturnSelf();
+
+    FFMpeg::shouldReceive('open')
+        ->once()
+        ->andReturnSelf();
+
+    FFMpeg::shouldReceive('getDurationInSeconds')
         ->once()
         ->andReturn(60); // 1 minute, so a single chunk
 
@@ -58,7 +68,7 @@ it('prepare transcription job downloads file and adds next job', function () {
     $job->handle();
 
     $tmpPath = "tmp/batch-{$batch->id}/audio.mp3";
-    Storage::assertExists($tmpPath);
+    Storage::disk('local')->assertExists($tmpPath);
 
     Queue::assertPushed(SplitAudioJob::class, function (SplitAudioJob $job) use ($entry, $tmpPath) {
         return $job->entry->is($entry)

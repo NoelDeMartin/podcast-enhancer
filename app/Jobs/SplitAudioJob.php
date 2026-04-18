@@ -40,8 +40,8 @@ class SplitAudioJob implements ShouldQueue
             return;
         }
 
-        if (! Storage::exists($this->audioPath)) {
-            Log::info(static::class.' skipped (audio missing)', [
+        if (! Storage::disk('local')->exists($this->audioPath)) {
+            Log::info(static::class.' skipped (local audio missing)', [
                 'entry_id' => $this->entry->id,
                 'audio_path' => $this->audioPath,
                 'batch_id' => $this->batchId,
@@ -50,7 +50,8 @@ class SplitAudioJob implements ShouldQueue
             return;
         }
 
-        Log::info(static::class." started (chunk #{$this->chunkIndex})", [
+        $displayIndex = $this->chunkIndex + 1;
+        Log::info(static::class." started (chunk #{$displayIndex} of {$this->chunksCount})", [
             'entry_id' => $this->entry->id,
             'audio_path' => $this->audioPath,
             'chunk_index' => $this->chunkIndex,
@@ -61,7 +62,7 @@ class SplitAudioJob implements ShouldQueue
         $extension = pathinfo($this->audioPath, PATHINFO_EXTENSION);
         $chunkFile = "tmp/batch-{$this->batchId}/chunks/chunk_{$this->chunkIndex}.{$extension}";
 
-        Log::info(static::class.' exporting chunk', [
+        Log::info(static::class." exporting chunk #{$displayIndex} of {$this->chunksCount} to remote disk", [
             'entry_id' => $this->entry->id,
             'audio_path' => $this->audioPath,
             'chunk_index' => $this->chunkIndex,
@@ -70,7 +71,7 @@ class SplitAudioJob implements ShouldQueue
             'batch_id' => $this->batchId,
         ]);
 
-        $media = FFMpeg::fromDisk(config('filesystems.default'))->open($this->audioPath);
+        $media = FFMpeg::fromDisk('local')->open($this->audioPath);
 
         $media->export()
             ->addFilter(['-ss', (string) $this->startTime, '-t', (string) ($this->chunkDuration + $this->overlap)])
@@ -82,7 +83,8 @@ class SplitAudioJob implements ShouldQueue
                 $this->entry,
                 $chunkFile,
                 $this->chunkIndex,
-                (int) $this->startTime
+                (int) $this->startTime,
+                $this->chunksCount
             ));
 
             if ($this->chunkIndex + 1 < $this->chunksCount) {
@@ -96,15 +98,15 @@ class SplitAudioJob implements ShouldQueue
                     $this->chunksCount
                 ));
             } else {
-                Storage::delete($this->audioPath);
-                Log::info(static::class.' deleted original audio after all splits', [
+                Storage::disk('local')->delete($this->audioPath);
+                Log::info(static::class.' deleted local original audio after all splits', [
                     'audio_path' => $this->audioPath,
                     'batch_id' => $this->batchId,
                 ]);
             }
         }
 
-        Log::info(static::class." finished (queued TranscribeAudioJob chunk #{$this->chunkIndex})", [
+        Log::info(static::class." finished (queued TranscribeAudioJob chunk #{$displayIndex} of {$this->chunksCount})", [
             'entry_id' => $this->entry->id,
             'audio_path' => $this->audioPath,
             'chunk_index' => $this->chunkIndex,

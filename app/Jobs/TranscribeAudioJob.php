@@ -25,7 +25,8 @@ class TranscribeAudioJob implements ShouldQueue
         public Entry $entry,
         public string $chunkPath,
         public int $chunkIndex,
-        public int $offsetSeconds
+        public int $offsetSeconds,
+        public int $chunksCount
     ) {}
 
     public function handle(): void
@@ -54,7 +55,8 @@ class TranscribeAudioJob implements ShouldQueue
             return;
         }
 
-        Log::info(static::class." started (chunk #{$this->chunkIndex})", [
+        $displayIndex = $this->chunkIndex + 1;
+        Log::info(static::class." started (chunk #{$displayIndex} of {$this->chunksCount})", [
             'entry_id' => $this->entry->id,
             'chunk_path' => $this->chunkPath,
             'chunk_index' => $this->chunkIndex,
@@ -82,7 +84,7 @@ class TranscribeAudioJob implements ShouldQueue
 
         Storage::delete($this->chunkPath);
 
-        Log::info(static::class." finished (saved transcription chunk #{$this->chunkIndex} and deleted chunk file)", [
+        Log::info(static::class." finished (saved transcription chunk #{$displayIndex} of {$this->chunksCount} and deleted chunk file)", [
             'entry_id' => $this->entry->id,
             'chunk_path' => $this->chunkPath,
             'chunk_index' => $this->chunkIndex,
