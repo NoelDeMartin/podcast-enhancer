@@ -7,7 +7,7 @@ This application is a personal podcast manager. Essentially, users will introduc
 
 ## Testing
 
-- Make sure to run tests using the APP_ENV=testing env variable.
+- Always run Pest tests setting the APP_ENV=testing env variable.
 
 === foundation rules ===
 
