@@ -2,24 +2,24 @@
 
 namespace App\Jobs;
 
+use App\Concerns\HandlesAiRateLimits;
 use App\Models\Entry;
 use Illuminate\Bus\Batchable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
-use Illuminate\Queue\Attributes\Backoff;
 use Illuminate\Queue\Attributes\Timeout;
 use Illuminate\Queue\Attributes\Tries;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
+use Laravel\Ai\Exceptions\RateLimitedException;
 use Laravel\Ai\Transcription;
 
 #[Timeout(300)]
 #[Tries(8)]
-#[Backoff([60, 120, 240, 480, 960, 1920, 3600])]
 class TranscribeAudioJob implements ShouldQueue
 {
-    use Batchable, InteractsWithQueue, Queueable;
+    use Batchable, HandlesAiRateLimits, InteractsWithQueue, Queueable;
 
     public function __construct(
         public Entry $entry,
@@ -64,10 +64,21 @@ class TranscribeAudioJob implements ShouldQueue
             'batch_id' => $this->batchId,
         ]);
 
-        $transcript = Transcription::fromStorage($this->chunkPath)
-            ->diarize()
-            ->timeout(300)
-            ->generate();
+        try {
+            $transcript = Transcription::fromStorage($this->chunkPath)
+                ->diarize()
+                ->timeout(300)
+                ->generate();
+        } catch (RateLimitedException $e) {
+            $this->postponeIfRateLimited($e, [
+                'entry_id' => $this->entry->id,
+                'chunk_path' => $this->chunkPath,
+                'chunk_index' => $this->chunkIndex,
+                'batch_id' => $this->batchId,
+            ]);
+
+            return;
+        }
 
         $segments = collect($transcript->segments)->map(function ($segment) {
             $data = $segment->toArray();

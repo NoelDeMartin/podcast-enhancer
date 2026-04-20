@@ -3,20 +3,23 @@
 namespace App\Jobs;
 
 use App\Ai\Agents\PodcastEditorAgent;
+use App\Concerns\HandlesAiRateLimits;
 use App\Models\Entry;
 use Illuminate\Bus\Batchable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Queue\Attributes\Timeout;
 use Illuminate\Queue\Attributes\Tries;
+use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
+use Laravel\Ai\Exceptions\RateLimitedException;
 
 #[Timeout(300)]
-#[Tries(1)]
+#[Tries(8)]
 class ProduceEntryJob implements ShouldQueue
 {
-    use Batchable, Queueable;
+    use Batchable, HandlesAiRateLimits, InteractsWithQueue, Queueable;
 
     public function __construct(public Entry $entry) {}
 
@@ -56,7 +59,16 @@ class ProduceEntryJob implements ShouldQueue
             $prompt = "ORIGINAL EPISODE SUMMARY:\n{$this->entry->original_summary}\n\nTRANSCRIPT:\n".$transcription;
         }
 
-        $response = (new PodcastEditorAgent)->prompt($prompt, timeout: 300);
+        try {
+            $response = (new PodcastEditorAgent)->prompt($prompt, timeout: 300);
+        } catch (RateLimitedException $e) {
+            $this->postponeIfRateLimited($e, [
+                'entry_id' => $this->entry->id,
+                'batch_id' => $this->batchId,
+            ]);
+
+            return;
+        }
 
         $this->entry->update([
             'summary' => $response['summary'],
