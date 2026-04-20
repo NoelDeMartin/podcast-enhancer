@@ -1068,6 +1068,19 @@ const submitEditEntry = () => {
                         </DialogDescription>
                     </DialogHeader>
                     <div class="max-h-[60vh] space-y-4 overflow-y-auto">
+                        <div
+                            v-if="viewingEntry?.absolute_audio_url"
+                            class="rounded-md border p-4"
+                        >
+                            <audio controls class="w-full">
+                                <source
+                                    :src="viewingEntry.absolute_audio_url"
+                                    type="audio/mpeg"
+                                />
+                                Your browser does not support the audio element.
+                            </audio>
+                        </div>
+
                         <div v-if="viewingEntry?.summary">
                             <h4 class="mb-2 text-sm font-semibold">
                                 AI Summary
@@ -1174,10 +1187,10 @@ const submitEditEntry = () => {
                     <TableHeader>
                         <TableRow>
                             <TableHead class="w-[10%]">Image</TableHead>
-                            <TableHead class="w-[28%]">Name</TableHead>
+                            <TableHead class="w-[33%]">Name</TableHead>
                             <TableHead class="w-[12%]">Published</TableHead>
-                            <TableHead class="w-[15%]">File</TableHead>
-                            <TableHead class="w-[20%]">Details</TableHead>
+                            <TableHead class="w-[20%]">Enhancements</TableHead>
+                            <TableHead class="w-[10%]">Details</TableHead>
                             <TableHead class="text-right">Actions</TableHead>
                         </TableRow>
                     </TableHeader>
@@ -1223,53 +1236,46 @@ const submitEditEntry = () => {
                                     {{ formatPublishedAt(entry) }}
                                 </TableCell>
                                 <TableCell class="align-top">
-                                    <a
-                                        v-if="entry.absolute_audio_url"
-                                        :href="entry.absolute_audio_url"
-                                        target="_blank"
-                                        class="text-blue-600 hover:underline dark:text-blue-400"
+                                    <div
+                                        v-if="
+                                            getBatchStatus(entry) === 'pending'
+                                        "
+                                        class="flex items-center gap-1 text-sm text-muted-foreground"
                                     >
-                                        View
-                                    </a>
+                                        <Loader2 class="h-3 w-3 animate-spin" />
+                                        Pending
+                                    </div>
+                                    <button
+                                        v-else-if="
+                                            getBatchStatus(entry) === 'failed'
+                                        "
+                                        class="text-sm text-red-500 hover:underline"
+                                        @click="viewingFailure = entry"
+                                    >
+                                        Failed
+                                    </button>
+                                    <span
+                                        v-else-if="entry.transcription_path"
+                                        class="text-sm text-green-600 dark:text-green-400"
+                                    >
+                                        Available
+                                    </span>
                                     <span
                                         v-else
-                                        class="text-gray-400 dark:text-gray-600"
-                                        >-</span
+                                        class="text-sm text-muted-foreground"
                                     >
+                                        Missing
+                                    </span>
                                 </TableCell>
                                 <TableCell class="align-top">
-                                    <div class="flex items-center gap-3">
-                                        <span
-                                            v-if="
-                                                getBatchStatus(entry) ===
-                                                'pending'
-                                            "
-                                            class="flex items-center gap-1 text-sm text-muted-foreground"
-                                        >
-                                            <Loader2
-                                                class="h-3 w-3 animate-spin"
-                                            />
-                                            Pending
-                                        </span>
-                                        <button
-                                            v-else-if="
-                                                getBatchStatus(entry) ===
-                                                'failed'
-                                            "
-                                            class="text-sm text-red-500 hover:underline"
-                                            @click="viewingFailure = entry"
-                                        >
-                                            Failed
-                                        </button>
-                                        <button
-                                            type="button"
-                                            class="text-blue-600 hover:underline dark:text-blue-400"
-                                            data-test="view-details"
-                                            @click="viewingEntry = entry"
-                                        >
-                                            View
-                                        </button>
-                                    </div>
+                                    <button
+                                        type="button"
+                                        class="text-blue-600 hover:underline dark:text-blue-400"
+                                        data-test="view-details"
+                                        @click="viewingEntry = entry"
+                                    >
+                                        View
+                                    </button>
                                 </TableCell>
                                 <TableCell class="text-right align-top">
                                     <DropdownMenu>
@@ -1308,7 +1314,11 @@ const submitEditEntry = () => {
                                                     )
                                                 "
                                             >
-                                                Regenerate
+                                                {{
+                                                    entry.transcription_path
+                                                        ? 'Regenerate enhancements'
+                                                        : 'Generate enhancements'
+                                                }}
                                             </DropdownMenuItem>
                                             <DropdownMenuItem
                                                 v-if="
