@@ -63,6 +63,26 @@ function parsedTranscription(entry: any): any[] | null {
         return null;
     }
 }
+
+type BatchStatus = 'pending' | 'failed' | 'completed' | null;
+
+function getBatchStatus(entry: any): BatchStatus {
+    const batch = entry.latest_job_batch?.job_batch;
+
+    if (!batch) {
+        return null;
+    }
+
+    if (batch.cancelled_at !== null) {
+        return 'failed';
+    }
+
+    if (batch.finished_at !== null) {
+        return 'completed';
+    }
+
+    return 'pending';
+}
 </script>
 
 <template>
@@ -129,9 +149,7 @@ function parsedTranscription(entry: any): any[] | null {
             <div class="grid gap-6">
                 <!-- Failure details if the job failed -->
                 <div
-                    v-if="
-                        entry.latest_job_batch?.job_batch?.cancelled_at !== null
-                    "
+                    v-if="getBatchStatus(entry) === 'failed'"
                     class="rounded-xl border bg-red-50 p-4 dark:bg-red-950/20"
                 >
                     <h3
@@ -143,7 +161,7 @@ function parsedTranscription(entry: any): any[] | null {
                         class="text-xs leading-relaxed whitespace-pre-wrap text-red-800 dark:text-red-300"
                         >{{
                             entry.latest_job_batch?.job_batch
-                                ?.failedJobDetails?.[0]?.exception ??
+                                ?.failed_job_details?.[0]?.exception ??
                             'No exception details available.'
                         }}</pre
                     >

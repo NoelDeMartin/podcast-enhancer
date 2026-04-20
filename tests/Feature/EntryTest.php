@@ -359,3 +359,35 @@ it('generates the correct rss description when original summary is missing', fun
         ->and($description)->not()->toContain('<h2>Original Description</h2>')
         ->and($description)->not()->toContain('<h2>Timestamps</h2>');
 });
+
+it('does not include enhancement links or enhanced by text when an entry is not enhanced', function () {
+    $feed = Feed::factory()->create();
+    $entry = Entry::factory()->create([
+        'feed_id' => $feed->id,
+        'summary' => null,
+        'transcription_path' => null,
+        'chapters' => null,
+    ]);
+
+    $description = $entry->rss_description;
+    $appUrl = url('/');
+    $showNotesUrl = route('entries.show', [$feed->id, $entry->id]);
+
+    expect($description)->not->toContain("Enhanced by <a href=\"{$appUrl}\">Podcasts Enhancer</a>")
+        ->and($description)->not->toContain("<a href=\"{$showNotesUrl}\">Read episode transcription</a>")
+        ->and($description)->toContain("<a href=\"{$showNotesUrl}\">Enhance with Podcasts Enhancer</a>");
+});
+
+it('preserves HTML in original summary and summary for rss_description', function () {
+    $feed = Feed::factory()->create();
+    $entry = Entry::factory()->create([
+        'feed_id' => $feed->id,
+        'summary' => 'AI <strong>Summary</strong>',
+        'original_summary' => 'Original <a href="http://example.com">Link</a>',
+    ]);
+
+    $description = $entry->rss_description;
+
+    expect($description)->toContain('AI <strong>Summary</strong>')
+        ->and($description)->toContain('Original <a href="http://example.com">Link</a>');
+});

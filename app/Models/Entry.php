@@ -95,9 +95,16 @@ class Entry extends Model
                 $showNotesUrl = route('entries.show', [$this->feed_id, $this->id]);
                 $appUrl = url('/');
 
-                $html = $aiSummary ? '<p>'.nl2br(e($aiSummary))."</p>\n\n" : '';
-                $html .= "<p>🧙 Enhanced by <a href=\"{$appUrl}\">Podcasts Enhancer</a></p>";
-                $html .= "<p>👉 <a href=\"{$showNotesUrl}\">Read episode transcription</a></p>\n\n";
+                $isEnhanced = $this->summary || $this->transcription_path || $this->chapters;
+
+                $html = $aiSummary ? '<p>'.nl2br($aiSummary)."</p>\n\n" : '';
+
+                if ($isEnhanced) {
+                    $html .= "<p>🧙 Enhanced by <a href=\"{$appUrl}\">Podcasts Enhancer</a></p>";
+                    $html .= "<p>👉 <a href=\"{$showNotesUrl}\">Read episode transcription</a></p>\n\n";
+                } else {
+                    $html .= "<p>👉 <a href=\"{$showNotesUrl}\">Enhance with Podcasts Enhancer</a></p>\n\n";
+                }
 
                 if ($this->chapters) {
                     $html .= "\n\n<h2>Timestamps</h2>\n<ul>\n";
@@ -109,7 +116,7 @@ class Entry extends Model
                 }
 
                 if ($originalSummary) {
-                    $html .= "\n\n<h2>Original Description</h2>\n\n<p>".nl2br(e($originalSummary)).'</p>';
+                    $html .= "\n\n<h2>Original Description</h2>\n\n<p>".nl2br($originalSummary).'</p>';
                 }
 
                 return trim($html);
