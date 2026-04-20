@@ -279,41 +279,6 @@ const formatLastSynced = (date: string) => {
                                         </div>
                                     </div>
                                     <div class="grid gap-2">
-                                        <Label for="import-title">Title</Label>
-                                        <Input
-                                            id="import-title"
-                                            v-model="importRssForm.title"
-                                            placeholder="Leave empty to use feed title"
-                                        />
-                                        <div
-                                            v-if="importRssForm.errors.title"
-                                            class="text-sm text-red-500"
-                                        >
-                                            {{ importRssForm.errors.title }}
-                                        </div>
-                                    </div>
-                                    <div class="grid gap-2">
-                                        <Label for="import-description"
-                                            >Description</Label
-                                        >
-                                        <Textarea
-                                            id="import-description"
-                                            v-model="importRssForm.description"
-                                            placeholder="Leave empty to use feed description"
-                                            rows="3"
-                                        />
-                                        <div
-                                            v-if="
-                                                importRssForm.errors.description
-                                            "
-                                            class="text-sm text-red-500"
-                                        >
-                                            {{
-                                                importRssForm.errors.description
-                                            }}
-                                        </div>
-                                    </div>
-                                    <div class="grid gap-2">
                                         <Label for="sync_frequency"
                                             >Sync Frequency</Label
                                         >
@@ -516,6 +481,22 @@ const formatLastSynced = (date: string) => {
                             </DialogDescription>
                         </DialogHeader>
                         <div class="grid gap-4 py-4">
+                            <div
+                                v-if="editingFeed?.rss_url"
+                                class="space-y-4 rounded-lg border border-yellow-100 bg-yellow-50 p-4 text-sm text-yellow-700 dark:border-yellow-200/10 dark:bg-yellow-700/10 dark:text-yellow-100"
+                            >
+                                <div class="flex items-center gap-2">
+                                    <Rss class="h-4 w-4" />
+                                    <span class="font-medium"
+                                        >External Feed</span
+                                    >
+                                </div>
+                                <p>
+                                    Title, description, and image are
+                                    automatically managed from the RSS feed.
+                                    Sync frequency can still be adjusted.
+                                </p>
+                            </div>
                             <div v-if="editingFeed?.rss_url" class="grid gap-2">
                                 <Label for="edit-rss-url">RSS URL</Label>
                                 <div
@@ -524,15 +505,17 @@ const formatLastSynced = (date: string) => {
                                 >
                                     {{ editingFeed.rss_url }}
                                 </div>
-                                <div class="text-xs text-muted-foreground">
-                                    The RSS URL cannot be changed.
-                                </div>
                             </div>
                             <div class="grid gap-2">
                                 <Label for="edit-title">Title</Label>
                                 <Input
                                     id="edit-title"
                                     v-model="editFeedForm.title"
+                                    :readonly="!!editingFeed?.rss_url"
+                                    :class="{
+                                        'bg-muted text-muted-foreground':
+                                            !!editingFeed?.rss_url,
+                                    }"
                                     required
                                 />
                                 <div
@@ -551,6 +534,11 @@ const formatLastSynced = (date: string) => {
                                     v-model="editFeedForm.description"
                                     placeholder="Optional description for this podcast feed..."
                                     rows="3"
+                                    :readonly="!!editingFeed?.rss_url"
+                                    :class="{
+                                        'bg-muted text-muted-foreground':
+                                            !!editingFeed?.rss_url,
+                                    }"
                                 />
                                 <div
                                     v-if="editFeedForm.errors.description"
@@ -597,106 +585,136 @@ const formatLastSynced = (date: string) => {
                                     {{ editFeedForm.errors.sync_frequency }}
                                 </div>
                             </div>
-                            <div class="grid gap-2">
-                                <Label for="editFeedImageSource"
-                                    >Image Source</Label
-                                >
-                                <Select v-model="editFeedImageSource">
-                                    <SelectTrigger>
-                                        <SelectValue
-                                            placeholder="Select source"
-                                        />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        <SelectItem value="url"
-                                            >Remote URL</SelectItem
-                                        >
-                                        <SelectItem value="file"
-                                            >Upload File</SelectItem
-                                        >
-                                    </SelectContent>
-                                </Select>
-                            </div>
-                            <div
-                                v-if="editFeedImageSource === 'url'"
-                                class="grid gap-2"
-                            >
-                                <Label for="edit-image_url">Image URL</Label>
-                                <Input
-                                    id="edit-image_url"
-                                    v-model="editFeedForm.image_url"
-                                    placeholder="https://example.com/image.jpg"
-                                />
-                                <div
-                                    v-if="editFeedForm.errors.image_url"
-                                    class="text-sm text-red-500"
-                                >
-                                    {{ editFeedForm.errors.image_url }}
-                                </div>
-                            </div>
-                            <div
-                                v-if="editFeedImageSource === 'file'"
-                                class="grid gap-2"
-                            >
-                                <Label for="edit-image_file">Image File</Label>
-                                <div
-                                    v-if="
-                                        !isExternal(editingFeed?.image_url) &&
-                                        editingFeed?.image_url &&
-                                        !editFeedForm.delete_image_file &&
-                                        !editFeedForm.image_file
-                                    "
-                                    class="flex items-center gap-4"
-                                >
-                                    <span class="text-sm text-gray-500"
-                                        >Current image attached</span
+                            <template v-if="!editingFeed?.rss_url">
+                                <div class="grid gap-2">
+                                    <Label for="editFeedImageSource"
+                                        >Image Source</Label
                                     >
-                                    <Button
-                                        type="button"
-                                        variant="destructive"
-                                        size="sm"
-                                        @click="
-                                            editFeedForm.delete_image_file = true
-                                        "
-                                    >
-                                        Delete
-                                    </Button>
+                                    <Select v-model="editFeedImageSource">
+                                        <SelectTrigger>
+                                            <SelectValue
+                                                placeholder="Select source"
+                                            />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem value="url"
+                                                >Remote URL</SelectItem
+                                            >
+                                            <SelectItem value="file"
+                                                >Upload File</SelectItem
+                                            >
+                                        </SelectContent>
+                                    </Select>
                                 </div>
-                                <div v-else>
+                                <div
+                                    v-if="editFeedImageSource === 'url'"
+                                    class="grid gap-2"
+                                >
+                                    <Label for="edit-image_url"
+                                        >Image URL</Label
+                                    >
                                     <Input
-                                        id="edit-image_file"
-                                        type="file"
-                                        @input="
-                                            editFeedForm.image_file =
-                                                $event.target.files[0]
-                                        "
-                                        accept="image/*"
+                                        id="edit-image_url"
+                                        v-model="editFeedForm.image_url"
+                                        placeholder="https://example.com/image.jpg"
                                     />
                                     <div
-                                        v-if="editFeedForm.errors.image_file"
+                                        v-if="editFeedForm.errors.image_url"
                                         class="text-sm text-red-500"
                                     >
-                                        {{ editFeedForm.errors.image_file }}
+                                        {{ editFeedForm.errors.image_url }}
                                     </div>
-                                    <Button
+                                </div>
+                                <div
+                                    v-if="editFeedImageSource === 'file'"
+                                    class="grid gap-2"
+                                >
+                                    <Label for="edit-image_file"
+                                        >Image File</Label
+                                    >
+                                    <div
                                         v-if="
-                                            editFeedForm.delete_image_file &&
                                             !isExternal(
                                                 editingFeed?.image_url,
                                             ) &&
-                                            editingFeed?.image_url
+                                            editingFeed?.image_url &&
+                                            !editFeedForm.delete_image_file &&
+                                            !editFeedForm.image_file
                                         "
-                                        type="button"
-                                        variant="link"
-                                        size="sm"
-                                        class="mt-1 px-0 text-gray-500"
-                                        @click="
-                                            editFeedForm.delete_image_file = false;
-                                            editFeedForm.image_file = null;
-                                        "
+                                        class="flex items-center gap-4"
                                     >
-                                        Cancel deletion
-                                    </Button>
+                                        <span class="text-sm text-gray-500"
+                                            >Current image attached</span
+                                        >
+                                        <Button
+                                            type="button"
+                                            variant="destructive"
+                                            size="sm"
+                                            @click="
+                                                editFeedForm.delete_image_file = true
+                                            "
+                                        >
+                                            Delete
+                                        </Button>
+                                    </div>
+                                    <div v-else>
+                                        <Input
+                                            id="edit-image_file"
+                                            type="file"
+                                            @input="
+                                                editFeedForm.image_file =
+                                                    $event.target.files[0]
+                                            "
+                                            accept="image/*"
+                                        />
+                                        <div
+                                            v-if="
+                                                editFeedForm.errors.image_file
+                                            "
+                                            class="text-sm text-red-500"
+                                        >
+                                            {{ editFeedForm.errors.image_file }}
+                                        </div>
+                                        <Button
+                                            v-if="
+                                                editFeedForm.delete_image_file &&
+                                                !isExternal(
+                                                    editingFeed?.image_url,
+                                                ) &&
+                                                editingFeed?.image_url
+                                            "
+                                            type="button"
+                                            variant="link"
+                                            size="sm"
+                                            class="mt-1 px-0 text-gray-500"
+                                            @click="
+                                                editFeedForm.delete_image_file = false;
+                                                editFeedForm.image_file = null;
+                                            "
+                                        >
+                                            Cancel deletion
+                                        </Button>
+                                    </div>
+                                </div>
+                            </template>
+                            <div v-else class="grid gap-2">
+                                <Label>Feed Image</Label>
+                                <div class="flex items-center gap-4">
+                                    <img
+                                        v-if="editingFeed.absolute_image_url"
+                                        :src="editingFeed.absolute_image_url"
+                                        alt="Feed image"
+                                        class="h-16 w-16 rounded border object-cover"
+                                    />
+                                    <div
+                                        v-else
+                                        class="flex h-16 w-16 items-center justify-center rounded border bg-muted"
+                                    >
+                                        <Rss class="h-8 w-8 text-muted" />
+                                    </div>
+                                    <div class="text-xs text-muted-foreground">
+                                        Managed by RSS feed
+                                    </div>
                                 </div>
                             </div>
                         </div>

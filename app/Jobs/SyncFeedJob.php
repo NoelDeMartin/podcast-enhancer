@@ -51,6 +51,11 @@ class SyncFeedJob implements ShouldQueue
             }
         }
 
-        $this->feed->update(['last_synced_at' => now()]);
+        $this->feed->update([
+            'title' => $data['title'] ?? $this->feed->title,
+            'description' => $data['description'] ?? $this->feed->description,
+            'image_url' => $data['image_url'] ?? $this->feed->image_url,
+            'last_synced_at' => now(),
+        ]);
     }
 }

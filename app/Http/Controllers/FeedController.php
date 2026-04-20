@@ -73,7 +73,11 @@ class FeedController extends Controller
     {
         $validated = $request->validated();
 
-        if ($request->hasFile('image_file')) {
+        if ($feed->rss_url) {
+            unset($validated['title'], $validated['description'], $validated['image_url'], $validated['image_file'], $validated['delete_image_file']);
+        }
+
+        if (isset($validated['image_file'])) {
             if ($feed->image_url && ! $feed->image_is_external) {
                 Storage::disk('public')->delete($feed->image_url);
             }
@@ -83,12 +87,12 @@ class FeedController extends Controller
                 Storage::disk('public')->delete($feed->image_url);
             }
             $validated['image_url'] = null;
-        } elseif ($request->has('image_url') && $request->image_url !== $feed->image_url) {
+        } elseif (isset($validated['image_url']) && $validated['image_url'] !== $feed->image_url) {
             if ($feed->image_url && ! $feed->image_is_external) {
                 Storage::disk('public')->delete($feed->image_url);
             }
         }
-        unset($validated['delete_image_file']);
+        unset($validated['image_file'], $validated['delete_image_file']);
 
         if (isset($validated['sync_frequency']) && (int) $validated['sync_frequency'] === 0) {
             $validated['sync_frequency'] = null;

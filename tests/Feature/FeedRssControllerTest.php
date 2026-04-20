@@ -1,5 +1,7 @@
 <?php
 
+namespace Tests\Feature;
+
 use App\Models\Entry;
 use App\Models\Feed;
 use Illuminate\Support\Facades\Storage;
@@ -17,26 +19,24 @@ it('generates an rss feed for a feed', function () {
 
     Storage::disk('public')->put('audios/audio.mp3', 'dummy content');
 
-    $response = $this->get(route('feeds.rss', $feed));
-
-    $response->assertSuccessful();
-    $response->assertHeader('Content-Type', 'text/xml; charset=UTF-8');
-
-    $response->assertSee('<title>My Podcast</title>', false);
-    $response->assertSee('<title>Episode 1</title>', false);
-    $response->assertSee('<description><![CDATA[<p>This is the first episode summary.</p>', false);
-    $response->assertSee('Read episode transcription</a>', false);
-    $response->assertSee('Enhanced by <a href="'.url('/').'">Podcasts Enhancer</a>', false);
-    $response->assertSee('<pubDate>'.$entry->published_at->toRfc2822String().'</pubDate>', false);
-    $response->assertSee(asset(Storage::disk('public')->url($entry->audio_url)), false);
-    $response->assertSee('length="13"', false); // "dummy content" is 13 bytes
+    $this->get(route('feeds.rss', $feed))
+        ->assertSuccessful()
+        ->assertHeader('Content-Type', 'text/xml; charset=UTF-8')
+        ->assertSee('<title>My Podcast</title>', false)
+        ->assertSee('<title>Episode 1</title>', false)
+        ->assertSee('<description><![CDATA[<p>This is the first episode summary.</p>', false)
+        ->assertSee('Read episode transcription</a>', false)
+        ->assertSee('Enhanced by <a href="'.url('/').'">Podcasts Enhancer</a>', false)
+        ->assertSee('<pubDate>'.$entry->published_at->toRfc2822String().'</pubDate>', false)
+        ->assertSee(asset(Storage::disk('public')->url($entry->audio_url)), false)
+        ->assertSee('length="13"', false); // "dummy content" is 13 bytes
 });
 
 it('includes podcast chapters in rss when available', function () {
     Storage::fake('public');
 
     $feed = Feed::factory()->create(['title' => 'My Podcast']);
-    $entry = Entry::factory()->create([
+    Entry::factory()->create([
         'feed_id' => $feed->id,
         'name' => 'Episode With Chapters',
         'audio_url' => 'audios/audio.mp3',
@@ -48,16 +48,15 @@ it('includes podcast chapters in rss when available', function () {
 
     Storage::disk('public')->put('audios/audio.mp3', 'dummy content');
 
-    $response = $this->get(route('feeds.rss', $feed));
-
-    $response->assertSuccessful();
-    $response->assertSee('xmlns:psc="http://podlove.org/simple-chapters"', false);
-    $response->assertSee('<li>00:00 - Intro</li>', false);
-    $response->assertSee('<li>01:00 - Main Topic</li>', false);
-    $response->assertSee('<content:encoded><![CDATA[', false);
-    $response->assertSee('<psc:chapters version="1.2">', false);
-    $response->assertSee('<psc:chapter start="00:00:00" title="Intro" />', false);
-    $response->assertSee('<psc:chapter start="00:01:00" title="Main Topic" />', false);
+    $this->get(route('feeds.rss', $feed))
+        ->assertSuccessful()
+        ->assertSee('xmlns:psc="http://podlove.org/simple-chapters"', false)
+        ->assertSee('<li>00:00 - Intro</li>', false)
+        ->assertSee('<li>01:00 - Main Topic</li>', false)
+        ->assertSee('<content:encoded><![CDATA[', false)
+        ->assertSee('<psc:chapters version="1.2">', false)
+        ->assertSee('<psc:chapter start="00:00:00" title="Intro" />', false)
+        ->assertSee('<psc:chapter start="00:01:00" title="Main Topic" />', false);
 });
 
 it('omits podcast chapters in rss when not available', function () {
@@ -73,8 +72,7 @@ it('omits podcast chapters in rss when not available', function () {
 
     Storage::disk('public')->put('audios/audio.mp3', 'dummy content');
 
-    $response = $this->get(route('feeds.rss', $feed));
-
-    $response->assertSuccessful();
-    $response->assertDontSee('<psc:chapters', false);
+    $this->get(route('feeds.rss', $feed))
+        ->assertSuccessful()
+        ->assertDontSee('<psc:chapters', false);
 });

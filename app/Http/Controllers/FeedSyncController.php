@@ -16,19 +16,17 @@ class FeedSyncController extends Controller
     {
         $request->validate([
             'rss_url' => ['required', 'url'],
-            'title' => ['nullable', 'string', 'max:255'],
-            'description' => ['nullable', 'string'],
             'sync_frequency' => ['nullable', 'integer', 'min:0'],
         ]);
 
         try {
             $data = $this->fetchAndParseRss($request->rss_url);
 
-            $feedTitle = $request->title ?: $data['title'];
-            $feedDescription = $request->description ?: $data['description'];
+            $feedTitle = $data['title'];
+            $feedDescription = $data['description'];
 
             if (empty($feedTitle)) {
-                return redirect()->back()->withErrors(['title' => 'Could not determine feed title from RSS. Please provide one.']);
+                return redirect()->back()->withErrors(['rss_url' => 'Could not determine feed title from RSS.']);
             }
 
             $feed = Feed::create([
