@@ -17,14 +17,14 @@ it('dispatches the correct initial batch', function () {
 
     /** @var TestCase $this */
     $user = User::factory()->create();
-    $feed = Feed::factory()->create();
+    $feed = Feed::factory()->for($user)->create();
     $entry = Entry::factory()->create([
         'feed_id' => $feed->id,
         'audio_url' => 'https://example.com/audio.mp3',
     ]);
 
     $response = $this->actingAs($user)
-        ->post(route('entries.produce', $entry));
+        ->post(route('entries.produce', [$feed, $entry]));
 
     $response->assertRedirect();
 

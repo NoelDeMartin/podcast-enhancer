@@ -7,7 +7,7 @@ use App\Models\User;
 it('deletes a feed and its entries', function () {
     $user = User::factory()->create();
 
-    $feed = Feed::factory()->create();
+    $feed = Feed::factory()->for($user)->create();
     $entries = Entry::factory()->count(3)->create([
         'feed_id' => $feed->id,
     ]);

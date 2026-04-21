@@ -10,7 +10,7 @@ beforeEach(function () {
 });
 
 it('can update custom feed', function () {
-    $feed = Feed::factory()->create([
+    $feed = Feed::factory()->for($this->user)->create([
         'title' => 'Old Title',
         'description' => 'Old Description',
         'rss_url' => null,
@@ -33,7 +33,7 @@ it('can update custom feed', function () {
 it('cannot update restricted fields for external feed', function () {
     Storage::fake('public');
 
-    $feed = Feed::factory()->create([
+    $feed = Feed::factory()->for($this->user)->create([
         'title' => 'Original Title',
         'description' => 'Original Description',
         'image_url' => 'https://example.com/original.png',
@@ -61,7 +61,7 @@ it('cannot update restricted fields for external feed', function () {
 it('cannot update image file for external feed', function () {
     Storage::fake('public');
 
-    $feed = Feed::factory()->create([
+    $feed = Feed::factory()->for($this->user)->create([
         'title' => 'Original Title',
         'image_url' => 'https://example.com/original.png',
         'rss_url' => 'https://example.com/feed.xml',

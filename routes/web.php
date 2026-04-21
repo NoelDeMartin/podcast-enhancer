@@ -19,12 +19,19 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('feeds/{feed}/sync', [FeedSyncController::class, 'sync'])->name('feeds.sync');
 
     Route::resource('feeds', FeedController::class)->only(['store', 'show', 'update', 'destroy']);
-    Route::resource('entries', EntryController::class)->only(['store', 'update', 'destroy']);
-    Route::get('feeds/{feed}/entries/{entry}', [EntryController::class, 'show'])->name('entries.show');
-    Route::post('entries/{entry}/produce', [EntryController::class, 'produce'])->name('entries.produce');
 
-    Route::post('feeds/{feed}/import-rss/fetch', [RssImportController::class, 'fetch'])->name('feeds.import-rss.fetch');
-    Route::post('feeds/{feed}/import-rss/store', [RssImportController::class, 'store'])->name('feeds.import-rss.store');
+    Route::resource('feeds.entries', EntryController::class)->only(['store', 'show', 'update', 'destroy'])->scoped()->names([
+        'store' => 'entries.store',
+        'show' => 'entries.show',
+        'update' => 'entries.update',
+        'destroy' => 'entries.destroy',
+    ]);
+    Route::post('feeds/{feed}/entries/{entry}/produce', [EntryController::class, 'produce'])->name('entries.produce')->scopeBindings();
+
+    Route::prefix('feeds/{feed}')->group(function () {
+        Route::post('import-rss/fetch', [RssImportController::class, 'fetch'])->name('feeds.import-rss.fetch');
+        Route::post('import-rss/store', [RssImportController::class, 'store'])->name('feeds.import-rss.store');
+    });
 });
 
 require __DIR__.'/settings.php';

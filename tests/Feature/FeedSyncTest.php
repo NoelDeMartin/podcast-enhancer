@@ -75,7 +75,7 @@ it('can import feed from rss without dispatching jobs', function () {
 });
 
 it('can synchronize existing feed without duplicates via background job', function () {
-    $feed = Feed::factory()->create([
+    $feed = Feed::factory()->for($this->user)->create([
         'rss_url' => 'https://example.com/feed.xml',
     ]);
 
@@ -124,12 +124,12 @@ it('can synchronize existing feed without duplicates via background job', functi
 });
 
 it('blocks manual entry creation for synchronized feeds', function () {
-    $feed = Feed::factory()->create([
+    $feed = Feed::factory()->for($this->user)->create([
         'rss_url' => 'https://example.com/feed.xml',
     ]);
 
     $response = $this->actingAs($this->user)
-        ->post(route('entries.store'), [
+        ->post(route('entries.store', $feed), [
             'feed_id' => $feed->id,
             'name' => 'Manual Episode',
             'published_at' => now()->format('Y-m-d\TH:i'),
@@ -139,7 +139,7 @@ it('blocks manual entry creation for synchronized feeds', function () {
 });
 
 it('blocks manual entry updates for synchronized feeds', function () {
-    $feed = Feed::factory()->create([
+    $feed = Feed::factory()->for($this->user)->create([
         'rss_url' => 'https://example.com/feed.xml',
     ]);
 
@@ -150,7 +150,7 @@ it('blocks manual entry updates for synchronized feeds', function () {
     ]);
 
     $response = $this->actingAs($this->user)
-        ->put(route('entries.update', $entry), [
+        ->put(route('entries.update', [$feed, $entry]), [
             'name' => 'Updated Episode',
         ]);
 
@@ -158,7 +158,7 @@ it('blocks manual entry updates for synchronized feeds', function () {
 });
 
 it('blocks manual entry deletion for synchronized feeds', function () {
-    $feed = Feed::factory()->create([
+    $feed = Feed::factory()->for($this->user)->create([
         'rss_url' => 'https://example.com/feed.xml',
     ]);
 
@@ -169,7 +169,7 @@ it('blocks manual entry deletion for synchronized feeds', function () {
     ]);
 
     $response = $this->actingAs($this->user)
-        ->delete(route('entries.destroy', $entry));
+        ->delete(route('entries.destroy', [$feed, $entry]));
 
     $response->assertStatus(403);
 });

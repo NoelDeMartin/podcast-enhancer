@@ -102,7 +102,7 @@ const entryImageSource = ref<'url' | 'file'>('url');
 const showEntryForm = ref(false);
 
 const submitEntry = () => {
-    entryForm.submit(storeEntry(), {
+    entryForm.submit(storeEntry(props.feed.id), {
         onSuccess: () => {
             entryForm.reset(
                 'name',
@@ -119,16 +119,18 @@ const submitEntry = () => {
 
 const deleteEntry = (id: number) => {
     if (confirm('Are you sure you want to delete this entry?')) {
-        useForm({}).submit(destroyEntry(id));
+        useForm({}).submit(destroyEntry([props.feed.id, id]));
     }
 };
 
 const regenerateTranscription = (id: number) => {
-    useForm({}).submit(produceEntry(id));
+    useForm({}).submit(produceEntry([props.feed.id, id]));
 };
 
 const regenerateMetadata = (id: number) => {
-    useForm({ reuse_transcript: true }).submit(produceEntry(id));
+    useForm({ reuse_transcript: true }).submit(
+        produceEntry([props.feed.id, id]),
+    );
 };
 
 const showRssModal = ref(false);
@@ -364,12 +366,15 @@ const startEditEntry = (entry: any) => {
 };
 
 const submitEditEntry = () => {
-    editEntryForm.submit(updateEntryAction(editingEntry.value.id), {
-        onSuccess: () => {
-            editingEntry.value = null;
-            isEditDialogOpen.value = false;
+    editEntryForm.submit(
+        updateEntryAction([props.feed.id, editingEntry.value.id]),
+        {
+            onSuccess: () => {
+                editingEntry.value = null;
+                isEditDialogOpen.value = false;
+            },
         },
-    });
+    );
 };
 </script>
 

@@ -12,7 +12,7 @@ uses(RefreshDatabase::class);
 
 it('can manage entries for a feed', function () {
     $user = User::factory()->create();
-    $feed = Feed::factory()->create(['title' => 'Tech News']);
+    $feed = Feed::factory()->for($user)->create(['title' => 'Tech News']);
     $entry = Entry::factory()->create([
         'feed_id' => $feed->id,
         'name' => 'Initial Entry',
@@ -69,7 +69,7 @@ it('can manage entries for a feed', function () {
 
 it('can view an entry page', function () {
     $user = User::factory()->create();
-    $feed = Feed::factory()->create(['title' => 'Tech News']);
+    $feed = Feed::factory()->for($user)->create(['title' => 'Tech News']);
     $entry = Entry::factory()->create([
         'feed_id' => $feed->id,
         'name' => 'My Awesome Entry',
@@ -91,7 +91,7 @@ it('can view an entry page', function () {
 
 it('can view entry details in a dialog on the feed page', function () {
     $user = User::factory()->create();
-    $feed = Feed::factory()->create(['title' => 'Tech News']);
+    $feed = Feed::factory()->for($user)->create(['title' => 'Tech News']);
     $entry = Entry::factory()->create([
         'feed_id' => $feed->id,
         'name' => 'Detailed Entry',

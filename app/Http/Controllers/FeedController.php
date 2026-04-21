@@ -19,7 +19,7 @@ class FeedController extends Controller
         if ($request->hasFile('image_file')) {
             $validated['image_url'] = $request->file('image_file')->store('images', 'public');
         }
-        Feed::create($validated);
+        $request->user()->feeds()->create($validated);
 
         return redirect()->back()->with('success', 'Feed created successfully.');
     }

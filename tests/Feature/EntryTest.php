@@ -17,12 +17,12 @@ beforeEach(function () {
 it('can store an entry with an uploaded file', function () {
     Storage::fake('public');
     Bus::fake();
-    $feed = Feed::factory()->create();
+    $feed = Feed::factory()->for($this->user)->create();
 
     $file = UploadedFile::fake()->create('audio.mp3', 1024);
 
     $response = $this->actingAs($this->user)
-        ->post(route('entries.store'), [
+        ->post(route('entries.store', $feed), [
             'feed_id' => $feed->id,
             'name' => 'New Entry',
             'published_at' => now()->format('Y-m-d\TH:i'),
@@ -42,10 +42,10 @@ it('can store an entry with an uploaded file', function () {
 
 it('can store an entry with an external audio URL', function () {
     Bus::fake();
-    $feed = Feed::factory()->create();
+    $feed = Feed::factory()->for($this->user)->create();
 
     $response = $this->actingAs($this->user)
-        ->post(route('entries.store'), [
+        ->post(route('entries.store', $feed), [
             'feed_id' => $feed->id,
             'name' => 'External Entry',
             'published_at' => now()->format('Y-m-d\TH:i'),
@@ -64,14 +64,14 @@ it('can store an entry with an external audio URL', function () {
 
 it('triggers transcription when a new audio_url is provided', function () {
     Bus::fake();
-    $feed = Feed::factory()->create();
+    $feed = Feed::factory()->for($this->user)->create();
     $entry = Entry::factory()->create([
         'feed_id' => $feed->id,
         'audio_url' => 'https://example.com/old.mp3',
     ]);
 
     $response = $this->actingAs($this->user)
-        ->put(route('entries.update', $entry), [
+        ->put(route('entries.update', [$feed, $entry]), [
             'name' => 'Updated Entry',
             'audio_url' => 'https://example.com/new.mp3',
         ]);
@@ -85,10 +85,10 @@ it('triggers transcription when a new audio_url is provided', function () {
 
 it('does not dispatch a transcription batch when storing entry without a file', function () {
     Bus::fake();
-    $feed = Feed::factory()->create();
+    $feed = Feed::factory()->for($this->user)->create();
 
     $this->actingAs($this->user)
-        ->post(route('entries.store'), [
+        ->post(route('entries.store', $feed), [
             'feed_id' => $feed->id,
             'name' => 'No File Entry',
             'published_at' => now()->format('Y-m-d\TH:i'),
@@ -105,7 +105,7 @@ it('can update an entry and replace the file', function () {
     Storage::fake('local');
     Storage::fake('public');
     Bus::fake();
-    $feed = Feed::factory()->create();
+    $feed = Feed::factory()->for($this->user)->create();
     $oldFile = UploadedFile::fake()->create('old.mp3', 1024);
     $oldPath = $oldFile->store('audios', 'public');
 
@@ -118,7 +118,7 @@ it('can update an entry and replace the file', function () {
     $newFile = UploadedFile::fake()->create('new.mp3', 1024);
 
     $response = $this->actingAs($this->user)
-        ->put(route('entries.update', $entry), [
+        ->put(route('entries.update', [$feed, $entry]), [
             'name' => 'Updated Entry',
             'file' => $newFile,
         ]);
@@ -141,7 +141,7 @@ it('clears transcription, summary, and chapters when deleting a file', function 
     Storage::fake('local');
     Storage::fake('public');
     Bus::fake();
-    $feed = Feed::factory()->create();
+    $feed = Feed::factory()->for($this->user)->create();
     $oldFile = UploadedFile::fake()->create('old.mp3', 1024);
     $oldPath = $oldFile->store('audios', 'public');
 
@@ -154,7 +154,7 @@ it('clears transcription, summary, and chapters when deleting a file', function 
     ]);
 
     $response = $this->actingAs($this->user)
-        ->put(route('entries.update', $entry), [
+        ->put(route('entries.update', [$feed, $entry]), [
             'name' => 'Updated Entry',
             'delete_file' => '1',
         ]);
@@ -172,7 +172,7 @@ it('clears transcription, summary, and chapters when deleting a file', function 
 it('can delete a file when updating an entry', function () {
     Storage::fake('public');
     Bus::fake();
-    $feed = Feed::factory()->create();
+    $feed = Feed::factory()->for($this->user)->create();
     $oldFile = UploadedFile::fake()->create('old.mp3', 1024);
     $oldPath = $oldFile->store('audios', 'public');
 
@@ -183,7 +183,7 @@ it('can delete a file when updating an entry', function () {
     ]);
 
     $response = $this->actingAs($this->user)
-        ->put(route('entries.update', $entry), [
+        ->put(route('entries.update', [$feed, $entry]), [
             'name' => 'Updated Entry',
             'delete_file' => '1',
         ]);
@@ -200,7 +200,7 @@ it('can delete a file when updating an entry', function () {
 it('records the job batch on the entry when dispatching transcription', function () {
     Storage::fake('public');
     Bus::fake();
-    $feed = Feed::factory()->create();
+    $feed = Feed::factory()->for($this->user)->create();
     $file = UploadedFile::fake()->create('audio.mp3', 1024);
     $path = $file->store('audios', 'public');
 
@@ -210,7 +210,7 @@ it('records the job batch on the entry when dispatching transcription', function
     ]);
 
     $this->actingAs($this->user)
-        ->post(route('entries.produce', $entry))
+        ->post(route('entries.produce', [$feed, $entry]))
         ->assertRedirect();
 
     expect(EntryJobBatch::where('entry_id', $entry->id)->count())->toBe(1);
@@ -219,7 +219,7 @@ it('records the job batch on the entry when dispatching transcription', function
 it('accumulates a new batch record each time transcription is triggered', function () {
     Storage::fake('public');
     Bus::fake();
-    $feed = Feed::factory()->create();
+    $feed = Feed::factory()->for($this->user)->create();
     $file = UploadedFile::fake()->create('audio.mp3', 1024);
     $path = $file->store('audios', 'public');
 
@@ -229,18 +229,22 @@ it('accumulates a new batch record each time transcription is triggered', functi
     ]);
 
     $this->actingAs($this->user)
-        ->post(route('entries.produce', $entry));
+        ->post(route('entries.produce', [$feed, $entry]));
     $this->actingAs($this->user)
-        ->post(route('entries.produce', $entry));
+        ->post(route('entries.produce', [$feed, $entry]));
 
     expect(EntryJobBatch::where('entry_id', $entry->id)->count())->toBe(2);
 });
 
 it('returns 422 when regenerating transcription for entry without a file', function () {
-    $entry = Entry::factory()->create(['audio_url' => null]);
+    $feed = Feed::factory()->for($this->user)->create();
+    $entry = Entry::factory()->create([
+        'feed_id' => $feed->id,
+        'audio_url' => null,
+    ]);
 
     $this->actingAs($this->user)
-        ->post(route('entries.produce', $entry))
+        ->post(route('entries.produce', [$feed, $entry]))
         ->assertStatus(422);
 
     expect(EntryJobBatch::where('entry_id', $entry->id)->count())->toBe(0);
@@ -250,7 +254,7 @@ it('can regenerate chapters and summary from an existing transcription', functio
     Storage::fake('local');
     Storage::fake('public');
     Bus::fake();
-    $feed = Feed::factory()->create();
+    $feed = Feed::factory()->for($this->user)->create();
 
     $entry = Entry::factory()->create([
         'feed_id' => $feed->id,
@@ -259,7 +263,7 @@ it('can regenerate chapters and summary from an existing transcription', functio
     ]);
 
     $this->actingAs($this->user)
-        ->post(route('entries.produce', $entry), [
+        ->post(route('entries.produce', [$feed, $entry]), [
             'reuse_transcript' => true,
         ])
         ->assertRedirect();
@@ -268,13 +272,15 @@ it('can regenerate chapters and summary from an existing transcription', functio
 });
 
 it('returns 422 when regenerating chapters and summary without a transcription', function () {
+    $feed = Feed::factory()->for($this->user)->create();
     $entry = Entry::factory()->create([
+        'feed_id' => $feed->id,
         'audio_url' => 'audios/audio.mp3',
         'transcription_path' => null,
     ]);
 
     $this->actingAs($this->user)
-        ->post(route('entries.produce', $entry), [
+        ->post(route('entries.produce', [$feed, $entry]), [
             'reuse_transcript' => true,
         ])
         ->assertStatus(422);
@@ -285,7 +291,7 @@ it('returns 422 when regenerating chapters and summary without a transcription',
 it('deletes the file when an entry is destroyed', function () {
     Storage::fake('local');
     Storage::fake('public');
-    $feed = Feed::factory()->create();
+    $feed = Feed::factory()->for($this->user)->create();
     $file = UploadedFile::fake()->create('audio.mp3', 1024);
     $path = $file->store('audios', 'public');
 
@@ -295,7 +301,7 @@ it('deletes the file when an entry is destroyed', function () {
     ]);
 
     $response = $this->actingAs($this->user)
-        ->delete(route('entries.destroy', $entry));
+        ->delete(route('entries.destroy', [$feed, $entry]));
 
     $response->assertRedirect();
 
@@ -304,7 +310,7 @@ it('deletes the file when an entry is destroyed', function () {
 });
 
 it('can view an entry', function () {
-    $feed = Feed::factory()->create();
+    $feed = Feed::factory()->for($this->user)->create();
     $entry = Entry::factory()->create([
         'feed_id' => $feed->id,
     ]);
@@ -319,7 +325,7 @@ it('can view an entry', function () {
 });
 
 it('generates the correct rss description with AI summary and original description', function () {
-    $feed = Feed::factory()->create();
+    $feed = Feed::factory()->for($this->user)->create();
     $entry = Entry::factory()->create([
         'feed_id' => $feed->id,
         'summary' => 'This is the AI summary.',
@@ -346,7 +352,7 @@ it('generates the correct rss description with AI summary and original descripti
 });
 
 it('generates the correct rss description when original summary is missing', function () {
-    $feed = Feed::factory()->create();
+    $feed = Feed::factory()->for($this->user)->create();
     $entry = Entry::factory()->create([
         'feed_id' => $feed->id,
         'summary' => 'This is just an AI summary.',
@@ -361,7 +367,7 @@ it('generates the correct rss description when original summary is missing', fun
 });
 
 it('does not include enhancement links or enhanced by text when an entry is not enhanced', function () {
-    $feed = Feed::factory()->create();
+    $feed = Feed::factory()->for($this->user)->create();
     $entry = Entry::factory()->create([
         'feed_id' => $feed->id,
         'summary' => null,
@@ -379,7 +385,7 @@ it('does not include enhancement links or enhanced by text when an entry is not 
 });
 
 it('preserves HTML in original summary and summary for rss_description', function () {
-    $feed = Feed::factory()->create();
+    $feed = Feed::factory()->for($this->user)->create();
     $entry = Entry::factory()->create([
         'feed_id' => $feed->id,
         'summary' => 'AI <strong>Summary</strong>',

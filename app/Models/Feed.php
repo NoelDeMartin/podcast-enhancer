@@ -2,20 +2,25 @@
 
 namespace App\Models;
 
+use App\Models\Scopes\UserScope;
 use Database\Factories\FeedFactory;
+use Illuminate\Database\Eloquent\Attributes\ScopedBy;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Support\Facades\Storage;
 
+#[ScopedBy([UserScope::class])]
 class Feed extends Model
 {
     /** @use HasFactory<FeedFactory> */
     use HasFactory;
 
     protected $fillable = [
+        'user_id',
         'title',
         'description',
         'rss_url',
@@ -60,6 +65,11 @@ class Feed extends Model
     public function entries(): HasMany
     {
         return $this->hasMany(Entry::class)->latest('published_at');
+    }
+
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class);
     }
 
     public function jobBatches(): HasMany

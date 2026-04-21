@@ -20,10 +20,6 @@ class EntryController extends Controller
 
     public function show(Feed $feed, Entry $entry): Response
     {
-        if ($entry->feed_id !== $feed->id) {
-            abort(404);
-        }
-
         $entry->load('feed', 'latestJobBatch');
 
         $this->loadFailedJobDetails($entry);
@@ -51,14 +47,13 @@ class EntryController extends Controller
         );
     }
 
-    public function store(StoreEntryRequest $request): RedirectResponse
+    public function store(Feed $feed, StoreEntryRequest $request): RedirectResponse
     {
-        $validated = $request->validated();
-
-        $feed = Feed::findOrFail($validated['feed_id']);
         if ($feed->rss_url) {
             abort(403, 'Manual entries cannot be added to a synchronized feed.');
         }
+
+        $validated = $request->validated();
 
         if ($request->hasFile('file')) {
             $validated['audio_url'] = $request->file('file')->store('audios', 'public');
@@ -68,7 +63,7 @@ class EntryController extends Controller
             $validated['image_url'] = $request->file('image_file')->store('images', 'public');
         }
 
-        $entry = Entry::create($validated);
+        $entry = $feed->entries()->create($validated);
 
         if ($entry->audio_url) {
             $this->dispatchTranscriptionBatch($entry);
@@ -77,9 +72,9 @@ class EntryController extends Controller
         return redirect()->back()->with('success', 'Entry created successfully.');
     }
 
-    public function update(UpdateEntryRequest $request, Entry $entry): RedirectResponse
+    public function update(Feed $feed, Entry $entry, UpdateEntryRequest $request): RedirectResponse
     {
-        if ($entry->feed->rss_url) {
+        if ($feed->rss_url) {
             abort(403, 'Entries in a synchronized feed cannot be modified manually.');
         }
 
@@ -151,9 +146,9 @@ class EntryController extends Controller
         return redirect()->back()->with('success', 'Entry updated successfully.');
     }
 
-    public function destroy(Entry $entry): RedirectResponse
+    public function destroy(Feed $feed, Entry $entry): RedirectResponse
     {
-        if ($entry->feed->rss_url) {
+        if ($feed->rss_url) {
             abort(403, 'Entries in a synchronized feed cannot be deleted manually.');
         }
 
@@ -174,7 +169,7 @@ class EntryController extends Controller
         return redirect()->back()->with('success', 'Entry deleted successfully.');
     }
 
-    public function produce(Request $request, Entry $entry): RedirectResponse
+    public function produce(Request $request, Feed $feed, Entry $entry): RedirectResponse
     {
         $reuseTranscript = $request->boolean('reuse_transcript');
 

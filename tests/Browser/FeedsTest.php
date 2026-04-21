@@ -11,7 +11,7 @@ uses(RefreshDatabase::class);
 
 it('can manage feeds on the dashboard', function () {
     $user = User::factory()->create();
-    $feed = Feed::factory()->create(['title' => 'Initial Feed']);
+    $feed = Feed::factory()->for($user)->create(['title' => 'Initial Feed']);
 
     $this->actingAs($user);
 

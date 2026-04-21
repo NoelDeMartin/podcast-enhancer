@@ -29,7 +29,7 @@ class FeedSyncController extends Controller
                 return redirect()->back()->withErrors(['rss_url' => 'Could not determine feed title from RSS.']);
             }
 
-            $feed = Feed::create([
+            $feed = $request->user()->feeds()->create([
                 'title' => $feedTitle,
                 'description' => $feedDescription,
                 'rss_url' => $request->rss_url,

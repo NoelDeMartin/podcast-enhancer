@@ -19,7 +19,7 @@ beforeEach(function () {
 
 it('can fetch episodes from an RSS feed', function () {
     $user = User::factory()->create();
-    $feed = Feed::factory()->create();
+    $feed = Feed::factory()->for($user)->create();
 
     $rssContent = '<?xml version="1.0" encoding="UTF-8"?>
 <rss version="2.0">
@@ -57,7 +57,7 @@ it('can import selected episodes', function () {
     Bus::fake();
 
     $user = User::factory()->create();
-    $feed = Feed::factory()->create();
+    $feed = Feed::factory()->for($user)->create();
 
     $episodes = [
         [
@@ -93,7 +93,7 @@ it('can import selected episodes', function () {
 
 it('fails to fetch invalid RSS feed', function () {
     $user = User::factory()->create();
-    $feed = Feed::factory()->create();
+    $feed = Feed::factory()->for($user)->create();
 
     Http::fake([
         'https://example.com/invalid.xml' => Http::response('invalid xml', 200),
@@ -110,7 +110,7 @@ it('fails to fetch invalid RSS feed', function () {
 
 it('fails to import episode without audio url', function () {
     $user = User::factory()->create();
-    $feed = Feed::factory()->create();
+    $feed = Feed::factory()->for($user)->create();
 
     $episodes = [
         [
@@ -134,7 +134,7 @@ it('imports episode without published_at using current time', function () {
     $this->travelTo(now()->startOfSecond());
 
     $user = User::factory()->create();
-    $feed = Feed::factory()->create();
+    $feed = Feed::factory()->for($user)->create();
 
     $episodes = [
         [

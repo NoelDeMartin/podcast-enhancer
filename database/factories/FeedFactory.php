@@ -3,6 +3,7 @@
 namespace Database\Factories;
 
 use App\Models\Feed;
+use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -18,6 +19,7 @@ class FeedFactory extends Factory
     public function definition(): array
     {
         return [
+            'user_id' => User::factory(),
             'title' => fake()->sentence(),
             'rss_url' => null,
         ];
