@@ -397,3 +397,49 @@ it('preserves HTML in original summary and summary for rss_description', functio
     expect($description)->toContain('AI <strong>Summary</strong>')
         ->and($description)->toContain('Original <a href="http://example.com">Link</a>');
 });
+
+it('trims original descriptions before importing in the database', function () {
+    Bus::fake();
+    $feed = Feed::factory()->for($this->user)->create(['rss_url' => null]);
+
+    $this->actingAs($this->user)
+        ->post(route('feeds.import-rss.store', $feed), [
+            'episodes' => [
+                [
+                    'name' => 'Episode 1 Unique',
+                    'summary' => '   This is a description with spaces.   ',
+                    'audio_url' => 'https://example.com/audio1.mp3',
+                    'published_at' => '2026-04-21 10:00:00',
+                ],
+                [
+                    'name' => 'Episode 2 Unique',
+                    'summary' => '   ',
+                    'audio_url' => 'https://example.com/audio2.mp3',
+                    'published_at' => '2026-04-21 11:00:00',
+                ],
+            ],
+        ])
+        ->assertSessionHas('success', '2 episodes imported successfully.');
+
+    $entry1 = $feed->entries()->where('name', 'Episode 1 Unique')->first();
+    expect($entry1)->not->toBeNull();
+    expect($entry1->original_summary)->toBe('This is a description with spaces.');
+
+    $entry2 = $feed->entries()->where('name', 'Episode 2 Unique')->first();
+    expect($entry2)->not->toBeNull();
+    expect($entry2->original_summary)->toBeEmpty();
+});
+
+it('does not show original description section if it is empty or whitespace', function () {
+    $feed = Feed::factory()->create();
+
+    $entry = Entry::factory()->create([
+        'feed_id' => $feed->id,
+        'original_summary' => '   ',
+    ]);
+
+    expect($entry->rss_description)->not->toContain('<h2>Original Description</h2>');
+
+    $entry->original_summary = '';
+    expect($entry->rss_description)->not->toContain('<h2>Original Description</h2>');
+});

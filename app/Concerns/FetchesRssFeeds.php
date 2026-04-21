@@ -57,7 +57,7 @@ trait FetchesRssFeeds
 
             $episodes[] = [
                 'name' => (string) $item->title,
-                'summary' => (string) $item->description,
+                'summary' => trim((string) $item->description),
                 'audio_url' => $audioUrl,
                 'image_url' => $episodeImageUrl,
                 'published_at' => $publishedAt,

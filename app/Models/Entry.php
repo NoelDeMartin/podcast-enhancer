@@ -115,7 +115,7 @@ class Entry extends Model
                     $html .= '</ul>';
                 }
 
-                if ($originalSummary) {
+                if (filled($originalSummary)) {
                     $html .= "\n\n<h2>Original Description</h2>\n\n<p>".nl2br($originalSummary).'</p>';
                 }
 
