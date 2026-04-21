@@ -17,7 +17,7 @@ return new class extends Migration
         });
 
         // Backfill existing feeds
-        Feed::all()->each(function ($feed) {
+        Feed::withoutGlobalScopes()->each(function ($feed) {
             $feed->update(['slug' => Feed::generateUniqueSlug($feed->title)]);
         });
 

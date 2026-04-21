@@ -19,10 +19,6 @@ class UserScope implements Scope
             return;
         }
 
-        if (app()->runningInConsole()) {
-            return;
-        }
-
         throw new \RuntimeException('Attempted to query scoped model ['.get_class($model).'] without an authenticated user.');
     }
 }

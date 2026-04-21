@@ -36,7 +36,7 @@ class Feed extends Model
 
         do {
             $slug = $base->toString().'-'.bin2hex(random_bytes(3));
-        } while (static::where('slug', $slug)->exists());
+        } while (static::withoutGlobalScopes()->where('slug', $slug)->exists());
 
         return $slug;
     }

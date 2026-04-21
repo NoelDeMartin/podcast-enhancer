@@ -25,6 +25,7 @@ class FeedRssController extends Controller
         }
 
         $entries = $feed->entries;
+        $entries->each->setRelation('feed', $feed);
 
         return response()
             ->view('feeds.rss', compact('feed', 'entries'))

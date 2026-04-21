@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Storage;
 beforeEach(function () {
     $this->withoutMiddleware(PreventRequestForgery::class);
     $this->user = User::factory()->create();
+    $this->actingAs($this->user);
 });
 
 it('can store an entry with an uploaded file', function () {
@@ -21,13 +22,12 @@ it('can store an entry with an uploaded file', function () {
 
     $file = UploadedFile::fake()->create('audio.mp3', 1024);
 
-    $response = $this->actingAs($this->user)
-        ->post(route('entries.store', $feed), [
-            'feed_id' => $feed->id,
-            'name' => 'New Entry',
-            'published_at' => now()->format('Y-m-d\TH:i'),
-            'file' => $file,
-        ]);
+    $response = $this->post(route('entries.store', $feed), [
+        'feed_id' => $feed->id,
+        'name' => 'New Entry',
+        'published_at' => now()->format('Y-m-d\TH:i'),
+        'file' => $file,
+    ]);
 
     $response->assertRedirect();
 
@@ -44,13 +44,12 @@ it('can store an entry with an external audio URL', function () {
     Bus::fake();
     $feed = Feed::factory()->for($this->user)->create();
 
-    $response = $this->actingAs($this->user)
-        ->post(route('entries.store', $feed), [
-            'feed_id' => $feed->id,
-            'name' => 'External Entry',
-            'published_at' => now()->format('Y-m-d\TH:i'),
-            'audio_url' => 'https://example.com/audio.mp3',
-        ]);
+    $response = $this->post(route('entries.store', $feed), [
+        'feed_id' => $feed->id,
+        'name' => 'External Entry',
+        'published_at' => now()->format('Y-m-d\TH:i'),
+        'audio_url' => 'https://example.com/audio.mp3',
+    ]);
 
     $response->assertRedirect();
 
@@ -70,11 +69,10 @@ it('triggers transcription when a new audio_url is provided', function () {
         'audio_url' => 'https://example.com/old.mp3',
     ]);
 
-    $response = $this->actingAs($this->user)
-        ->put(route('entries.update', [$feed, $entry]), [
-            'name' => 'Updated Entry',
-            'audio_url' => 'https://example.com/new.mp3',
-        ]);
+    $response = $this->put(route('entries.update', [$feed, $entry]), [
+        'name' => 'Updated Entry',
+        'audio_url' => 'https://example.com/new.mp3',
+    ]);
 
     $response->assertRedirect();
 
@@ -87,12 +85,11 @@ it('does not dispatch a transcription batch when storing entry without a file', 
     Bus::fake();
     $feed = Feed::factory()->for($this->user)->create();
 
-    $this->actingAs($this->user)
-        ->post(route('entries.store', $feed), [
-            'feed_id' => $feed->id,
-            'name' => 'No File Entry',
-            'published_at' => now()->format('Y-m-d\TH:i'),
-        ]);
+    $this->post(route('entries.store', $feed), [
+        'feed_id' => $feed->id,
+        'name' => 'No File Entry',
+        'published_at' => now()->format('Y-m-d\TH:i'),
+    ]);
 
     $entry = Entry::where('name', 'No File Entry')->first();
     expect($entry)->not->toBeNull();
@@ -117,11 +114,10 @@ it('can update an entry and replace the file', function () {
 
     $newFile = UploadedFile::fake()->create('new.mp3', 1024);
 
-    $response = $this->actingAs($this->user)
-        ->put(route('entries.update', [$feed, $entry]), [
-            'name' => 'Updated Entry',
-            'file' => $newFile,
-        ]);
+    $response = $this->put(route('entries.update', [$feed, $entry]), [
+        'name' => 'Updated Entry',
+        'file' => $newFile,
+    ]);
 
     $response->assertRedirect();
 
@@ -153,11 +149,10 @@ it('clears transcription, summary, and chapters when deleting a file', function 
         'chapters' => [['title' => 'Old Chapter', 'startTime' => 0]],
     ]);
 
-    $response = $this->actingAs($this->user)
-        ->put(route('entries.update', [$feed, $entry]), [
-            'name' => 'Updated Entry',
-            'delete_file' => '1',
-        ]);
+    $response = $this->put(route('entries.update', [$feed, $entry]), [
+        'name' => 'Updated Entry',
+        'delete_file' => '1',
+    ]);
 
     $response->assertRedirect();
 
@@ -182,11 +177,10 @@ it('can delete a file when updating an entry', function () {
         'audio_url' => $oldPath,
     ]);
 
-    $response = $this->actingAs($this->user)
-        ->put(route('entries.update', [$feed, $entry]), [
-            'name' => 'Updated Entry',
-            'delete_file' => '1',
-        ]);
+    $response = $this->put(route('entries.update', [$feed, $entry]), [
+        'name' => 'Updated Entry',
+        'delete_file' => '1',
+    ]);
 
     $response->assertRedirect();
 
@@ -209,8 +203,7 @@ it('records the job batch on the entry when dispatching transcription', function
         'audio_url' => $path,
     ]);
 
-    $this->actingAs($this->user)
-        ->post(route('entries.produce', [$feed, $entry]))
+    $this->post(route('entries.produce', [$feed, $entry]))
         ->assertRedirect();
 
     expect(EntryJobBatch::where('entry_id', $entry->id)->count())->toBe(1);
@@ -228,10 +221,8 @@ it('accumulates a new batch record each time transcription is triggered', functi
         'audio_url' => $path,
     ]);
 
-    $this->actingAs($this->user)
-        ->post(route('entries.produce', [$feed, $entry]));
-    $this->actingAs($this->user)
-        ->post(route('entries.produce', [$feed, $entry]));
+    $this->post(route('entries.produce', [$feed, $entry]));
+    $this->post(route('entries.produce', [$feed, $entry]));
 
     expect(EntryJobBatch::where('entry_id', $entry->id)->count())->toBe(2);
 });
@@ -243,8 +234,7 @@ it('returns 422 when regenerating transcription for entry without a file', funct
         'audio_url' => null,
     ]);
 
-    $this->actingAs($this->user)
-        ->post(route('entries.produce', [$feed, $entry]))
+    $this->post(route('entries.produce', [$feed, $entry]))
         ->assertStatus(422);
 
     expect(EntryJobBatch::where('entry_id', $entry->id)->count())->toBe(0);
@@ -262,10 +252,9 @@ it('can regenerate chapters and summary from an existing transcription', functio
         'transcription_path' => 'transcriptions/example.json',
     ]);
 
-    $this->actingAs($this->user)
-        ->post(route('entries.produce', [$feed, $entry]), [
-            'reuse_transcript' => true,
-        ])
+    $this->post(route('entries.produce', [$feed, $entry]), [
+        'reuse_transcript' => true,
+    ])
         ->assertRedirect();
 
     expect(EntryJobBatch::where('entry_id', $entry->id)->count())->toBe(1);
@@ -279,10 +268,9 @@ it('returns 422 when regenerating chapters and summary without a transcription',
         'transcription_path' => null,
     ]);
 
-    $this->actingAs($this->user)
-        ->post(route('entries.produce', [$feed, $entry]), [
-            'reuse_transcript' => true,
-        ])
+    $this->post(route('entries.produce', [$feed, $entry]), [
+        'reuse_transcript' => true,
+    ])
         ->assertStatus(422);
 
     expect(EntryJobBatch::where('entry_id', $entry->id)->count())->toBe(0);
@@ -300,8 +288,7 @@ it('deletes the file when an entry is destroyed', function () {
         'audio_url' => $path,
     ]);
 
-    $response = $this->actingAs($this->user)
-        ->delete(route('entries.destroy', [$feed, $entry]));
+    $response = $this->delete(route('entries.destroy', [$feed, $entry]));
 
     $response->assertRedirect();
 
@@ -315,8 +302,7 @@ it('can view an entry', function () {
         'feed_id' => $feed->id,
     ]);
 
-    $this->actingAs($this->user)
-        ->get(route('entries.show', [$feed, $entry]))
+    $this->get(route('entries.show', [$feed, $entry]))
         ->assertOk()
         ->assertInertia(fn ($page) => $page
             ->component('Entries/Show')
@@ -402,23 +388,22 @@ it('trims original descriptions before importing in the database', function () {
     Bus::fake();
     $feed = Feed::factory()->for($this->user)->create(['rss_url' => null]);
 
-    $this->actingAs($this->user)
-        ->post(route('feeds.import-rss.store', $feed), [
-            'episodes' => [
-                [
-                    'name' => 'Episode 1 Unique',
-                    'summary' => '   This is a description with spaces.   ',
-                    'audio_url' => 'https://example.com/audio1.mp3',
-                    'published_at' => '2026-04-21 10:00:00',
-                ],
-                [
-                    'name' => 'Episode 2 Unique',
-                    'summary' => '   ',
-                    'audio_url' => 'https://example.com/audio2.mp3',
-                    'published_at' => '2026-04-21 11:00:00',
-                ],
+    $this->post(route('feeds.import-rss.store', $feed), [
+        'episodes' => [
+            [
+                'name' => 'Episode 1 Unique',
+                'summary' => '   This is a description with spaces.   ',
+                'audio_url' => 'https://example.com/audio1.mp3',
+                'published_at' => '2026-04-21 10:00:00',
             ],
-        ])
+            [
+                'name' => 'Episode 2 Unique',
+                'summary' => '   ',
+                'audio_url' => 'https://example.com/audio2.mp3',
+                'published_at' => '2026-04-21 11:00:00',
+            ],
+        ],
+    ])
         ->assertSessionHas('success', '2 episodes imported successfully.');
 
     $entry1 = $feed->entries()->where('name', 'Episode 1 Unique')->first();
@@ -431,7 +416,7 @@ it('trims original descriptions before importing in the database', function () {
 });
 
 it('does not show original description section if it is empty or whitespace', function () {
-    $feed = Feed::factory()->create();
+    $feed = Feed::factory()->for($this->user)->create();
 
     $entry = Entry::factory()->create([
         'feed_id' => $feed->id,

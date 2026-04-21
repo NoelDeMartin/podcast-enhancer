@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\Entry;
 use App\Models\Feed;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -54,4 +55,26 @@ it('can manage feeds on the dashboard', function () {
     }, 200);
 
     assertDatabaseMissing('feeds', ['title' => 'Updated Awesome Feed']);
+});
+
+it('can access public rss feed without authentication', function () {
+    $user = User::factory()->create();
+    $feed = Feed::factory()->for($user)->create([
+        'title' => 'Security Test Feed',
+        'description' => 'Security Test Description',
+    ]);
+
+    Entry::factory()->for($feed)->create([
+        'name' => 'Secure Episode',
+        'summary' => 'This is a summary that triggers a relation check.',
+        'audio_url' => null,
+        'chapters' => [
+            ['title' => 'Intro', 'startTime' => 0],
+        ],
+    ]);
+
+    visit(route('feeds.rss', $feed))
+        ->assertSee('Security Test Feed')
+        ->assertSee('Secure Episode')
+        ->assertSee('Timestamps');
 });
