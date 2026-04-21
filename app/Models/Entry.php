@@ -92,7 +92,7 @@ class Entry extends Model
                 $aiSummary = $this->summary ?? '';
                 $originalSummary = $this->original_summary ?? '';
 
-                $showNotesUrl = route('entries.show', [$this->feed_id, $this->id]);
+                $showNotesUrl = route('entries.show', [$this->feed, $this->id]);
                 $appUrl = url('/');
 
                 $isEnhanced = $this->summary || $this->transcription_path || $this->chapters;

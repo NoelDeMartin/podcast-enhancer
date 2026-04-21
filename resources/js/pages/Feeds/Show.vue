@@ -102,7 +102,7 @@ const entryImageSource = ref<'url' | 'file'>('url');
 const showEntryForm = ref(false);
 
 const submitEntry = () => {
-    entryForm.submit(storeEntry(props.feed.id), {
+    entryForm.submit(storeEntry(props.feed.slug), {
         onSuccess: () => {
             entryForm.reset(
                 'name',
@@ -119,17 +119,17 @@ const submitEntry = () => {
 
 const deleteEntry = (id: number) => {
     if (confirm('Are you sure you want to delete this entry?')) {
-        useForm({}).submit(destroyEntry([props.feed.id, id]));
+        useForm({}).submit(destroyEntry([props.feed.slug, id]));
     }
 };
 
 const regenerateTranscription = (id: number) => {
-    useForm({}).submit(produceEntry([props.feed.id, id]));
+    useForm({}).submit(produceEntry([props.feed.slug, id]));
 };
 
 const regenerateMetadata = (id: number) => {
     useForm({ reuse_transcript: true }).submit(
-        produceEntry([props.feed.id, id]),
+        produceEntry([props.feed.slug, id]),
     );
 };
 
@@ -145,7 +145,7 @@ const fetchRss = async () => {
     rssError.value = '';
 
     try {
-        const response = await fetch(fetchRssAction(props.feed.id).url, {
+        const response = await fetch(fetchRssAction(props.feed.slug).url, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -180,7 +180,7 @@ const importRss = () => {
     const selected = episodes.value.filter((_, i) =>
         selectedEpisodes.value.includes(i),
     );
-    useForm({ episodes: selected }).submit(storeRssAction(props.feed.id), {
+    useForm({ episodes: selected }).submit(storeRssAction(props.feed.slug), {
         onSuccess: () => {
             showRssModal.value = false;
             rssUrl.value = '';
@@ -340,7 +340,7 @@ const isSyncing = ref(false);
 const viewingSyncFailure = ref(false);
 const syncFeed = () => {
     isSyncing.value = true;
-    useForm({}).post(syncFeedAction.url(props.feed.id), {
+    useForm({}).post(syncFeedAction.url(props.feed.slug), {
         onFinish: () => {
             isSyncing.value = false;
         },
@@ -367,7 +367,7 @@ const startEditEntry = (entry: any) => {
 
 const submitEditEntry = () => {
     editEntryForm.submit(
-        updateEntryAction([props.feed.id, editingEntry.value.id]),
+        updateEntryAction([props.feed.slug, editingEntry.value.id]),
         {
             onSuccess: () => {
                 editingEntry.value = null;
@@ -391,7 +391,7 @@ const submitEditEntry = () => {
                         {{ feed.title }}
                     </h2>
                     <a
-                        :href="FeedRssController.url(feed.id)"
+                        :href="FeedRssController.url(feed.slug)"
                         target="_blank"
                         class="text-orange-500 hover:text-orange-600"
                         title="RSS Feed"
@@ -1226,7 +1226,7 @@ const submitEditEntry = () => {
                                     <Link
                                         :href="
                                             showEntryAction.url([
-                                                feed.id,
+                                                feed.slug,
                                                 entry.id,
                                             ])
                                         "

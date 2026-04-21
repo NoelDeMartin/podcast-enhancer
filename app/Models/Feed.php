@@ -22,12 +22,32 @@ class Feed extends Model
     protected $fillable = [
         'user_id',
         'title',
+        'slug',
         'description',
         'rss_url',
         'image_url',
         'last_synced_at',
         'sync_frequency',
     ];
+
+    public static function generateUniqueSlug(string $title): string
+    {
+        $base = str($title)->slug();
+
+        do {
+            $slug = $base->toString().'-'.bin2hex(random_bytes(3));
+        } while (static::where('slug', $slug)->exists());
+
+        return $slug;
+    }
+
+    /**
+     * Get the route key for the model.
+     */
+    public function getRouteKeyName(): string
+    {
+        return 'slug';
+    }
 
     protected $appends = [
         'absolute_image_url',

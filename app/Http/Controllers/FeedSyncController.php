@@ -31,6 +31,7 @@ class FeedSyncController extends Controller
 
             $feed = $request->user()->feeds()->create([
                 'title' => $feedTitle,
+                'slug' => Feed::generateUniqueSlug($feedTitle),
                 'description' => $feedDescription,
                 'rss_url' => $request->rss_url,
                 'image_url' => $data['image_url'] ?? null,

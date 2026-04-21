@@ -336,7 +336,7 @@ it('generates the correct rss description with AI summary and original descripti
         ],
     ]);
 
-    $showNotesUrl = route('entries.show', [$feed->id, $entry->id]);
+    $showNotesUrl = route('entries.show', [$feed, $entry]);
     $appUrl = url('/');
 
     $description = $entry->rss_description;
@@ -377,7 +377,7 @@ it('does not include enhancement links or enhanced by text when an entry is not 
 
     $description = $entry->rss_description;
     $appUrl = url('/');
-    $showNotesUrl = route('entries.show', [$feed->id, $entry->id]);
+    $showNotesUrl = route('entries.show', [$feed, $entry]);
 
     expect($description)->not->toContain("Enhanced by <a href=\"{$appUrl}\">Podcasts Enhancer</a>")
         ->and($description)->not->toContain("<a href=\"{$showNotesUrl}\">Read episode transcription</a>")

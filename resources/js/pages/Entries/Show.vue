@@ -20,7 +20,7 @@ const breadcrumbs: BreadcrumbItem[] = [
     },
     {
         title: props.entry.feed.title,
-        href: showFeedAction.url(props.entry.feed.id),
+        href: showFeedAction.url(props.entry.feed.slug),
     },
     {
         title: props.entry.name,

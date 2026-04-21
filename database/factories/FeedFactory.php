@@ -18,9 +18,12 @@ class FeedFactory extends Factory
      */
     public function definition(): array
     {
+        $title = fake()->sentence();
+
         return [
             'user_id' => User::factory(),
-            'title' => fake()->sentence(),
+            'title' => $title,
+            'slug' => Feed::generateUniqueSlug($title),
             'rss_url' => null,
         ];
     }

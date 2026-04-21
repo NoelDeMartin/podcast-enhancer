@@ -15,7 +15,7 @@ class FeedRssController extends Controller
      */
     public function __invoke(Request $request, string $feed): Response
     {
-        $feed = Feed::withoutGlobalScope(UserScope::class)->findOrFail($feed);
+        $feed = Feed::withoutGlobalScope(UserScope::class)->where('slug', $feed)->firstOrFail();
 
         if ($feed->rss_url && $feed->sync_frequency) {
             if (! $feed->last_synced_at || $feed->last_synced_at->addSeconds($feed->sync_frequency)->isPast()) {

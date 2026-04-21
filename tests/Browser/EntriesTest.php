@@ -20,7 +20,7 @@ it('can manage entries for a feed', function () {
 
     $this->actingAs($user);
 
-    $page = visit('/feeds/'.$feed->id)
+    $page = visit('/feeds/'.$feed->slug)
         ->assertSee('Initial Entry');
 
     // Create Entry
@@ -62,7 +62,7 @@ it('can manage entries for a feed', function () {
 
     expect($deleted)->toBeTrue();
 
-    visit('/feeds/'.$feed->id)->assertDontSee('Pest 4.0 Released');
+    visit('/feeds/'.$feed->slug)->assertDontSee('Pest 4.0 Released');
 
     assertDatabaseMissing('entries', ['name' => 'Pest 4.0 Released']);
 });
@@ -80,7 +80,7 @@ it('can view an entry page', function () {
 
     $this->actingAs($user);
 
-    visit('/feeds/'.$feed->id.'/entries/'.$entry->id)
+    visit('/feeds/'.$feed->slug.'/entries/'.$entry->id)
         ->waitForText('My Awesome Entry')
         ->assertSee('AI Summary')
         ->assertSee('This is a great summary.')
@@ -101,7 +101,7 @@ it('can view entry details in a dialog on the feed page', function () {
 
     $this->actingAs($user);
 
-    visit('/feeds/'.$feed->id)
+    visit('/feeds/'.$feed->slug)
         ->waitForText('Detailed Entry')
         ->click('[data-test="view-details"]')
         ->waitForText('Summary')

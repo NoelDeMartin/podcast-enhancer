@@ -99,7 +99,7 @@ const submitDeleteFeed = () => {
         return;
     }
 
-    deleteFeedForm.delete(destroy.url(deletingFeed.value.id), {
+    deleteFeedForm.delete(destroy.url(deletingFeed.value.slug), {
         onFinish: () => {
             isDeleteDialogOpen.value = false;
             deletingFeed.value = null;
@@ -144,7 +144,7 @@ const startEditFeed = (feed: any) => {
 };
 
 const submitEditFeed = () => {
-    editFeedForm.put(update.url(editingFeed.value.id), {
+    editFeedForm.put(update.url(editingFeed.value.slug), {
         onSuccess: () => {
             editingFeed.value = null;
             isEditDialogOpen.value = false;
@@ -817,7 +817,7 @@ const formatLastSynced = (date: string) => {
                             </TableCell>
                             <TableCell class="font-medium">
                                 <Link
-                                    :href="show.url(feed.id)"
+                                    :href="show.url(feed.slug)"
                                     class="hover:underline"
                                 >
                                     {{ feed.title }}
