@@ -1,11 +1,19 @@
 <script setup lang="ts">
 import { Head } from '@inertiajs/vue3';
-import DOMPurify from 'dompurify';
-import linkifyHtml from 'linkify-html';
 import { Clock, ExternalLink } from 'lucide-vue-next';
+import { computed } from 'vue';
 import { show as showFeedAction } from '@/actions/App/Http/Controllers/FeedController';
+import EntryEnhancementActions from '@/components/EntryEnhancementActions.vue';
+import EntryEnhancementStatus from '@/components/EntryEnhancementStatus.vue';
 import { Badge } from '@/components/ui/badge';
+import { useEntryPolling } from '@/composables/useEntryPolling';
 import AppLayout from '@/layouts/AppLayout.vue';
+import {
+    formatSummary,
+    formatTimestamp,
+    getBatchStatus,
+    parsedTranscription,
+} from '@/lib/entries';
 import { dashboard } from '@/routes';
 import type { BreadcrumbItem } from '@/types';
 
@@ -28,61 +36,9 @@ const breadcrumbs: BreadcrumbItem[] = [
     },
 ];
 
-function formatTimestamp(seconds: number): string {
-    const h = Math.floor(seconds / 3600);
-    const m = Math.floor((seconds % 3600) / 60);
-    const s = Math.floor(seconds % 60);
+const isProcessing = computed(() => getBatchStatus(props.entry) === 'pending');
 
-    return h > 0
-        ? `${h}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`
-        : `${m}:${String(s).padStart(2, '0')}`;
-}
-
-function formatSummary(summary: string | null | undefined): string {
-    if (!summary) {
-        return '';
-    }
-
-    const linkedSummary = linkifyHtml(summary, {
-        defaultProtocol: 'https',
-        target: '_blank',
-        rel: 'noopener noreferrer',
-    });
-
-    return DOMPurify.sanitize(linkedSummary, { ADD_ATTR: ['target'] });
-}
-
-function parsedTranscription(entry: any): any[] | null {
-    if (!entry?.transcription) {
-        return null;
-    }
-
-    try {
-        return JSON.parse(entry.transcription);
-    } catch {
-        return null;
-    }
-}
-
-type BatchStatus = 'pending' | 'failed' | 'completed' | null;
-
-function getBatchStatus(entry: any): BatchStatus {
-    const batch = entry.latest_job_batch?.job_batch;
-
-    if (!batch) {
-        return null;
-    }
-
-    if (batch.cancelled_at !== null) {
-        return 'failed';
-    }
-
-    if (batch.finished_at !== null) {
-        return 'completed';
-    }
-
-    return 'pending';
-}
+useEntryPolling(isProcessing);
 </script>
 
 <template>
@@ -93,34 +49,44 @@ function getBatchStatus(entry: any): BatchStatus {
             class="mx-auto flex h-full w-full max-w-5xl flex-1 flex-col gap-6 p-4"
         >
             <div class="flex flex-col gap-2">
-                <div class="flex items-center gap-4">
-                    <img
-                        v-if="
-                            entry.absolute_image_url ||
-                            entry.feed.absolute_image_url
-                        "
-                        :src="
-                            entry.absolute_image_url ||
-                            entry.feed.absolute_image_url
-                        "
-                        alt="Entry image"
-                        class="h-16 w-16 rounded object-cover shadow-sm"
-                    />
-                    <div>
-                        <h2 class="text-2xl font-bold tracking-tight">
-                            {{ entry.name }}
-                        </h2>
-                        <div
-                            v-if="entry.published_at"
-                            class="mt-1 text-sm text-muted-foreground"
-                        >
-                            Published:
-                            {{
-                                new Date(
-                                    entry.published_at,
-                                ).toLocaleDateString()
-                            }}
+                <div class="flex items-start justify-between gap-4">
+                    <div class="flex items-center gap-4">
+                        <img
+                            v-if="
+                                entry.absolute_image_url ||
+                                entry.feed.absolute_image_url
+                            "
+                            :src="
+                                entry.absolute_image_url ||
+                                entry.feed.absolute_image_url
+                            "
+                            alt="Entry image"
+                            class="h-16 w-16 rounded object-cover shadow-sm"
+                        />
+                        <div>
+                            <h2 class="text-2xl font-bold tracking-tight">
+                                {{ entry.name }}
+                            </h2>
+                            <div
+                                v-if="entry.published_at"
+                                class="mt-1 text-sm text-muted-foreground"
+                            >
+                                Published:
+                                {{
+                                    new Date(
+                                        entry.published_at,
+                                    ).toLocaleDateString()
+                                }}
+                            </div>
                         </div>
+                    </div>
+
+                    <div class="flex flex-col items-end gap-2">
+                        <EntryEnhancementStatus :entry="entry" />
+                        <EntryEnhancementActions
+                            :feed="entry.feed"
+                            :entry="entry"
+                        />
                     </div>
                 </div>
             </div>
@@ -147,26 +113,6 @@ function getBatchStatus(entry: any): BatchStatus {
             </div>
 
             <div class="grid gap-6">
-                <!-- Failure details if the job failed -->
-                <div
-                    v-if="getBatchStatus(entry) === 'failed'"
-                    class="rounded-xl border bg-red-50 p-4 dark:bg-red-950/20"
-                >
-                    <h3
-                        class="mb-2 font-semibold text-red-800 dark:text-red-300"
-                    >
-                        Processing Failed
-                    </h3>
-                    <pre
-                        class="text-xs leading-relaxed whitespace-pre-wrap text-red-800 dark:text-red-300"
-                        >{{
-                            entry.latest_job_batch?.job_batch
-                                ?.failed_job_details?.[0]?.exception ??
-                            'No exception details available.'
-                        }}</pre
-                    >
-                </div>
-
                 <div
                     v-if="entry.summary"
                     class="rounded-xl border bg-white p-6 dark:bg-zinc-950"

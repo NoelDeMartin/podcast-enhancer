@@ -1,8 +1,6 @@
 <script setup lang="ts">
 import { Head, Link, usePoll } from '@inertiajs/vue3';
 import { useForm } from '@inertiajs/vue3';
-import DOMPurify from 'dompurify';
-import linkifyHtml from 'linkify-html';
 import {
     Clock,
     Loader2,
@@ -16,7 +14,6 @@ import {
     store as storeEntry,
     destroy as destroyEntry,
     update as updateEntryAction,
-    produce as produceEntry,
     show as showEntryAction,
 } from '@/actions/App/Http/Controllers/EntryController';
 import FeedRssController from '@/actions/App/Http/Controllers/FeedRssController';
@@ -25,6 +22,8 @@ import {
     fetch as fetchRssAction,
     store as storeRssAction,
 } from '@/actions/App/Http/Controllers/RssImportController';
+import EntryEnhancementActions from '@/components/EntryEnhancementActions.vue';
+import EntryEnhancementStatus from '@/components/EntryEnhancementStatus.vue';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -62,6 +61,12 @@ import {
     TableRow,
 } from '@/components/ui/table';
 import AppLayout from '@/layouts/AppLayout.vue';
+import {
+    formatSummary,
+    formatTimestamp,
+    getBatchStatus,
+    parsedTranscription,
+} from '@/lib/entries';
 import { dashboard } from '@/routes';
 import type { BreadcrumbItem } from '@/types';
 
@@ -121,16 +126,6 @@ const deleteEntry = (id: number) => {
     if (confirm('Are you sure you want to delete this entry?')) {
         useForm({}).submit(destroyEntry([props.feed.slug, id]));
     }
-};
-
-const regenerateTranscription = (id: number) => {
-    useForm({}).submit(produceEntry([props.feed.slug, id]));
-};
-
-const regenerateMetadata = (id: number) => {
-    useForm({ reuse_transcript: true }).submit(
-        produceEntry([props.feed.slug, id]),
-    );
 };
 
 const showRssModal = ref(false);
@@ -201,17 +196,6 @@ const toggleEpisode = (index: number) => {
 };
 
 const viewingEntry = ref<any>(null);
-const viewingFailure = ref<any>(null);
-
-function formatTimestamp(seconds: number): string {
-    const h = Math.floor(seconds / 3600);
-    const m = Math.floor((seconds % 3600) / 60);
-    const s = Math.floor(seconds % 60);
-
-    return h > 0
-        ? `${h}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`
-        : `${m}:${String(s).padStart(2, '0')}`;
-}
 
 function formatPublishedAt(entry: any): string {
     const value = entry?.published_at;
@@ -233,53 +217,7 @@ function formatPublishedAt(entry: any): string {
     }).format(date);
 }
 
-function parsedTranscription(entry: any): any[] | null {
-    if (!entry?.transcription) {
-        return null;
-    }
-
-    try {
-        return JSON.parse(entry.transcription);
-    } catch {
-        return null;
-    }
-}
-
-function formatSummary(summary: string | null | undefined): string {
-    if (!summary) {
-        return '';
-    }
-
-    const linkedSummary = linkifyHtml(summary, {
-        defaultProtocol: 'https',
-        target: '_blank',
-        rel: 'noopener noreferrer',
-    });
-
-    return DOMPurify.sanitize(linkedSummary, { ADD_ATTR: ['target'] });
-}
-
-type BatchStatus = 'pending' | 'failed' | 'completed' | null;
-
-function getBatchStatus(entry: any): BatchStatus {
-    const batch = entry.latest_job_batch?.job_batch;
-
-    if (!batch) {
-        return null;
-    }
-
-    if (batch.cancelled_at !== null) {
-        return 'failed';
-    }
-
-    if (batch.finished_at !== null) {
-        return 'completed';
-    }
-
-    return 'pending';
-}
-
-function getFeedSyncStatus(): BatchStatus {
+function getFeedSyncStatus(): 'pending' | 'failed' | 'completed' | null {
     const batch = props.feed.latest_job_batch?.job_batch;
 
     if (!batch) {
@@ -1013,32 +951,6 @@ const submitEditEntry = () => {
             </Dialog>
 
             <Dialog
-                :open="!!viewingFailure"
-                @update:open="viewingFailure = null"
-            >
-                <DialogContent class="max-w-2xl">
-                    <DialogHeader>
-                        <DialogTitle>Transcription Failed</DialogTitle>
-                        <DialogDescription>
-                            {{ viewingFailure?.name }}
-                        </DialogDescription>
-                    </DialogHeader>
-                    <div
-                        class="max-h-[60vh] overflow-y-auto rounded-md border bg-red-50 p-4 dark:bg-red-950/20"
-                    >
-                        <pre
-                            class="text-xs leading-relaxed whitespace-pre-wrap text-red-800 dark:text-red-300"
-                            >{{
-                                viewingFailure?.latest_job_batch?.job_batch
-                                    ?.failed_job_details?.[0]?.exception ??
-                                'No exception details available.'
-                            }}</pre
-                        >
-                    </div>
-                </DialogContent>
-            </Dialog>
-
-            <Dialog
                 :open="viewingSyncFailure"
                 @update:open="viewingSyncFailure = false"
             >
@@ -1241,36 +1153,7 @@ const submitEditEntry = () => {
                                     {{ formatPublishedAt(entry) }}
                                 </TableCell>
                                 <TableCell class="align-top">
-                                    <div
-                                        v-if="
-                                            getBatchStatus(entry) === 'pending'
-                                        "
-                                        class="flex items-center gap-1 text-sm text-muted-foreground"
-                                    >
-                                        <Loader2 class="h-3 w-3 animate-spin" />
-                                        Pending
-                                    </div>
-                                    <button
-                                        v-else-if="
-                                            getBatchStatus(entry) === 'failed'
-                                        "
-                                        class="text-sm text-red-500 hover:underline"
-                                        @click="viewingFailure = entry"
-                                    >
-                                        Failed
-                                    </button>
-                                    <span
-                                        v-else-if="entry.transcription_path"
-                                        class="text-sm text-green-600 dark:text-green-400"
-                                    >
-                                        Available
-                                    </span>
-                                    <span
-                                        v-else
-                                        class="text-sm text-muted-foreground"
-                                    >
-                                        Missing
-                                    </span>
+                                    <EntryEnhancementStatus :entry="entry" />
                                 </TableCell>
                                 <TableCell class="align-top">
                                     <button
@@ -1307,37 +1190,13 @@ const submitEditEntry = () => {
                                                     Edit
                                                 </DropdownMenuItem>
                                             </template>
-                                            <DropdownMenuItem
-                                                v-if="
-                                                    entry.audio_url &&
-                                                    getBatchStatus(entry) !==
-                                                        'pending'
-                                                "
-                                                @click="
-                                                    regenerateTranscription(
-                                                        entry.id,
-                                                    )
-                                                "
-                                            >
-                                                {{
-                                                    entry.transcription_path
-                                                        ? 'Regenerate enhancements'
-                                                        : 'Generate enhancements'
-                                                }}
-                                            </DropdownMenuItem>
-                                            <DropdownMenuItem
-                                                v-if="
-                                                    entry.transcription_path &&
-                                                    getBatchStatus(entry) !==
-                                                        'pending'
-                                                "
-                                                @click="
-                                                    regenerateMetadata(entry.id)
-                                                "
-                                            >
-                                                Regenerate (only chapters &
-                                                summary)
-                                            </DropdownMenuItem>
+
+                                            <EntryEnhancementActions
+                                                :feed="feed"
+                                                :entry="entry"
+                                                type="dropdown-items"
+                                            />
+
                                             <template v-if="!feed.rss_url">
                                                 <DropdownMenuItem
                                                     class="text-red-600"
