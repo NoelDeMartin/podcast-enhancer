@@ -82,6 +82,7 @@ it('can synchronize existing feed without duplicates via background job', functi
     // Create an existing entry
     $feed->entries()->create([
         'name' => 'Episode 1',
+        'slug' => Entry::generateUniqueSlug('Episode 1'),
         'audio_url' => 'https://example.com/audio1.mp3',
         'published_at' => now(),
     ]);
@@ -145,6 +146,7 @@ it('blocks manual entry updates for synchronized feeds', function () {
 
     $entry = $feed->entries()->create([
         'name' => 'Episode 1',
+        'slug' => Entry::generateUniqueSlug('Episode 1'),
         'audio_url' => 'https://example.com/audio1.mp3',
         'published_at' => now(),
     ]);
@@ -164,6 +166,7 @@ it('blocks manual entry deletion for synchronized feeds', function () {
 
     $entry = $feed->entries()->create([
         'name' => 'Episode 1',
+        'slug' => Entry::generateUniqueSlug('Episode 1'),
         'audio_url' => 'https://example.com/audio1.mp3',
         'published_at' => now(),
     ]);

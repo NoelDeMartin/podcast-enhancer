@@ -26,7 +26,7 @@ class EntryController extends Controller
             ->firstOrFail();
 
         $entry = Entry::withoutGlobalScope(UserScope::class)
-            ->where('id', $entry)
+            ->where('slug', $entry)
             ->where('feed_id', $feed->id)
             ->firstOrFail();
 
@@ -82,6 +82,8 @@ class EntryController extends Controller
             $validated['image_url'] = $request->file('image_file')->store('images', 'public');
         }
 
+        $validated['slug'] = Entry::generateUniqueSlug($validated['name']);
+
         $entry = $feed->entries()->create($validated);
 
         if ($entry->audio_url) {
@@ -93,7 +95,7 @@ class EntryController extends Controller
 
     public function update(UpdateEntryRequest $request, Feed $feed, string $entry): RedirectResponse
     {
-        $entry = Entry::where('id', $entry)->where('feed_id', $feed->id)->firstOrFail();
+        $entry = Entry::where('slug', $entry)->where('feed_id', $feed->id)->firstOrFail();
 
         Gate::authorize('update', $entry);
 
@@ -171,7 +173,7 @@ class EntryController extends Controller
 
     public function destroy(Feed $feed, string $entry): RedirectResponse
     {
-        $entry = Entry::where('id', $entry)->where('feed_id', $feed->id)->firstOrFail();
+        $entry = Entry::where('slug', $entry)->where('feed_id', $feed->id)->firstOrFail();
 
         Gate::authorize('delete', $entry);
 
@@ -198,7 +200,7 @@ class EntryController extends Controller
 
     public function produce(Feed $feed, string $entry): RedirectResponse
     {
-        $entry = Entry::where('id', $entry)->where('feed_id', $feed->id)->firstOrFail();
+        $entry = Entry::where('slug', $entry)->where('feed_id', $feed->id)->firstOrFail();
 
         Gate::authorize('produce', $entry);
 

@@ -3,6 +3,7 @@
 namespace App\Jobs;
 
 use App\Concerns\FetchesRssFeeds;
+use App\Models\Entry;
 use App\Models\Feed;
 use Illuminate\Bus\Batchable;
 use Illuminate\Bus\Queueable;
@@ -41,6 +42,7 @@ class SyncFeedJob implements ShouldQueue
             if ($audioUrl && ! in_array($audioUrl, $existingAudioUrls) && ! in_array($name, $existingNames)) {
                 $this->feed->entries()->create([
                     'name' => $name,
+                    'slug' => Entry::generateUniqueSlug($name),
                     'audio_url' => $audioUrl,
                     'image_url' => $episodeData['image_url'] ?? null,
                     'original_summary' => $episodeData['summary'] ?? null,

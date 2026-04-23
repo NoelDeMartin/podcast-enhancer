@@ -23,12 +23,12 @@ const props = withDefaults(
 );
 
 const regenerateTranscription = () => {
-    useForm({}).submit(produceEntry([props.feed.slug, props.entry.id]));
+    useForm({}).submit(produceEntry([props.feed.slug, props.entry.slug]));
 };
 
 const regenerateMetadata = () => {
     useForm({ reuse_transcript: true }).submit(
-        produceEntry([props.feed.slug, props.entry.id]),
+        produceEntry([props.feed.slug, props.entry.slug]),
     );
 };
 

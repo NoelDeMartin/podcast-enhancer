@@ -19,6 +19,7 @@ class Entry extends Model
     protected $fillable = [
         'feed_id',
         'name',
+        'slug',
         'audio_url',
         'image_url',
         'transcription_path',
@@ -27,6 +28,25 @@ class Entry extends Model
         'chapters',
         'published_at',
     ];
+
+    public static function generateUniqueSlug(string $name): string
+    {
+        $base = str($name)->slug();
+
+        do {
+            $slug = $base->toString().'-'.bin2hex(random_bytes(3));
+        } while (static::where('slug', $slug)->exists());
+
+        return $slug;
+    }
+
+    /**
+     * Get the route key for the model.
+     */
+    public function getRouteKeyName(): string
+    {
+        return 'slug';
+    }
 
     protected $appends = [
         'absolute_audio_url',
@@ -92,7 +112,7 @@ class Entry extends Model
                 $aiSummary = $this->summary ?? '';
                 $originalSummary = $this->original_summary ?? '';
 
-                $showNotesUrl = route('entries.show', [$this->feed, $this->id]);
+                $showNotesUrl = route('entries.show', [$this->feed, $this]);
                 $appUrl = url('/');
 
                 $isEnhanced = $this->summary || $this->transcription_path || $this->chapters;

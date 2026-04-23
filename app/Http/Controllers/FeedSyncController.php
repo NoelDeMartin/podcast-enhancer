@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Concerns\DispatchesBatches;
 use App\Concerns\FetchesRssFeeds;
+use App\Models\Entry;
 use App\Models\Feed;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Gate;
@@ -47,6 +48,7 @@ class FeedSyncController extends Controller
                 if ($episodeData['audio_url']) {
                     $feed->entries()->create([
                         'name' => $episodeData['name'],
+                        'slug' => Entry::generateUniqueSlug($episodeData['name']),
                         'audio_url' => $episodeData['audio_url'],
                         'image_url' => $episodeData['image_url'] ?? null,
                         'original_summary' => $episodeData['summary'] ?? null,

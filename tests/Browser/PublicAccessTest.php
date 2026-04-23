@@ -28,7 +28,7 @@ it('allows guests to view an entry page', function () {
         'summary' => 'Public Summary',
     ]);
 
-    visit('/feeds/'.$feed->slug.'/entries/'.$entry->id)
+    visit('/feeds/'.$feed->slug.'/entries/'.$entry->slug)
         ->waitForText('Public Entry')
         ->assertSee('Public Summary')
         ->assertNoJavaScriptErrors();

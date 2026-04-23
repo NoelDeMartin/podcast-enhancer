@@ -80,7 +80,7 @@ it('can view an entry page', function () {
 
     $this->actingAs($user);
 
-    visit('/feeds/'.$feed->slug.'/entries/'.$entry->id)
+    visit('/feeds/'.$feed->slug.'/entries/'.$entry->slug)
         ->waitForText('My Awesome Entry')
         ->assertSee('AI Summary')
         ->assertSee('This is a great summary.')

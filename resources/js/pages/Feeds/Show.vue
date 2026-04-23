@@ -127,11 +127,11 @@ const submitEntry = () => {
     });
 };
 
-const deleteEntry = (id: number) => {
-    const entry = props.feed.entries.find((e: any) => e.id === id);
+const deleteEntry = (slug: string) => {
+    const entry = props.feed.entries.find((e: any) => e.slug === slug);
 
     if (confirm('Are you sure you want to delete this entry?')) {
-        useForm({}).submit(destroyEntry([props.feed, entry]));
+        useForm({}).submit(destroyEntry([props.feed, entry.slug]));
     }
 };
 
@@ -311,12 +311,15 @@ const startEditEntry = (entry: any) => {
 };
 
 const submitEditEntry = () => {
-    editEntryForm.submit(updateEntryAction([props.feed, editingEntry.value]), {
-        onSuccess: () => {
-            editingEntry.value = null;
-            isEditDialogOpen.value = false;
+    editEntryForm.submit(
+        updateEntryAction([props.feed, editingEntry.value.slug]),
+        {
+            onSuccess: () => {
+                editingEntry.value = null;
+                isEditDialogOpen.value = false;
+            },
         },
-    });
+    );
 };
 </script>
 
@@ -1149,8 +1152,8 @@ const submitEditEntry = () => {
                                     <Link
                                         :href="
                                             showEntryAction.url([
-                                                props.feed.slug,
-                                                entry.id,
+                                                props.feed,
+                                                entry.slug,
                                             ])
                                         "
                                         class="hover:underline"
@@ -1224,7 +1227,7 @@ const submitEditEntry = () => {
                                                 <DropdownMenuItem
                                                     class="text-red-600"
                                                     @click="
-                                                        deleteEntry(entry.id)
+                                                        deleteEntry(entry.slug)
                                                     "
                                                 >
                                                     Delete

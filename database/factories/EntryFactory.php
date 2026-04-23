@@ -18,9 +18,12 @@ class EntryFactory extends Factory
      */
     public function definition(): array
     {
+        $name = fake()->sentence();
+
         return [
             'feed_id' => Feed::factory(),
-            'name' => fake()->sentence(),
+            'name' => $name,
+            'slug' => Entry::generateUniqueSlug($name),
             'published_at' => now(),
         ];
     }
