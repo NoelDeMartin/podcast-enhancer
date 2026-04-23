@@ -12,7 +12,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Fortify\TwoFactorAuthenticatable;
 
-#[Fillable(['name', 'email', 'password'])]
+#[Fillable(['name', 'email', 'password', 'credits'])]
 #[Hidden(['password', 'two_factor_secret', 'two_factor_recovery_codes', 'remember_token'])]
 class User extends Authenticatable
 {
@@ -36,5 +36,10 @@ class User extends Authenticatable
     public function feeds(): HasMany
     {
         return $this->hasMany(Feed::class);
+    }
+
+    public function creditUsages(): HasMany
+    {
+        return $this->hasMany(CreditUsage::class);
     }
 }

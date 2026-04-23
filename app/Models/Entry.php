@@ -158,4 +158,9 @@ class Entry extends Model
     {
         return $this->hasOne(EntryJobBatch::class)->latestOfMany();
     }
+
+    public function creditUsages(): HasMany
+    {
+        return $this->hasMany(CreditUsage::class);
+    }
 }

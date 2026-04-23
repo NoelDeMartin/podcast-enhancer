@@ -16,7 +16,7 @@ it('dispatches the correct initial batch', function () {
     Bus::fake();
 
     /** @var TestCase $this */
-    $user = User::factory()->create();
+    $user = User::factory()->create(['credits' => 1000]);
     $feed = Feed::factory()->for($user)->create();
     $entry = Entry::factory()->create([
         'feed_id' => $feed->id,
@@ -44,7 +44,8 @@ it('prepare transcription job downloads file and adds next job', function () {
         'https://example.com/audio.mp3' => Http::response('fake-audio-content', 200),
     ]);
 
-    $entry = Entry::factory()->create([
+    $user = User::factory()->create(['credits' => 100]);
+    $entry = Entry::factory()->for(Feed::factory()->for($user))->create([
         'audio_url' => 'https://example.com/audio.mp3',
     ]);
 
@@ -63,7 +64,7 @@ it('prepare transcription job downloads file and adds next job', function () {
         ->once()
         ->andReturn(60); // 1 minute, so a single chunk
 
-    $job = new PrepareTranscriptionJob($entry);
+    $job = new PrepareTranscriptionJob($entry, $user->id);
     $job->withBatchId($batch->id);
     $job->handle();
 

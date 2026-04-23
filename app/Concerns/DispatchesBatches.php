@@ -26,7 +26,7 @@ trait DispatchesBatches
         }
 
         $batch = Bus::batch([
-            new PrepareTranscriptionJob($entry),
+            new PrepareTranscriptionJob($entry, $entry->feed->user_id),
         ])
             ->then(function (Batch $batch) use ($entryId) {
                 /** @var Entry|null $entry */

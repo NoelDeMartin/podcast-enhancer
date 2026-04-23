@@ -3,11 +3,13 @@
 namespace App\Jobs;
 
 use App\Models\Entry;
+use App\Models\User;
 use Illuminate\Bus\Batchable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Queue\Attributes\Timeout;
 use Illuminate\Queue\Attributes\Tries;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
@@ -19,7 +21,7 @@ class PrepareTranscriptionJob implements ShouldQueue
 {
     use Batchable, Queueable;
 
-    public function __construct(public Entry $entry) {}
+    public function __construct(public Entry $entry, public int $userId) {}
 
     public function handle(): void
     {
@@ -75,6 +77,25 @@ class PrepareTranscriptionJob implements ShouldQueue
         $chunkDuration = 1800; // 30 minutes
         $overlap = 30;
 
+        $creditsRequired = (int) ceil($durationInSeconds / 60);
+        $user = User::findOrFail($this->userId);
+
+        if ($user->credits < $creditsRequired) {
+            Log::info(static::class.' failed (insufficient credits)', [
+                'entry_id' => $this->entry->id,
+                'user_id' => $user->id,
+                'credits_required' => $creditsRequired,
+                'user_credits' => $user->credits,
+                'batch_id' => $this->batchId,
+            ]);
+
+            Storage::disk('local')->delete($tmpPath);
+
+            $this->fail(new \Exception("Insufficient credits to process entry. Required: {$creditsRequired}, Available: {$user->credits}"));
+
+            return;
+        }
+
         $chunksCount = (int) ceil($durationInSeconds / $chunkDuration);
 
         Log::info(static::class.' calculated chunks for transcription', [
@@ -84,10 +105,19 @@ class PrepareTranscriptionJob implements ShouldQueue
             'chunk_duration_seconds' => $chunkDuration,
             'overlap_seconds' => $overlap,
             'chunks_count' => $chunksCount,
+            'credits_required' => $creditsRequired,
             'batch_id' => $this->batchId,
         ]);
 
         if ($chunksCount > 0 && $batch = $this->batch()) {
+            DB::transaction(function () use ($user, $creditsRequired) {
+                $user->decrement('credits', $creditsRequired);
+                $this->entry->creditUsages()->create([
+                    'user_id' => $user->id,
+                    'credits' => $creditsRequired,
+                ]);
+            });
+
             $batch->add(new SplitAudioJob(
                 $this->entry,
                 $tmpPath,
