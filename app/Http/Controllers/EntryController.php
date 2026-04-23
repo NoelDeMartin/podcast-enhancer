@@ -38,12 +38,17 @@ class EntryController extends Controller
 
         $entry->transcription = $entry->transcription_path ? Storage::get($entry->transcription_path) : null;
 
+        $entry->can = [
+            'produce' => request()->user()?->can('produce', $entry) ?? false,
+            'regenerate' => request()->user()?->can('regenerate', $entry) ?? false,
+        ];
+
         return Inertia::render('Entries/Show', [
             'entry' => $entry,
             'can' => [
                 'update' => request()->user()?->can('update', $entry) ?? false,
                 'delete' => request()->user()?->can('delete', $entry) ?? false,
-                'produce' => request()->user()?->can('produce', $entry) ?? false,
+                'uploadFiles' => request()->user()?->can('uploadFiles', Entry::class) ?? false,
             ],
         ]);
     }
@@ -75,10 +80,12 @@ class EntryController extends Controller
         $validated = $request->validated();
 
         if ($request->hasFile('file')) {
+            Gate::authorize('uploadFiles', Entry::class);
             $validated['audio_url'] = $request->file('file')->store('audios', 'public');
         }
 
         if ($request->hasFile('image_file')) {
+            Gate::authorize('uploadFiles', Entry::class);
             $validated['image_url'] = $request->file('image_file')->store('images', 'public');
         }
 
@@ -108,6 +115,7 @@ class EntryController extends Controller
         $fileChanged = false;
 
         if ($request->hasFile('file')) {
+            Gate::authorize('uploadFiles', $entry);
             if ($entry->audio_url && ! $entry->audio_is_external) {
                 Storage::disk('public')->delete($entry->audio_url);
             }
@@ -144,6 +152,7 @@ class EntryController extends Controller
         }
 
         if ($request->hasFile('image_file')) {
+            Gate::authorize('uploadFiles', $entry);
             if ($entry->image_url && ! $entry->image_is_external) {
                 Storage::disk('public')->delete($entry->image_url);
             }
@@ -202,7 +211,11 @@ class EntryController extends Controller
     {
         $entry = Entry::where('slug', $entry)->where('feed_id', $feed->id)->firstOrFail();
 
-        Gate::authorize('produce', $entry);
+        if ($entry->transcription_path) {
+            Gate::authorize('regenerate', $entry);
+        } else {
+            Gate::authorize('produce', $entry);
+        }
 
         $reuseTranscript = request()->boolean('reuse_transcript');
 

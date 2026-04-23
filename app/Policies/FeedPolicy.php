@@ -54,4 +54,12 @@ class FeedPolicy
     {
         return $user->id === $feed->user_id;
     }
+
+    /**
+     * Determine whether the user can upload files.
+     */
+    public function uploadFiles(User $user): bool
+    {
+        return $user->isPro();
+    }
 }

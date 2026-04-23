@@ -21,6 +21,7 @@ class FeedController extends Controller
 
         $validated = $request->validated();
         if ($request->hasFile('image_file')) {
+            Gate::authorize('uploadFiles', Feed::class);
             $validated['image_url'] = $request->file('image_file')->store('images', 'public');
         }
 
@@ -45,6 +46,10 @@ class FeedController extends Controller
 
         $feed->entries->each(function ($entry) {
             $entry->transcription = $entry->transcription_path ? Storage::get($entry->transcription_path) : null;
+            $entry->can = [
+                'produce' => request()->user()?->can('produce', $entry) ?? false,
+                'regenerate' => request()->user()?->can('regenerate', $entry) ?? false,
+            ];
         });
 
         return Inertia::render('Feeds/Show', [
@@ -53,6 +58,7 @@ class FeedController extends Controller
                 'update' => request()->user()?->can('update', $feed) ?? false,
                 'delete' => request()->user()?->can('delete', $feed) ?? false,
                 'sync' => request()->user()?->can('sync', $feed) ?? false,
+                'uploadFiles' => request()->user()?->can('uploadFiles', Feed::class) ?? false,
             ],
         ]);
     }
@@ -98,6 +104,7 @@ class FeedController extends Controller
         }
 
         if (isset($validated['image_file'])) {
+            Gate::authorize('uploadFiles', $feed);
             if ($feed->image_url && ! $feed->image_is_external) {
                 Storage::disk('public')->delete($feed->image_url);
             }

@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\Storage;
 
 beforeEach(function () {
     $this->withoutMiddleware(PreventRequestForgery::class);
-    $this->user = User::factory()->create();
+    $this->user = User::factory()->pro()->create();
     $this->actingAs($this->user);
 });
 

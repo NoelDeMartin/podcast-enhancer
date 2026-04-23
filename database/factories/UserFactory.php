@@ -57,4 +57,24 @@ class UserFactory extends Factory
             'two_factor_confirmed_at' => now(),
         ]);
     }
+
+    /**
+     * Indicate that the user is on the pro plan.
+     */
+    public function pro(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'plan' => 'pro',
+        ]);
+    }
+
+    /**
+     * Indicate that the user is on the basic plan.
+     */
+    public function basic(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'plan' => 'basic',
+        ]);
+    }
 }

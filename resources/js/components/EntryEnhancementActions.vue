@@ -39,7 +39,13 @@ const hasTranscription = () => !!props.entry.transcription_path;
 <template>
     <template v-if="type === 'dropdown-items'">
         <DropdownMenuItem
-            v-if="entry.audio_url && !isPending()"
+            v-if="
+                entry.audio_url &&
+                !isPending() &&
+                (!hasTranscription()
+                    ? entry.can?.produce
+                    : entry.can?.regenerate)
+            "
             @click="regenerateTranscription"
         >
             {{
@@ -50,7 +56,7 @@ const hasTranscription = () => !!props.entry.transcription_path;
         </DropdownMenuItem>
 
         <DropdownMenuItem
-            v-if="hasTranscription() && !isPending()"
+            v-if="hasTranscription() && !isPending() && entry.can?.regenerate"
             @click="regenerateMetadata"
         >
             Regenerate (only chapters & summary)
@@ -58,7 +64,11 @@ const hasTranscription = () => !!props.entry.transcription_path;
     </template>
 
     <template v-else-if="!isPending() && entry.audio_url">
-        <DropdownMenu>
+        <DropdownMenu
+            v-if="
+                !hasTranscription() ? entry.can?.produce : entry.can?.regenerate
+            "
+        >
             <DropdownMenuTrigger as-child>
                 <Button variant="outline">
                     <Sparkles class="mr-2 h-4 w-4" />
@@ -66,7 +76,14 @@ const hasTranscription = () => !!props.entry.transcription_path;
                 </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-                <DropdownMenuItem @click="regenerateTranscription">
+                <DropdownMenuItem
+                    v-if="
+                        !hasTranscription()
+                            ? entry.can?.produce
+                            : entry.can?.regenerate
+                    "
+                    @click="regenerateTranscription"
+                >
                     {{
                         hasTranscription()
                             ? 'Regenerate everything'
@@ -74,7 +91,7 @@ const hasTranscription = () => !!props.entry.transcription_path;
                     }}
                 </DropdownMenuItem>
                 <DropdownMenuItem
-                    v-if="hasTranscription()"
+                    v-if="hasTranscription() && entry.can?.regenerate"
                     @click="regenerateMetadata"
                 >
                     Regenerate (only chapters & summary)

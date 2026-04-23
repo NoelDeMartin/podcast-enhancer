@@ -22,7 +22,7 @@ const props = defineProps<{
     can: {
         update: boolean;
         delete: boolean;
-        produce: boolean;
+        uploadFiles: boolean;
     };
 }>();
 
@@ -89,7 +89,7 @@ useEntryPolling(isProcessing);
                     <div class="flex flex-col items-end gap-2">
                         <EntryEnhancementStatus :entry="entry" />
                         <EntryEnhancementActions
-                            v-if="can.produce"
+                            v-if="entry.can?.produce || entry.can?.regenerate"
                             :feed="entry.feed"
                             :entry="entry"
                         />

@@ -51,6 +51,9 @@ import type { BreadcrumbItem } from '@/types';
 
 defineProps<{
     feeds: any[];
+    can?: {
+        uploadFiles: boolean;
+    };
 }>();
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -410,7 +413,9 @@ const formatLastSynced = (date: string) => {
                                                 <SelectItem value="url"
                                                     >Remote URL</SelectItem
                                                 >
-                                                <SelectItem value="file"
+                                                <SelectItem
+                                                    v-if="can?.uploadFiles"
+                                                    value="file"
                                                     >Upload File</SelectItem
                                                 >
                                             </SelectContent>
@@ -600,7 +605,9 @@ const formatLastSynced = (date: string) => {
                                             <SelectItem value="url"
                                                 >Remote URL</SelectItem
                                             >
-                                            <SelectItem value="file"
+                                            <SelectItem
+                                                v-if="can?.uploadFiles"
+                                                value="file"
                                                 >Upload File</SelectItem
                                             >
                                         </SelectContent>

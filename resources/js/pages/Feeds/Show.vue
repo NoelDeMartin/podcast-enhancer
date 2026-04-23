@@ -76,6 +76,7 @@ const props = defineProps<{
         update: boolean;
         delete: boolean;
         sync: boolean;
+        uploadFiles: boolean;
     };
 }>();
 
@@ -450,7 +451,9 @@ const submitEditEntry = () => {
                                                     <SelectItem value="url"
                                                         >Remote URL</SelectItem
                                                     >
-                                                    <SelectItem value="file"
+                                                    <SelectItem
+                                                        v-if="can.uploadFiles"
+                                                        value="file"
                                                         >Upload File</SelectItem
                                                     >
                                                 </SelectContent>
@@ -512,7 +515,9 @@ const submitEditEntry = () => {
                                                     <SelectItem value="url"
                                                         >Remote URL</SelectItem
                                                     >
-                                                    <SelectItem value="file"
+                                                    <SelectItem
+                                                        v-if="can.uploadFiles"
+                                                        value="file"
                                                         >Upload File</SelectItem
                                                     >
                                                 </SelectContent>
@@ -757,7 +762,9 @@ const submitEditEntry = () => {
                                         <SelectItem value="url"
                                             >Remote URL</SelectItem
                                         >
-                                        <SelectItem value="file"
+                                        <SelectItem
+                                            v-if="can.uploadFiles"
+                                            value="file"
                                             >Upload File</SelectItem
                                         >
                                     </SelectContent>
@@ -859,7 +866,9 @@ const submitEditEntry = () => {
                                         <SelectItem value="url"
                                             >Remote URL</SelectItem
                                         >
-                                        <SelectItem value="file"
+                                        <SelectItem
+                                            v-if="can.uploadFiles"
+                                            value="file"
                                             >Upload File</SelectItem
                                         >
                                     </SelectContent>
@@ -1213,7 +1222,10 @@ const submitEditEntry = () => {
                                             </template>
 
                                             <EntryEnhancementActions
-                                                v-if="can.update"
+                                                v-if="
+                                                    entry.can?.produce ||
+                                                    entry.can?.regenerate
+                                                "
                                                 :feed="feed"
                                                 :entry="entry"
                                                 type="dropdown-items"
