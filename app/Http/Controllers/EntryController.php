@@ -3,10 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Concerns\DispatchesBatches;
+use App\Concerns\LoadsFailedJobs;
+use App\Facades\Media;
 use App\Http\Requests\StoreEntryRequest;
 use App\Http\Requests\UpdateEntryRequest;
 use App\Models\Entry;
-use App\Models\FailedJob;
 use App\Models\Feed;
 use App\Models\Scopes\UserScope;
 use Illuminate\Http\RedirectResponse;
@@ -17,7 +18,7 @@ use Inertia\Response;
 
 class EntryController extends Controller
 {
-    use DispatchesBatches;
+    use DispatchesBatches, LoadsFailedJobs;
 
     public function show(string $feed, string $entry): Response
     {
@@ -34,7 +35,9 @@ class EntryController extends Controller
 
         $entry->load(['feed' => fn ($query) => $query->withoutGlobalScope(UserScope::class), 'latestJobBatch']);
 
-        $this->loadFailedJobDetails($entry);
+        if ($entry->latestJobBatch?->jobBatch) {
+            $this->loadFailedJobDetails($entry->latestJobBatch->jobBatch);
+        }
 
         $entry->transcription = $entry->transcription_path ? Storage::get($entry->transcription_path) : null;
 
@@ -53,22 +56,6 @@ class EntryController extends Controller
         ]);
     }
 
-    private function loadFailedJobDetails(Entry $entry): void
-    {
-        $batch = $entry->latestJobBatch?->jobBatch;
-
-        if (! $batch || empty($batch->failed_job_ids)) {
-            return;
-        }
-
-        $failedJobs = FailedJob::whereIn('uuid', $batch->failed_job_ids)->get()->keyBy('uuid');
-
-        $batch->setRelation(
-            'failedJobDetails',
-            collect($batch->failed_job_ids)->map(fn ($uuid) => $failedJobs->get($uuid))->filter()->values(),
-        );
-    }
-
     public function store(StoreEntryRequest $request, Feed $feed): RedirectResponse
     {
         Gate::authorize('update', $feed);
@@ -81,12 +68,12 @@ class EntryController extends Controller
 
         if ($request->hasFile('file')) {
             Gate::authorize('uploadFiles', Entry::class);
-            $validated['audio_url'] = $request->file('file')->store('audios', 'public');
+            $validated['audio_url'] = Media::update('audios', null, $request->file('file'));
         }
 
         if ($request->hasFile('image_file')) {
             Gate::authorize('uploadFiles', Entry::class);
-            $validated['image_url'] = $request->file('image_file')->store('images', 'public');
+            $validated['image_url'] = Media::update('images', null, $request->file('image_file'));
         }
 
         $validated['slug'] = Entry::generateUniqueSlug($validated['name']);
@@ -111,69 +98,50 @@ class EntryController extends Controller
         }
 
         $validated = $request->validated();
-
         $fileChanged = false;
 
-        if ($request->hasFile('file')) {
-            Gate::authorize('uploadFiles', $entry);
-            if ($entry->audio_url && ! $entry->audio_is_external) {
-                Storage::disk('public')->delete($entry->audio_url);
+        // Handle Audio Update
+        if (array_key_exists('file', $validated) || ! empty($validated['delete_file']) || (array_key_exists('audio_url', $validated) && $validated['audio_url'] !== $entry->audio_url)) {
+            if (isset($validated['file'])) {
+                Gate::authorize('uploadFiles', $entry);
             }
+
+            $validated['audio_url'] = Media::update(
+                'audios',
+                $entry->audio_url,
+                $validated['file'] ?? $validated['audio_url'] ?? null,
+                ! empty($validated['delete_file'])
+            );
+
             if ($entry->transcription_path) {
                 Storage::delete($entry->transcription_path);
                 $validated['transcription_path'] = null;
             }
-            $validated['audio_url'] = $request->file('file')->store('audios', 'public');
+
             $validated['summary'] = null;
             $validated['chapters'] = null;
-            $fileChanged = true;
-        } elseif ($request->boolean('delete_file') && $entry->audio_url) {
-            if (! $entry->audio_is_external) {
-                Storage::disk('public')->delete($entry->audio_url);
-            }
-            if ($entry->transcription_path) {
-                Storage::delete($entry->transcription_path);
-            }
-            $validated['audio_url'] = null;
-            $validated['transcription_path'] = null;
-            $validated['summary'] = null;
-            $validated['chapters'] = null;
-        } elseif ($request->has('audio_url') && $request->audio_url !== $entry->audio_url) {
-            if ($entry->audio_url && ! $entry->audio_is_external) {
-                Storage::disk('public')->delete($entry->audio_url);
-            }
-            if ($entry->transcription_path) {
-                Storage::delete($entry->transcription_path);
-                $validated['transcription_path'] = null;
-            }
-            $validated['summary'] = null;
-            $validated['chapters'] = null;
-            $fileChanged = true;
+            $fileChanged = empty($validated['delete_file']);
         }
 
-        if ($request->hasFile('image_file')) {
-            Gate::authorize('uploadFiles', $entry);
-            if ($entry->image_url && ! $entry->image_is_external) {
-                Storage::disk('public')->delete($entry->image_url);
+        // Handle Image Update
+        if (array_key_exists('image_file', $validated) || ! empty($validated['delete_image_file']) || (array_key_exists('image_url', $validated) && $validated['image_url'] !== $entry->image_url)) {
+            if (isset($validated['image_file'])) {
+                Gate::authorize('uploadFiles', $entry);
             }
-            $validated['image_url'] = $request->file('image_file')->store('images', 'public');
-        } elseif ($request->boolean('delete_image_file') && $entry->image_url) {
-            if (! $entry->image_is_external) {
-                Storage::disk('public')->delete($entry->image_url);
-            }
-            $validated['image_url'] = null;
-        } elseif ($request->has('image_url') && $request->image_url !== $entry->image_url) {
-            if ($entry->image_url && ! $entry->image_is_external) {
-                Storage::disk('public')->delete($entry->image_url);
-            }
+
+            $validated['image_url'] = Media::update(
+                'images',
+                $entry->image_url,
+                $validated['image_file'] ?? $validated['image_url'] ?? null,
+                ! empty($validated['delete_image_file'])
+            );
         }
 
-        unset($validated['delete_file']);
-        unset($validated['delete_image_file']);
+        unset($validated['delete_file'], $validated['delete_image_file']);
 
         $entry->update($validated);
 
-        if ($fileChanged) {
+        if ($fileChanged && $entry->audio_url) {
             $this->dispatchTranscriptionBatch($entry);
         }
 
@@ -190,13 +158,8 @@ class EntryController extends Controller
             abort(403, 'Entries in a synchronized feed cannot be deleted manually.');
         }
 
-        if ($entry->audio_url && ! $entry->audio_is_external) {
-            Storage::disk('public')->delete($entry->audio_url);
-        }
-
-        if ($entry->image_url && ! $entry->image_is_external) {
-            Storage::disk('public')->delete($entry->image_url);
-        }
+        Media::delete($entry->audio_url);
+        Media::delete($entry->image_url);
 
         if ($entry->transcription_path) {
             Storage::delete($entry->transcription_path);

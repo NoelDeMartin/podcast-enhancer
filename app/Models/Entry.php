@@ -2,6 +2,9 @@
 
 namespace App\Models;
 
+use App\Concerns\HasImageUrl;
+use App\Concerns\HasSlug;
+use App\Facades\Media;
 use Database\Factories\EntryFactory;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -14,7 +17,7 @@ use Illuminate\Support\Facades\Storage;
 class Entry extends Model
 {
     /** @use HasFactory<EntryFactory> */
-    use HasFactory;
+    use HasFactory, HasImageUrl, HasSlug;
 
     protected $fillable = [
         'feed_id',
@@ -28,25 +31,6 @@ class Entry extends Model
         'chapters',
         'published_at',
     ];
-
-    public static function generateUniqueSlug(string $name): string
-    {
-        $base = str($name)->slug();
-
-        do {
-            $slug = $base->toString().'-'.bin2hex(random_bytes(3));
-        } while (static::where('slug', $slug)->exists());
-
-        return $slug;
-    }
-
-    /**
-     * Get the route key for the model.
-     */
-    public function getRouteKeyName(): string
-    {
-        return 'slug';
-    }
 
     protected $appends = [
         'absolute_audio_url',
@@ -67,32 +51,14 @@ class Entry extends Model
     protected function absoluteAudioUrl(): Attribute
     {
         return Attribute::make(
-            get: fn () => $this->audio_url && ! $this->audio_is_external
-                ? asset(Storage::disk('public')->url($this->audio_url))
-                : $this->audio_url,
-        );
-    }
-
-    protected function absoluteImageUrl(): Attribute
-    {
-        return Attribute::make(
-            get: fn () => $this->image_url && ! $this->image_is_external
-                ? asset(Storage::disk('public')->url($this->image_url))
-                : $this->image_url,
+            get: fn () => Media::url($this->audio_url),
         );
     }
 
     protected function audioIsExternal(): Attribute
     {
         return Attribute::make(
-            get: fn () => $this->audio_url && filter_var($this->audio_url, FILTER_VALIDATE_URL),
-        );
-    }
-
-    protected function imageIsExternal(): Attribute
-    {
-        return Attribute::make(
-            get: fn () => $this->image_url && filter_var($this->image_url, FILTER_VALIDATE_URL),
+            get: fn () => Media::isExternal($this->audio_url),
         );
     }
 
@@ -108,39 +74,7 @@ class Entry extends Model
     protected function rssDescription(): Attribute
     {
         return Attribute::make(
-            get: function () {
-                $aiSummary = $this->summary ?? '';
-                $originalSummary = $this->original_summary ?? '';
-
-                $showNotesUrl = route('entries.show', [$this->feed, $this]);
-                $appUrl = url('/');
-
-                $isEnhanced = $this->summary || $this->transcription_path || $this->chapters;
-
-                $html = $aiSummary ? '<p>'.nl2br($aiSummary)."</p>\n\n" : '';
-
-                if ($isEnhanced) {
-                    $html .= "<p>🧙 Enhanced by <a href=\"{$appUrl}\">Podcasts Enhancer</a></p>";
-                    $html .= "<p>👉 <a href=\"{$showNotesUrl}\">Read episode transcription</a></p>\n\n";
-                } else {
-                    $html .= "<p>👉 <a href=\"{$showNotesUrl}\">Enhance with Podcasts Enhancer</a></p>\n\n";
-                }
-
-                if ($this->chapters) {
-                    $html .= "\n\n<h2>Timestamps</h2>\n<ul>\n";
-                    foreach ($this->chapters as $chapter) {
-                        $time = gmdate($chapter['startTime'] >= 3600 ? 'H:i:s' : 'i:s', (int) $chapter['startTime']);
-                        $html .= '    <li>'.$time.' - '.e($chapter['title'])."</li>\n";
-                    }
-                    $html .= '</ul>';
-                }
-
-                if (filled($originalSummary)) {
-                    $html .= "\n\n<h2>Original Description</h2>\n\n<p>".nl2br($originalSummary).'</p>';
-                }
-
-                return trim($html);
-            },
+            get: fn () => trim(view('feeds.entry-description', ['entry' => $this])->render()),
         );
     }
 

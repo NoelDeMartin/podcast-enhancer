@@ -7,9 +7,7 @@ use App\Jobs\ProduceEntryJob;
 use App\Jobs\StitchTranscriptionsJob;
 use App\Jobs\SyncFeedJob;
 use App\Models\Entry;
-use App\Models\EntryJobBatch;
 use App\Models\Feed;
-use App\Models\FeedJobBatch;
 use Illuminate\Bus\Batch;
 use Illuminate\Support\Facades\Bus;
 use Illuminate\Support\Facades\Cache;
@@ -48,10 +46,7 @@ trait DispatchesBatches
             ->name('Process entry '.$entryId)
             ->dispatch();
 
-        EntryJobBatch::forceCreate([
-            'entry_id' => $entryId,
-            'batch_id' => $batch->id,
-        ]);
+        $entry->jobBatches()->create(['batch_id' => $batch->id]);
     }
 
     protected function dispatchProductionBatch(Entry $entry, string $transcriptionBatchId): Batch
@@ -67,10 +62,7 @@ trait DispatchesBatches
             })
             ->dispatch();
 
-        EntryJobBatch::forceCreate([
-            'entry_id' => $entry->id,
-            'batch_id' => $batch->id,
-        ]);
+        $entry->jobBatches()->create(['batch_id' => $batch->id]);
 
         return $batch;
     }
@@ -78,15 +70,10 @@ trait DispatchesBatches
     protected function dispatchMetadataBatch(Entry $entry): void
     {
         $batch = Bus::batch([
-            [
-                new ProduceEntryJob($entry),
-            ],
+            new ProduceEntryJob($entry),
         ])->dispatch();
 
-        EntryJobBatch::forceCreate([
-            'entry_id' => $entry->id,
-            'batch_id' => $batch->id,
-        ]);
+        $entry->jobBatches()->create(['batch_id' => $batch->id]);
     }
 
     protected function dispatchSyncBatch(Feed $feed): void
@@ -97,10 +84,7 @@ trait DispatchesBatches
             ->name('Sync feed '.$feed->id)
             ->dispatch();
 
-        FeedJobBatch::forceCreate([
-            'feed_id' => $feed->id,
-            'batch_id' => $batch->id,
-        ]);
+        $feed->jobBatches()->create(['batch_id' => $batch->id]);
     }
 
     protected function transcriptionTmpDirectory(string $transcriptionBatchId): string

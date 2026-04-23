@@ -2,9 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Concerns\LoadsFailedJobs;
+use App\Facades\Media;
 use App\Http\Requests\StoreFeedRequest;
 use App\Http\Requests\UpdateFeedRequest;
-use App\Models\FailedJob;
 use App\Models\Feed;
 use App\Models\Scopes\UserScope;
 use Illuminate\Http\RedirectResponse;
@@ -15,6 +16,8 @@ use Inertia\Response;
 
 class FeedController extends Controller
 {
+    use LoadsFailedJobs;
+
     public function store(StoreFeedRequest $request): RedirectResponse
     {
         Gate::authorize('create', Feed::class);
@@ -22,7 +25,7 @@ class FeedController extends Controller
         $validated = $request->validated();
         if ($request->hasFile('image_file')) {
             Gate::authorize('uploadFiles', Feed::class);
-            $validated['image_url'] = $request->file('image_file')->store('images', 'public');
+            $validated['image_url'] = Media::update('images', null, $request->file('image_file'));
         }
 
         $validated['slug'] = Feed::generateUniqueSlug($validated['title']);
@@ -73,24 +76,9 @@ class FeedController extends Controller
             $jobBatches->push($feed->latestJobBatch->jobBatch);
         }
 
-        $failedJobIds = $jobBatches
-            ->flatMap(fn ($batch) => $batch->failed_job_ids ?? [])
-            ->unique()
-            ->values()
-            ->all();
-
-        if (empty($failedJobIds)) {
-            return;
+        if ($jobBatches->isNotEmpty()) {
+            $this->loadFailedJobDetails($jobBatches);
         }
-
-        $failedJobs = FailedJob::whereIn('uuid', $failedJobIds)->get()->keyBy('uuid');
-
-        $jobBatches->each(function ($batch) use ($failedJobs) {
-            $batch->setRelation(
-                'failedJobDetails',
-                collect($batch->failed_job_ids ?? [])->map(fn ($uuid) => $failedJobs->get($uuid))->filter()->values(),
-            );
-        });
     }
 
     public function update(UpdateFeedRequest $request, Feed $feed): RedirectResponse
@@ -103,22 +91,19 @@ class FeedController extends Controller
             unset($validated['title'], $validated['description'], $validated['image_url'], $validated['image_file'], $validated['delete_image_file']);
         }
 
-        if (isset($validated['image_file'])) {
-            Gate::authorize('uploadFiles', $feed);
-            if ($feed->image_url && ! $feed->image_is_external) {
-                Storage::disk('public')->delete($feed->image_url);
+        if (array_key_exists('image_file', $validated) || ! empty($validated['delete_image_file']) || (array_key_exists('image_url', $validated) && $validated['image_url'] !== $feed->image_url)) {
+            if (isset($validated['image_file'])) {
+                Gate::authorize('uploadFiles', $feed);
             }
-            $validated['image_url'] = $request->file('image_file')->store('images', 'public');
-        } elseif ($request->boolean('delete_image_file') && $feed->image_url) {
-            if (! $feed->image_is_external) {
-                Storage::disk('public')->delete($feed->image_url);
-            }
-            $validated['image_url'] = null;
-        } elseif (isset($validated['image_url']) && $validated['image_url'] !== $feed->image_url) {
-            if ($feed->image_url && ! $feed->image_is_external) {
-                Storage::disk('public')->delete($feed->image_url);
-            }
+
+            $validated['image_url'] = Media::update(
+                'images',
+                $feed->image_url,
+                $validated['image_file'] ?? $validated['image_url'] ?? null,
+                ! empty($validated['delete_image_file'])
+            );
         }
+
         unset($validated['image_file'], $validated['delete_image_file']);
 
         if (isset($validated['sync_frequency']) && (int) $validated['sync_frequency'] === 0) {
@@ -134,9 +119,7 @@ class FeedController extends Controller
     {
         Gate::authorize('delete', $feed);
 
-        if ($feed->image_url && ! $feed->image_is_external) {
-            Storage::disk('public')->delete($feed->image_url);
-        }
+        Media::delete($feed->image_url);
 
         $feed->delete();
 
