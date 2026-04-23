@@ -7,21 +7,23 @@ use App\Concerns\FetchesRssFeeds;
 use App\Models\Feed;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Gate;
 
 class RssImportController extends Controller
 {
     use DispatchesBatches;
     use FetchesRssFeeds;
 
-    public function fetch(Request $request): JsonResponse
+    public function fetch(Feed $feed): JsonResponse
     {
-        $request->validate([
+        Gate::authorize('update', $feed);
+
+        request()->validate([
             'url' => ['required', 'url'],
         ]);
 
         try {
-            $data = $this->fetchAndParseRss($request->url);
+            $data = $this->fetchAndParseRss(request()->url);
 
             return response()->json(['episodes' => $data['episodes']]);
         } catch (\Exception $e) {
@@ -33,13 +35,15 @@ class RssImportController extends Controller
         }
     }
 
-    public function store(Request $request, Feed $feed): RedirectResponse
+    public function store(Feed $feed): RedirectResponse
     {
+        Gate::authorize('update', $feed);
+
         if ($feed->rss_url) {
             abort(403, 'Manual RSS imports are not allowed for synchronized feeds.');
         }
 
-        $request->validate([
+        request()->validate([
             'episodes' => ['required', 'array'],
             'episodes.*.name' => ['required', 'string'],
             'episodes.*.audio_url' => ['required', 'url'],
@@ -48,7 +52,7 @@ class RssImportController extends Controller
             'episodes.*.published_at' => ['nullable', 'date'],
         ]);
 
-        foreach ($request->episodes as $episodeData) {
+        foreach (request()->episodes as $episodeData) {
             $publishedAt = filled($episodeData['published_at'] ?? null)
                 ? $episodeData['published_at']
                 : now();
@@ -64,6 +68,6 @@ class RssImportController extends Controller
             $this->dispatchTranscriptionBatch($entry);
         }
 
-        return redirect()->back()->with('success', count($request->episodes).' episodes imported successfully.');
+        return redirect()->back()->with('success', count(request()->episodes).' episodes imported successfully.');
     }
 }

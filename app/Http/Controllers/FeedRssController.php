@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use App\Jobs\SyncFeedJob;
 use App\Models\Feed;
 use App\Models\Scopes\UserScope;
-use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 
 class FeedRssController extends Controller
@@ -13,7 +12,7 @@ class FeedRssController extends Controller
     /**
      * Handle the incoming request.
      */
-    public function __invoke(Request $request, string $feed): Response
+    public function __invoke(string $feed): Response
     {
         $feed = Feed::withoutGlobalScope(UserScope::class)->where('slug', $feed)->firstOrFail();
 

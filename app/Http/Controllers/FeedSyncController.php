@@ -6,21 +6,23 @@ use App\Concerns\DispatchesBatches;
 use App\Concerns\FetchesRssFeeds;
 use App\Models\Feed;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Gate;
 
 class FeedSyncController extends Controller
 {
     use DispatchesBatches, FetchesRssFeeds;
 
-    public function store(Request $request): RedirectResponse
+    public function store(): RedirectResponse
     {
-        $request->validate([
+        Gate::authorize('create', Feed::class);
+
+        request()->validate([
             'rss_url' => ['required', 'url'],
             'sync_frequency' => ['nullable', 'integer', 'min:0'],
         ]);
 
         try {
-            $data = $this->fetchAndParseRss($request->rss_url);
+            $data = $this->fetchAndParseRss(request()->rss_url);
 
             $feedTitle = $data['title'];
             $feedDescription = $data['description'];
@@ -29,14 +31,14 @@ class FeedSyncController extends Controller
                 return redirect()->back()->withErrors(['rss_url' => 'Could not determine feed title from RSS.']);
             }
 
-            $feed = $request->user()->feeds()->create([
+            $feed = request()->user()->feeds()->create([
                 'title' => $feedTitle,
                 'slug' => Feed::generateUniqueSlug($feedTitle),
                 'description' => $feedDescription,
-                'rss_url' => $request->rss_url,
+                'rss_url' => request()->rss_url,
                 'image_url' => $data['image_url'] ?? null,
                 'last_synced_at' => now(),
-                'sync_frequency' => $request->sync_frequency ?: null,
+                'sync_frequency' => request()->sync_frequency ?: null,
             ]);
 
             $importedCount = 0;
@@ -65,6 +67,8 @@ class FeedSyncController extends Controller
 
     public function sync(Feed $feed): RedirectResponse
     {
+        Gate::authorize('sync', $feed);
+
         if (! $feed->rss_url) {
             abort(400, 'This feed does not have an RSS URL configured for synchronization.');
         }

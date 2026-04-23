@@ -9,21 +9,21 @@ beforeEach(function () {
     $this->otherUser = User::factory()->create();
 });
 
-it('cannot view another user\'s feed', function () {
+it('can view another user\'s feed', function () {
     $feed = Feed::factory()->for($this->otherUser)->create();
 
     $this->actingAs($this->user)
         ->get(route('feeds.show', $feed))
-        ->assertNotFound();
+        ->assertOk();
 });
 
-it('cannot view another user\'s entry', function () {
+it('can view another user\'s entry', function () {
     $feed = Feed::factory()->for($this->otherUser)->create();
     $entry = Entry::factory()->create(['feed_id' => $feed->id]);
 
     $this->actingAs($this->user)
         ->get(route('entries.show', [$feed, $entry]))
-        ->assertNotFound();
+        ->assertOk();
 });
 
 it('cannot update another user\'s entry', function () {

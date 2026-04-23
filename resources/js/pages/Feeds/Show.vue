@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Head, Link, usePoll } from '@inertiajs/vue3';
+import { Head, Link, usePoll, usePage } from '@inertiajs/vue3';
 import { useForm } from '@inertiajs/vue3';
 import {
     Clock,
@@ -72,6 +72,11 @@ import type { BreadcrumbItem } from '@/types';
 
 const props = defineProps<{
     feed: any;
+    can: {
+        update: boolean;
+        delete: boolean;
+        sync: boolean;
+    };
 }>();
 
 function formatDatetimeLocalForInput(date: Date): string {
@@ -80,16 +85,16 @@ function formatDatetimeLocalForInput(date: Date): string {
     return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
 }
 
-const breadcrumbs: BreadcrumbItem[] = [
+const breadcrumbs = computed<BreadcrumbItem[]>(() => [
     {
-        title: 'Dashboard',
-        href: dashboard(),
+        title: usePage().props.auth.user ? 'Dashboard' : 'Home',
+        href: usePage().props.auth.user ? dashboard() : '/',
     },
     {
         title: props.feed.title,
         href: '#',
     },
-];
+]);
 
 const entryForm = useForm({
     feed_id: props.feed.id,
@@ -107,7 +112,7 @@ const entryImageSource = ref<'url' | 'file'>('url');
 const showEntryForm = ref(false);
 
 const submitEntry = () => {
-    entryForm.submit(storeEntry(props.feed.slug), {
+    entryForm.submit(storeEntry(props.feed), {
         onSuccess: () => {
             entryForm.reset(
                 'name',
@@ -123,8 +128,10 @@ const submitEntry = () => {
 };
 
 const deleteEntry = (id: number) => {
+    const entry = props.feed.entries.find((e: any) => e.id === id);
+
     if (confirm('Are you sure you want to delete this entry?')) {
-        useForm({}).submit(destroyEntry([props.feed.slug, id]));
+        useForm({}).submit(destroyEntry([props.feed, entry]));
     }
 };
 
@@ -140,7 +147,7 @@ const fetchRss = async () => {
     rssError.value = '';
 
     try {
-        const response = await fetch(fetchRssAction(props.feed.slug).url, {
+        const response = await fetch(fetchRssAction(props.feed).url, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -175,7 +182,7 @@ const importRss = () => {
     const selected = episodes.value.filter((_, i) =>
         selectedEpisodes.value.includes(i),
     );
-    useForm({ episodes: selected }).submit(storeRssAction(props.feed.slug), {
+    useForm({ episodes: selected }).submit(storeRssAction(props.feed), {
         onSuccess: () => {
             showRssModal.value = false;
             rssUrl.value = '';
@@ -304,15 +311,12 @@ const startEditEntry = (entry: any) => {
 };
 
 const submitEditEntry = () => {
-    editEntryForm.submit(
-        updateEntryAction([props.feed.slug, editingEntry.value.id]),
-        {
-            onSuccess: () => {
-                editingEntry.value = null;
-                isEditDialogOpen.value = false;
-            },
+    editEntryForm.submit(updateEntryAction([props.feed, editingEntry.value]), {
+        onSuccess: () => {
+            editingEntry.value = null;
+            isEditDialogOpen.value = false;
         },
-    );
+    });
 };
 </script>
 
@@ -338,7 +342,10 @@ const submitEditEntry = () => {
                     </a>
                 </div>
 
-                <div class="flex items-center gap-2">
+                <div
+                    v-if="can.update || can.sync"
+                    class="flex items-center gap-2"
+                >
                     <div
                         v-if="getFeedSyncStatus() === 'failed'"
                         class="flex items-center gap-1"
@@ -352,7 +359,7 @@ const submitEditEntry = () => {
                     </div>
 
                     <Button
-                        v-if="feed.rss_url"
+                        v-if="feed.rss_url && can.sync"
                         @click="syncFeed"
                         :disabled="
                             isSyncing || getFeedSyncStatus() === 'pending'
@@ -371,7 +378,7 @@ const submitEditEntry = () => {
                                 : 'Synchronize'
                         }}
                     </Button>
-                    <template v-else>
+                    <template v-else-if="!feed.rss_url && can.update">
                         <Dialog v-model:open="showEntryForm">
                             <DialogTrigger as-child>
                                 <Button>
@@ -1108,7 +1115,11 @@ const submitEditEntry = () => {
                             <TableHead class="w-[12%]">Published</TableHead>
                             <TableHead class="w-[20%]">Enhancements</TableHead>
                             <TableHead class="w-[10%]">Details</TableHead>
-                            <TableHead class="text-right">Actions</TableHead>
+                            <TableHead
+                                v-if="can.update || can.delete"
+                                class="text-right"
+                                >Actions</TableHead
+                            >
                         </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -1138,7 +1149,7 @@ const submitEditEntry = () => {
                                     <Link
                                         :href="
                                             showEntryAction.url([
-                                                feed.slug,
+                                                props.feed.slug,
                                                 entry.id,
                                             ])
                                         "
@@ -1165,7 +1176,10 @@ const submitEditEntry = () => {
                                         View
                                     </button>
                                 </TableCell>
-                                <TableCell class="text-right align-top">
+                                <TableCell
+                                    v-if="can.update || can.delete"
+                                    class="text-right align-top"
+                                >
                                     <DropdownMenu>
                                         <DropdownMenuTrigger as-child>
                                             <Button
@@ -1181,7 +1195,11 @@ const submitEditEntry = () => {
                                             </Button>
                                         </DropdownMenuTrigger>
                                         <DropdownMenuContent align="end">
-                                            <template v-if="!feed.rss_url">
+                                            <template
+                                                v-if="
+                                                    !feed.rss_url && can.update
+                                                "
+                                            >
                                                 <DropdownMenuItem
                                                     @click="
                                                         startEditEntry(entry)
@@ -1192,12 +1210,17 @@ const submitEditEntry = () => {
                                             </template>
 
                                             <EntryEnhancementActions
+                                                v-if="can.update"
                                                 :feed="feed"
                                                 :entry="entry"
                                                 type="dropdown-items"
                                             />
 
-                                            <template v-if="!feed.rss_url">
+                                            <template
+                                                v-if="
+                                                    !feed.rss_url && can.delete
+                                                "
+                                            >
                                                 <DropdownMenuItem
                                                     class="text-red-600"
                                                     @click="
@@ -1213,8 +1236,14 @@ const submitEditEntry = () => {
                             </TableRow>
                         </template>
                         <TableRow v-if="feed.entries.length === 0">
-                            <TableCell colspan="6" class="h-24 text-center">
-                                No entries yet. Click "Add Entry" to create one.
+                            <TableCell
+                                :colspan="can.update || can.delete ? 6 : 5"
+                                class="h-24 text-center"
+                            >
+                                No entries yet.
+                                <template v-if="can.update">
+                                    Click "Add Entry" to create one.
+                                </template>
                             </TableCell>
                         </TableRow>
                     </TableBody>

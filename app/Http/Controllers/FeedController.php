@@ -6,7 +6,9 @@ use App\Http\Requests\StoreFeedRequest;
 use App\Http\Requests\UpdateFeedRequest;
 use App\Models\FailedJob;
 use App\Models\Feed;
+use App\Models\Scopes\UserScope;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -15,6 +17,8 @@ class FeedController extends Controller
 {
     public function store(StoreFeedRequest $request): RedirectResponse
     {
+        Gate::authorize('create', Feed::class);
+
         $validated = $request->validated();
         if ($request->hasFile('image_file')) {
             $validated['image_url'] = $request->file('image_file')->store('images', 'public');
@@ -27,8 +31,14 @@ class FeedController extends Controller
         return redirect()->back()->with('success', 'Feed created successfully.');
     }
 
-    public function show(Feed $feed): Response
+    public function show(string $feed): Response
     {
+        $feed = Feed::withoutGlobalScope(UserScope::class)
+            ->where('slug', $feed)
+            ->firstOrFail();
+
+        Gate::authorize('view', $feed);
+
         $feed->load(['entries.latestJobBatch', 'latestJobBatch']);
 
         $this->loadFailedJobDetails($feed);
@@ -39,6 +49,11 @@ class FeedController extends Controller
 
         return Inertia::render('Feeds/Show', [
             'feed' => $feed,
+            'can' => [
+                'update' => request()->user()?->can('update', $feed) ?? false,
+                'delete' => request()->user()?->can('delete', $feed) ?? false,
+                'sync' => request()->user()?->can('sync', $feed) ?? false,
+            ],
         ]);
     }
 
@@ -74,6 +89,8 @@ class FeedController extends Controller
 
     public function update(UpdateFeedRequest $request, Feed $feed): RedirectResponse
     {
+        Gate::authorize('update', $feed);
+
         $validated = $request->validated();
 
         if ($feed->rss_url) {
@@ -108,6 +125,8 @@ class FeedController extends Controller
 
     public function destroy(Feed $feed): RedirectResponse
     {
+        Gate::authorize('delete', $feed);
+
         if ($feed->image_url && ! $feed->image_is_external) {
             Storage::disk('public')->delete($feed->image_url);
         }

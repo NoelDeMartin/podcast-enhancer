@@ -8,8 +8,9 @@ use App\Http\Requests\UpdateEntryRequest;
 use App\Models\Entry;
 use App\Models\FailedJob;
 use App\Models\Feed;
+use App\Models\Scopes\UserScope;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -18,9 +19,20 @@ class EntryController extends Controller
 {
     use DispatchesBatches;
 
-    public function show(Feed $feed, Entry $entry): Response
+    public function show(string $feed, string $entry): Response
     {
-        $entry->load('feed', 'latestJobBatch');
+        $feed = Feed::withoutGlobalScope(UserScope::class)
+            ->where('slug', $feed)
+            ->firstOrFail();
+
+        $entry = Entry::withoutGlobalScope(UserScope::class)
+            ->where('id', $entry)
+            ->where('feed_id', $feed->id)
+            ->firstOrFail();
+
+        Gate::authorize('view', $entry);
+
+        $entry->load(['feed' => fn ($query) => $query->withoutGlobalScope(UserScope::class), 'latestJobBatch']);
 
         $this->loadFailedJobDetails($entry);
 
@@ -28,6 +40,11 @@ class EntryController extends Controller
 
         return Inertia::render('Entries/Show', [
             'entry' => $entry,
+            'can' => [
+                'update' => request()->user()?->can('update', $entry) ?? false,
+                'delete' => request()->user()?->can('delete', $entry) ?? false,
+                'produce' => request()->user()?->can('produce', $entry) ?? false,
+            ],
         ]);
     }
 
@@ -47,8 +64,10 @@ class EntryController extends Controller
         );
     }
 
-    public function store(Feed $feed, StoreEntryRequest $request): RedirectResponse
+    public function store(StoreEntryRequest $request, Feed $feed): RedirectResponse
     {
+        Gate::authorize('update', $feed);
+
         if ($feed->rss_url) {
             abort(403, 'Manual entries cannot be added to a synchronized feed.');
         }
@@ -72,8 +91,12 @@ class EntryController extends Controller
         return redirect()->back()->with('success', 'Entry created successfully.');
     }
 
-    public function update(Feed $feed, Entry $entry, UpdateEntryRequest $request): RedirectResponse
+    public function update(UpdateEntryRequest $request, Feed $feed, string $entry): RedirectResponse
     {
+        $entry = Entry::where('id', $entry)->where('feed_id', $feed->id)->firstOrFail();
+
+        Gate::authorize('update', $entry);
+
         if ($feed->rss_url) {
             abort(403, 'Entries in a synchronized feed cannot be modified manually.');
         }
@@ -146,8 +169,12 @@ class EntryController extends Controller
         return redirect()->back()->with('success', 'Entry updated successfully.');
     }
 
-    public function destroy(Feed $feed, Entry $entry): RedirectResponse
+    public function destroy(Feed $feed, string $entry): RedirectResponse
     {
+        $entry = Entry::where('id', $entry)->where('feed_id', $feed->id)->firstOrFail();
+
+        Gate::authorize('delete', $entry);
+
         if ($feed->rss_url) {
             abort(403, 'Entries in a synchronized feed cannot be deleted manually.');
         }
@@ -169,9 +196,13 @@ class EntryController extends Controller
         return redirect()->back()->with('success', 'Entry deleted successfully.');
     }
 
-    public function produce(Request $request, Feed $feed, Entry $entry): RedirectResponse
+    public function produce(Feed $feed, string $entry): RedirectResponse
     {
-        $reuseTranscript = $request->boolean('reuse_transcript');
+        $entry = Entry::where('id', $entry)->where('feed_id', $feed->id)->firstOrFail();
+
+        Gate::authorize('produce', $entry);
+
+        $reuseTranscript = request()->boolean('reuse_transcript');
 
         if (! $reuseTranscript && ! $entry->audio_url) {
             abort(422, 'No audio file attached to this entry.');

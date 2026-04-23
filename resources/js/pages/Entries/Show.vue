@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Head } from '@inertiajs/vue3';
+import { Head, usePage } from '@inertiajs/vue3';
 import { Clock, ExternalLink } from 'lucide-vue-next';
 import { computed } from 'vue';
 import { show as showFeedAction } from '@/actions/App/Http/Controllers/FeedController';
@@ -19,12 +19,17 @@ import type { BreadcrumbItem } from '@/types';
 
 const props = defineProps<{
     entry: any;
+    can: {
+        update: boolean;
+        delete: boolean;
+        produce: boolean;
+    };
 }>();
 
-const breadcrumbs: BreadcrumbItem[] = [
+const breadcrumbs = computed<BreadcrumbItem[]>(() => [
     {
-        title: 'Dashboard',
-        href: dashboard(),
+        title: usePage().props.auth.user ? 'Dashboard' : 'Home',
+        href: usePage().props.auth.user ? dashboard() : '/',
     },
     {
         title: props.entry.feed.title,
@@ -34,7 +39,7 @@ const breadcrumbs: BreadcrumbItem[] = [
         title: props.entry.name,
         href: '#',
     },
-];
+]);
 
 const isProcessing = computed(() => getBatchStatus(props.entry) === 'pending');
 
@@ -84,6 +89,7 @@ useEntryPolling(isProcessing);
                     <div class="flex flex-col items-end gap-2">
                         <EntryEnhancementStatus :entry="entry" />
                         <EntryEnhancementActions
+                            v-if="can.produce"
                             :feed="entry.feed"
                             :entry="entry"
                         />
