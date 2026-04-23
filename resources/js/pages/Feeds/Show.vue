@@ -1161,7 +1161,7 @@ const submitEditEntry = () => {
                                     <Link
                                         :href="
                                             showEntryAction.url([
-                                                props.feed,
+                                                props.feed.slug,
                                                 entry.slug,
                                             ])
                                         "
