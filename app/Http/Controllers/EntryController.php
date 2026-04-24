@@ -11,6 +11,7 @@ use App\Models\Entry;
 use App\Models\Feed;
 use App\Models\Scopes\UserScope;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
@@ -38,8 +39,6 @@ class EntryController extends Controller
         if ($entry->latestJobBatch?->jobBatch) {
             $this->loadFailedJobDetails($entry->latestJobBatch->jobBatch);
         }
-
-        $entry->transcription = $entry->transcription_path ? Storage::get($entry->transcription_path) : null;
 
         $entry->can = [
             'produce' => request()->user()?->can('produce', $entry) ?? false,
@@ -100,7 +99,7 @@ class EntryController extends Controller
         $validated = $request->validated();
         $fileChanged = false;
 
-        if (array_key_exists('file', $validated) || ! empty($validated['delete_file']) || (array_key_exists('audio_url', $validated) && $validated['audio_url'] !== $entry->audio_url)) {
+        if ($this->shouldUpdateAudio($validated, $entry)) {
             if (isset($validated['file'])) {
                 Gate::authorize('uploadFiles', $entry);
             }
@@ -122,7 +121,7 @@ class EntryController extends Controller
             $fileChanged = empty($validated['delete_file']);
         }
 
-        if (array_key_exists('image_file', $validated) || ! empty($validated['delete_image_file']) || (array_key_exists('image_url', $validated) && $validated['image_url'] !== $entry->image_url)) {
+        if ($this->shouldUpdateImage($validated, $entry)) {
             if (isset($validated['image_file'])) {
                 Gate::authorize('uploadFiles', $entry);
             }
@@ -135,9 +134,7 @@ class EntryController extends Controller
             );
         }
 
-        unset($validated['delete_file'], $validated['delete_image_file']);
-
-        $entry->update($validated);
+        $entry->update(Arr::except($validated, ['file', 'delete_file', 'image_file', 'delete_image_file']));
 
         if ($fileChanged && $entry->audio_url) {
             $this->dispatchTranscriptionBatch($entry);
@@ -193,5 +190,19 @@ class EntryController extends Controller
         return redirect()->back()->with('success', $reuseTranscript
             ? 'Chapters and summary regeneration queued successfully.'
             : 'Transcription queued successfully.');
+    }
+
+    private function shouldUpdateAudio(array $validated, Entry $entry): bool
+    {
+        return array_key_exists('file', $validated)
+            || ! empty($validated['delete_file'])
+            || (array_key_exists('audio_url', $validated) && $validated['audio_url'] !== $entry->audio_url);
+    }
+
+    private function shouldUpdateImage(array $validated, Entry $entry): bool
+    {
+        return array_key_exists('image_file', $validated)
+            || ! empty($validated['delete_image_file'])
+            || (array_key_exists('image_url', $validated) && $validated['image_url'] !== $entry->image_url);
     }
 }

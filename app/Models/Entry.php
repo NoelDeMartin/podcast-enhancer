@@ -38,6 +38,7 @@ class Entry extends Model
         'audio_is_external',
         'image_is_external',
         'audio_file_size',
+        'transcription',
     ];
 
     protected function casts(): array
@@ -46,6 +47,13 @@ class Entry extends Model
             'chapters' => 'json',
             'published_at' => 'datetime',
         ];
+    }
+
+    protected function transcription(): Attribute
+    {
+        return Attribute::make(
+            get: fn () => $this->transcription_path ? Storage::get($this->transcription_path) : null,
+        );
     }
 
     protected function absoluteAudioUrl(): Attribute
