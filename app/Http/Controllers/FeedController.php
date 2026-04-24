@@ -45,7 +45,7 @@ class FeedController extends Controller
 
         $feed->load(['entries.latestJobBatch', 'latestJobBatch']);
 
-        $this->loadFailedJobDetails($feed);
+        $this->loadFeedFailedJobDetails($feed);
 
         $feed->entries->each(function ($entry) {
             $entry->transcription = $entry->transcription_path ? Storage::get($entry->transcription_path) : null;
@@ -66,7 +66,7 @@ class FeedController extends Controller
         ]);
     }
 
-    private function loadFailedJobDetails(Feed $feed): void
+    private function loadFeedFailedJobDetails(Feed $feed): void
     {
         $jobBatches = $feed->entries
             ->pluck('latestJobBatch.jobBatch')

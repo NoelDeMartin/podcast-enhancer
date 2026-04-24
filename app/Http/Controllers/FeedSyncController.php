@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Concerns\DispatchesBatches;
 use App\Concerns\FetchesRssFeeds;
+use App\Http\Requests\StoreFeedSyncRequest;
 use App\Models\Entry;
 use App\Models\Feed;
 use Illuminate\Http\RedirectResponse;
@@ -13,17 +14,12 @@ class FeedSyncController extends Controller
 {
     use DispatchesBatches, FetchesRssFeeds;
 
-    public function store(): RedirectResponse
+    public function store(StoreFeedSyncRequest $request): RedirectResponse
     {
         Gate::authorize('create', Feed::class);
 
-        request()->validate([
-            'rss_url' => ['required', 'url'],
-            'sync_frequency' => ['nullable', 'integer', 'min:0'],
-        ]);
-
         try {
-            $data = $this->fetchAndParseRss(request()->rss_url);
+            $data = $this->fetchAndParseRss($request->rss_url);
 
             $feedTitle = $data['title'];
             $feedDescription = $data['description'];
@@ -32,14 +28,14 @@ class FeedSyncController extends Controller
                 return redirect()->back()->withErrors(['rss_url' => 'Could not determine feed title from RSS.']);
             }
 
-            $feed = request()->user()->feeds()->create([
+            $feed = $request->user()->feeds()->create([
                 'title' => $feedTitle,
                 'slug' => Feed::generateUniqueSlug($feedTitle),
                 'description' => $feedDescription,
-                'rss_url' => request()->rss_url,
+                'rss_url' => $request->rss_url,
                 'image_url' => $data['image_url'] ?? null,
                 'last_synced_at' => now(),
-                'sync_frequency' => request()->sync_frequency ?: null,
+                'sync_frequency' => $request->sync_frequency ?: null,
             ]);
 
             $importedCount = 0;
@@ -60,10 +56,9 @@ class FeedSyncController extends Controller
 
             return redirect()->back()->with('success', "Feed created and {$importedCount} episodes imported successfully.");
         } catch (\Exception $e) {
-            $errorKey = $e->getMessage() === 'Failed to fetch RSS feed.' ? 'rss_url' : 'rss_url';
             $errorMessage = $e->getMessage() === 'Failed to fetch RSS feed.' ? 'Failed to fetch RSS feed.' : 'Invalid RSS feed format.';
 
-            return redirect()->back()->withErrors([$errorKey => $errorMessage]);
+            return redirect()->back()->withErrors(['rss_url' => $errorMessage]);
         }
     }
 

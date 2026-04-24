@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Concerns\DispatchesBatches;
 use App\Concerns\FetchesRssFeeds;
+use App\Http\Requests\FetchRssRequest;
+use App\Http\Requests\StoreRssImportRequest;
 use App\Models\Entry;
 use App\Models\Feed;
 use Illuminate\Http\JsonResponse;
@@ -15,16 +17,12 @@ class RssImportController extends Controller
     use DispatchesBatches;
     use FetchesRssFeeds;
 
-    public function fetch(Feed $feed): JsonResponse
+    public function fetch(FetchRssRequest $request, Feed $feed): JsonResponse
     {
         Gate::authorize('update', $feed);
 
-        request()->validate([
-            'url' => ['required', 'url'],
-        ]);
-
         try {
-            $data = $this->fetchAndParseRss(request()->url);
+            $data = $this->fetchAndParseRss($request->url);
 
             return response()->json(['episodes' => $data['episodes']]);
         } catch (\Exception $e) {
@@ -36,7 +34,7 @@ class RssImportController extends Controller
         }
     }
 
-    public function store(Feed $feed): RedirectResponse
+    public function store(StoreRssImportRequest $request, Feed $feed): RedirectResponse
     {
         Gate::authorize('update', $feed);
 
@@ -44,16 +42,7 @@ class RssImportController extends Controller
             abort(403, 'Manual RSS imports are not allowed for synchronized feeds.');
         }
 
-        request()->validate([
-            'episodes' => ['required', 'array'],
-            'episodes.*.name' => ['required', 'string'],
-            'episodes.*.audio_url' => ['required', 'url'],
-            'episodes.*.image_url' => ['nullable', 'url'],
-            'episodes.*.summary' => ['nullable', 'string'],
-            'episodes.*.published_at' => ['nullable', 'date'],
-        ]);
-
-        foreach (request()->episodes as $episodeData) {
+        foreach ($request->episodes as $episodeData) {
             $publishedAt = filled($episodeData['published_at'] ?? null)
                 ? $episodeData['published_at']
                 : now();
@@ -70,6 +59,6 @@ class RssImportController extends Controller
             $this->dispatchTranscriptionBatch($entry);
         }
 
-        return redirect()->back()->with('success', count(request()->episodes).' episodes imported successfully.');
+        return redirect()->back()->with('success', count($request->episodes).' episodes imported successfully.');
     }
 }

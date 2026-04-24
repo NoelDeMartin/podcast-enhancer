@@ -6,9 +6,6 @@ use Illuminate\Support\Str;
 
 trait HasSlug
 {
-    /**
-     * Generate a unique slug for the model.
-     */
     public static function generateUniqueSlug(string $value): string
     {
         $base = Str::slug($value);
@@ -20,9 +17,6 @@ trait HasSlug
         return $slug;
     }
 
-    /**
-     * Get the route key for the model.
-     */
     public function getRouteKeyName(): string
     {
         return 'slug';

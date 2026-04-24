@@ -89,7 +89,7 @@ class EntryController extends Controller
 
     public function update(UpdateEntryRequest $request, Feed $feed, string $entry): RedirectResponse
     {
-        $entry = Entry::where('slug', $entry)->where('feed_id', $feed->id)->firstOrFail();
+        $entry = $feed->entries()->where('slug', $entry)->firstOrFail();
 
         Gate::authorize('update', $entry);
 
@@ -100,7 +100,6 @@ class EntryController extends Controller
         $validated = $request->validated();
         $fileChanged = false;
 
-        // Handle Audio Update
         if (array_key_exists('file', $validated) || ! empty($validated['delete_file']) || (array_key_exists('audio_url', $validated) && $validated['audio_url'] !== $entry->audio_url)) {
             if (isset($validated['file'])) {
                 Gate::authorize('uploadFiles', $entry);
@@ -123,7 +122,6 @@ class EntryController extends Controller
             $fileChanged = empty($validated['delete_file']);
         }
 
-        // Handle Image Update
         if (array_key_exists('image_file', $validated) || ! empty($validated['delete_image_file']) || (array_key_exists('image_url', $validated) && $validated['image_url'] !== $entry->image_url)) {
             if (isset($validated['image_file'])) {
                 Gate::authorize('uploadFiles', $entry);
@@ -150,7 +148,7 @@ class EntryController extends Controller
 
     public function destroy(Feed $feed, string $entry): RedirectResponse
     {
-        $entry = Entry::where('slug', $entry)->where('feed_id', $feed->id)->firstOrFail();
+        $entry = $feed->entries()->where('slug', $entry)->firstOrFail();
 
         Gate::authorize('delete', $entry);
 
@@ -172,13 +170,9 @@ class EntryController extends Controller
 
     public function produce(Feed $feed, string $entry): RedirectResponse
     {
-        $entry = Entry::where('slug', $entry)->where('feed_id', $feed->id)->firstOrFail();
+        $entry = $feed->entries()->where('slug', $entry)->firstOrFail();
 
-        if ($entry->transcription_path) {
-            Gate::authorize('regenerate', $entry);
-        } else {
-            Gate::authorize('produce', $entry);
-        }
+        Gate::authorize($entry->transcription_path ? 'regenerate' : 'produce', $entry);
 
         $reuseTranscript = request()->boolean('reuse_transcript');
 

@@ -9,9 +9,6 @@ use Illuminate\Http\Response;
 
 class FeedRssController extends Controller
 {
-    /**
-     * Handle the incoming request.
-     */
     public function __invoke(string $feed): Response
     {
         $feed = Feed::withoutGlobalScope(UserScope::class)->where('slug', $feed)->firstOrFail();

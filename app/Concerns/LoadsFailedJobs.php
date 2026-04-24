@@ -8,9 +8,6 @@ use Illuminate\Support\Collection;
 
 trait LoadsFailedJobs
 {
-    /**
-     * Load failed job details for the given job batches.
-     */
     protected function loadFailedJobDetails(Collection|JobBatch $batches): void
     {
         $batches = Collection::wrap($batches);
