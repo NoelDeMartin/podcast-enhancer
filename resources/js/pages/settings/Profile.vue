@@ -96,15 +96,12 @@ const user = computed(() => page.props.auth.user);
                             v-if="status === 'verification-link-sent'"
                             class="mt-2 text-sm font-medium text-green-600"
                         >
-                            A new verification link has been sent to your email
-                            address.
+                            A new verification link has been sent to your email address.
                         </div>
                     </div>
 
                     <div class="flex items-center gap-4">
-                        <Button
-                            :disabled="processing"
-                            data-test="update-profile-button"
+                        <Button :disabled="processing" data-test="update-profile-button"
                             >Save</Button
                         >
 
@@ -114,10 +111,7 @@ const user = computed(() => page.props.auth.user);
                             leave-active-class="transition ease-in-out"
                             leave-to-class="opacity-0"
                         >
-                            <p
-                                v-show="recentlySuccessful"
-                                class="text-sm text-neutral-600"
-                            >
+                            <p v-show="recentlySuccessful" class="text-sm text-neutral-600">
                                 Saved.
                             </p>
                         </Transition>

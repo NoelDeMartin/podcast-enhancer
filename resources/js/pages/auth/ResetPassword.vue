@@ -19,10 +19,7 @@ const inputEmail = ref(props.email);
 </script>
 
 <template>
-    <AuthLayout
-        title="Reset password"
-        description="Please enter your new password below"
-    >
+    <AuthLayout title="Reset password" description="Please enter your new password below">
         <Head title="Reset password" />
 
         <Form
@@ -60,9 +57,7 @@ const inputEmail = ref(props.email);
                 </div>
 
                 <div class="grid gap-2">
-                    <Label for="password_confirmation">
-                        Confirm password
-                    </Label>
+                    <Label for="password_confirmation"> Confirm password </Label>
                     <PasswordInput
                         id="password_confirmation"
                         name="password_confirmation"

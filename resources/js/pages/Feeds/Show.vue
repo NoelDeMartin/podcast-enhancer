@@ -1,14 +1,7 @@
 <script setup lang="ts">
 import { Head, Link, usePoll, usePage } from '@inertiajs/vue3';
 import { useForm } from '@inertiajs/vue3';
-import {
-    Clock,
-    Loader2,
-    MoreHorizontal,
-    Plus,
-    Rss,
-    RefreshCw,
-} from 'lucide-vue-next';
+import { Clock, Loader2, MoreHorizontal, Plus, Rss, RefreshCw } from 'lucide-vue-next';
 import { computed, ref, watch } from 'vue';
 import {
     store as storeEntry,
@@ -61,12 +54,7 @@ import {
     TableRow,
 } from '@/components/ui/table';
 import AppLayout from '@/layouts/AppLayout.vue';
-import {
-    formatSummary,
-    formatTimestamp,
-    getBatchStatus,
-    parsedTranscription,
-} from '@/lib/entries';
+import { formatSummary, formatTimestamp, getBatchStatus, parsedTranscription } from '@/lib/entries';
 import { dashboard } from '@/routes';
 import type { BreadcrumbItem } from '@/types';
 
@@ -115,13 +103,7 @@ const showEntryForm = ref(false);
 const submitEntry = () => {
     entryForm.submit(storeEntry(props.feed), {
         onSuccess: () => {
-            entryForm.reset(
-                'name',
-                'audio_url',
-                'file',
-                'image_url',
-                'image_file',
-            );
+            entryForm.reset('name', 'audio_url', 'file', 'image_url', 'image_file');
             entryForm.published_at = formatDatetimeLocalForInput(new Date());
             showEntryForm.value = false;
         },
@@ -154,11 +136,8 @@ const fetchRss = async () => {
                 'Content-Type': 'application/json',
                 Accept: 'application/json',
                 'X-CSRF-TOKEN':
-                    (
-                        document.querySelector(
-                            'meta[name="csrf-token"]',
-                        ) as HTMLMetaElement
-                    )?.content || '',
+                    (document.querySelector('meta[name="csrf-token"]') as HTMLMetaElement)
+                        ?.content || '',
             },
             body: JSON.stringify({ url: rssUrl.value }),
         });
@@ -180,9 +159,7 @@ const fetchRss = async () => {
 };
 
 const importRss = () => {
-    const selected = episodes.value.filter((_, i) =>
-        selectedEpisodes.value.includes(i),
-    );
+    const selected = episodes.value.filter((_, i) => selectedEpisodes.value.includes(i));
     useForm({ episodes: selected }).submit(storeRssAction(props.feed), {
         onSuccess: () => {
             showRssModal.value = false;
@@ -195,9 +172,7 @@ const importRss = () => {
 
 const toggleEpisode = (index: number) => {
     if (selectedEpisodes.value.includes(index)) {
-        selectedEpisodes.value = selectedEpisodes.value.filter(
-            (i) => i !== index,
-        );
+        selectedEpisodes.value = selectedEpisodes.value.filter((i) => i !== index);
     } else {
         selectedEpisodes.value.push(index);
     }
@@ -312,15 +287,12 @@ const startEditEntry = (entry: any) => {
 };
 
 const submitEditEntry = () => {
-    editEntryForm.submit(
-        updateEntryAction([props.feed, editingEntry.value.slug]),
-        {
-            onSuccess: () => {
-                editingEntry.value = null;
-                isEditDialogOpen.value = false;
-            },
+    editEntryForm.submit(updateEntryAction([props.feed, editingEntry.value.slug]), {
+        onSuccess: () => {
+            editingEntry.value = null;
+            isEditDialogOpen.value = false;
         },
-    );
+    });
 };
 </script>
 
@@ -346,14 +318,8 @@ const submitEditEntry = () => {
                     </a>
                 </div>
 
-                <div
-                    v-if="can.update || can.sync"
-                    class="flex items-center gap-2"
-                >
-                    <div
-                        v-if="getFeedSyncStatus() === 'failed'"
-                        class="flex items-center gap-1"
-                    >
+                <div v-if="can.update || can.sync" class="flex items-center gap-2">
+                    <div v-if="getFeedSyncStatus() === 'failed'" class="flex items-center gap-1">
                         <button
                             class="text-xs text-red-500 hover:underline"
                             @click="viewingSyncFailure = true"
@@ -365,22 +331,14 @@ const submitEditEntry = () => {
                     <Button
                         v-if="feed.rss_url && can.sync"
                         @click="syncFeed"
-                        :disabled="
-                            isSyncing || getFeedSyncStatus() === 'pending'
-                        "
+                        :disabled="isSyncing || getFeedSyncStatus() === 'pending'"
                     >
                         <Loader2
-                            v-if="
-                                isSyncing || getFeedSyncStatus() === 'pending'
-                            "
+                            v-if="isSyncing || getFeedSyncStatus() === 'pending'"
                             class="mr-2 h-4 w-4 animate-spin"
                         />
                         <RefreshCw v-else class="mr-2 h-4 w-4" />
-                        {{
-                            getFeedSyncStatus() === 'pending'
-                                ? 'Synchronizing...'
-                                : 'Synchronize'
-                        }}
+                        {{ getFeedSyncStatus() === 'pending' ? 'Synchronizing...' : 'Synchronize' }}
                     </Button>
                     <template v-else-if="!feed.rss_url && can.update">
                         <Dialog v-model:open="showEntryForm">
@@ -415,9 +373,7 @@ const submitEditEntry = () => {
                                             </div>
                                         </div>
                                         <div class="grid gap-2">
-                                            <Label for="published_at"
-                                                >Published at</Label
-                                            >
+                                            <Label for="published_at">Published at</Label>
                                             <Input
                                                 id="published_at"
                                                 v-model="entryForm.published_at"
@@ -425,73 +381,46 @@ const submitEditEntry = () => {
                                                 required
                                             />
                                             <div
-                                                v-if="
-                                                    entryForm.errors
-                                                        .published_at
-                                                "
+                                                v-if="entryForm.errors.published_at"
                                                 class="text-sm text-red-500"
                                             >
-                                                {{
-                                                    entryForm.errors
-                                                        .published_at
-                                                }}
+                                                {{ entryForm.errors.published_at }}
                                             </div>
                                         </div>
                                         <div class="grid gap-2">
-                                            <Label for="source"
-                                                >Source Type</Label
-                                            >
+                                            <Label for="source">Source Type</Label>
                                             <Select v-model="entrySource">
                                                 <SelectTrigger>
-                                                    <SelectValue
-                                                        placeholder="Select source"
-                                                    />
+                                                    <SelectValue placeholder="Select source" />
                                                 </SelectTrigger>
                                                 <SelectContent>
-                                                    <SelectItem value="url"
-                                                        >Remote URL</SelectItem
-                                                    >
-                                                    <SelectItem
-                                                        v-if="can.uploadFiles"
-                                                        value="file"
-                                                        >Upload File</SelectItem
-                                                    >
+                                                    <SelectItem value="url">Remote URL</SelectItem>
+                                                    <SelectItem v-if="can.uploadFiles" value="file"
+                                                        >Upload File
+                                                    </SelectItem>
                                                 </SelectContent>
                                             </Select>
                                         </div>
-                                        <div
-                                            v-if="entrySource === 'url'"
-                                            class="grid gap-2"
-                                        >
-                                            <Label for="audio_url"
-                                                >Audio URL</Label
-                                            >
+                                        <div v-if="entrySource === 'url'" class="grid gap-2">
+                                            <Label for="audio_url">Audio URL</Label>
                                             <Input
                                                 id="audio_url"
                                                 v-model="entryForm.audio_url"
                                                 placeholder="https://example.com/audio.mp3"
                                             />
                                             <div
-                                                v-if="
-                                                    entryForm.errors.audio_url
-                                                "
+                                                v-if="entryForm.errors.audio_url"
                                                 class="text-sm text-red-500"
                                             >
                                                 {{ entryForm.errors.audio_url }}
                                             </div>
                                         </div>
-                                        <div
-                                            v-if="entrySource === 'file'"
-                                            class="grid gap-2"
-                                        >
+                                        <div v-if="entrySource === 'file'" class="grid gap-2">
                                             <Label for="file">Audio File</Label>
                                             <Input
                                                 id="file"
                                                 type="file"
-                                                @input="
-                                                    entryForm.file =
-                                                        $event.target.files[0]
-                                                "
+                                                @input="entryForm.file = $event.target.files[0]"
                                                 accept="audio/*"
                                             />
                                             <div
@@ -502,81 +431,53 @@ const submitEditEntry = () => {
                                             </div>
                                         </div>
                                         <div class="grid gap-2">
-                                            <Label for="entryImageSource"
-                                                >Image Source</Label
-                                            >
+                                            <Label for="entryImageSource">Image Source</Label>
                                             <Select v-model="entryImageSource">
                                                 <SelectTrigger>
-                                                    <SelectValue
-                                                        placeholder="Select source"
-                                                    />
+                                                    <SelectValue placeholder="Select source" />
                                                 </SelectTrigger>
                                                 <SelectContent>
-                                                    <SelectItem value="url"
-                                                        >Remote URL</SelectItem
-                                                    >
-                                                    <SelectItem
-                                                        v-if="can.uploadFiles"
-                                                        value="file"
-                                                        >Upload File</SelectItem
-                                                    >
+                                                    <SelectItem value="url">Remote URL</SelectItem>
+                                                    <SelectItem v-if="can.uploadFiles" value="file"
+                                                        >Upload File
+                                                    </SelectItem>
                                                 </SelectContent>
                                             </Select>
                                         </div>
-                                        <div
-                                            v-if="entryImageSource === 'url'"
-                                            class="grid gap-2"
-                                        >
-                                            <Label for="image_url"
-                                                >Image URL</Label
-                                            >
+                                        <div v-if="entryImageSource === 'url'" class="grid gap-2">
+                                            <Label for="image_url">Image URL</Label>
                                             <Input
                                                 id="image_url"
                                                 v-model="entryForm.image_url"
                                                 placeholder="https://example.com/image.jpg"
                                             />
                                             <div
-                                                v-if="
-                                                    entryForm.errors.image_url
-                                                "
+                                                v-if="entryForm.errors.image_url"
                                                 class="text-sm text-red-500"
                                             >
                                                 {{ entryForm.errors.image_url }}
                                             </div>
                                         </div>
-                                        <div
-                                            v-if="entryImageSource === 'file'"
-                                            class="grid gap-2"
-                                        >
-                                            <Label for="image_file"
-                                                >Image File</Label
-                                            >
+                                        <div v-if="entryImageSource === 'file'" class="grid gap-2">
+                                            <Label for="image_file">Image File</Label>
                                             <Input
                                                 id="image_file"
                                                 type="file"
                                                 @input="
-                                                    entryForm.image_file =
-                                                        $event.target.files[0]
+                                                    entryForm.image_file = $event.target.files[0]
                                                 "
                                                 accept="image/*"
                                             />
                                             <div
-                                                v-if="
-                                                    entryForm.errors.image_file
-                                                "
+                                                v-if="entryForm.errors.image_file"
                                                 class="text-sm text-red-500"
                                             >
-                                                {{
-                                                    entryForm.errors.image_file
-                                                }}
+                                                {{ entryForm.errors.image_file }}
                                             </div>
                                         </div>
                                     </div>
                                     <DialogFooter>
-                                        <Button
-                                            type="submit"
-                                            :disabled="entryForm.processing"
-                                        >
+                                        <Button type="submit" :disabled="entryForm.processing">
                                             Save Entry
                                         </Button>
                                     </DialogFooter>
@@ -594,12 +495,9 @@ const submitEditEntry = () => {
                             <DialogContent class="sm:max-w-[600px]">
                                 <div v-if="episodes.length === 0">
                                     <DialogHeader>
-                                        <DialogTitle
-                                            >Import from RSS Feed</DialogTitle
-                                        >
+                                        <DialogTitle>Import from RSS Feed</DialogTitle>
                                         <DialogDescription>
-                                            Enter the RSS feed URL to fetch
-                                            episodes.
+                                            Enter the RSS feed URL to fetch episodes.
                                         </DialogDescription>
                                     </DialogHeader>
                                     <div class="grid gap-4 py-4">
@@ -611,10 +509,7 @@ const submitEditEntry = () => {
                                                 placeholder="https://example.com/feed.xml"
                                                 :disabled="isFetchingRss"
                                             />
-                                            <p
-                                                v-if="rssError"
-                                                class="text-sm text-red-500"
-                                            >
+                                            <p v-if="rssError" class="text-sm text-red-500">
                                                 {{ rssError }}
                                             </p>
                                         </div>
@@ -634,13 +529,9 @@ const submitEditEntry = () => {
                                 </div>
                                 <div v-else>
                                     <DialogHeader>
-                                        <DialogTitle
-                                            >Select Episodes to
-                                            Import</DialogTitle
-                                        >
+                                        <DialogTitle>Select Episodes to Import</DialogTitle>
                                         <DialogDescription>
-                                            Select the episodes you want to add
-                                            to this feed.
+                                            Select the episodes you want to add to this feed.
                                         </DialogDescription>
                                     </DialogHeader>
                                     <div
@@ -649,48 +540,32 @@ const submitEditEntry = () => {
                                         <Table>
                                             <TableHeader>
                                                 <TableRow>
-                                                    <TableHead
-                                                        class="w-[50px]"
-                                                    ></TableHead>
-                                                    <TableHead
-                                                        >Episode</TableHead
-                                                    >
+                                                    <TableHead class="w-[50px]"></TableHead>
+                                                    <TableHead>Episode</TableHead>
                                                 </TableRow>
                                             </TableHeader>
                                             <TableBody>
                                                 <TableRow
-                                                    v-for="(
-                                                        episode, index
-                                                    ) in episodes"
+                                                    v-for="(episode, index) in episodes"
                                                     :key="index"
                                                 >
                                                     <TableCell>
                                                         <Checkbox
                                                             :model-value="
-                                                                selectedEpisodes.includes(
-                                                                    index,
-                                                                )
+                                                                selectedEpisodes.includes(index)
                                                             "
-                                                            :disabled="
-                                                                !episode.audio_url
-                                                            "
+                                                            :disabled="!episode.audio_url"
                                                             @update:modelValue="
-                                                                toggleEpisode(
-                                                                    index,
-                                                                )
+                                                                toggleEpisode(index)
                                                             "
                                                         />
                                                     </TableCell>
                                                     <TableCell>
-                                                        <div
-                                                            class="font-medium"
-                                                        >
+                                                        <div class="font-medium">
                                                             {{ episode.name }}
                                                         </div>
                                                         <div
-                                                            v-if="
-                                                                !episode.audio_url
-                                                            "
+                                                            v-if="!episode.audio_url"
                                                             class="text-xs text-red-500"
                                                         >
                                                             No audio URL found
@@ -700,18 +575,10 @@ const submitEditEntry = () => {
                                             </TableBody>
                                         </Table>
                                     </div>
-                                    <DialogFooter
-                                        class="flex justify-between sm:justify-between"
-                                    >
+                                    <DialogFooter class="flex justify-between sm:justify-between">
+                                        <Button variant="ghost" @click="episodes = []">Back</Button>
                                         <Button
-                                            variant="ghost"
-                                            @click="episodes = []"
-                                            >Back</Button
-                                        >
-                                        <Button
-                                            :disabled="
-                                                selectedEpisodes.length === 0
-                                            "
+                                            :disabled="selectedEpisodes.length === 0"
                                             @click="importRss"
                                         >
                                             Import
@@ -738,15 +605,8 @@ const submitEditEntry = () => {
                         <div class="grid gap-4 py-4">
                             <div class="grid gap-2">
                                 <Label for="edit-name">Name</Label>
-                                <Input
-                                    id="edit-name"
-                                    v-model="editEntryForm.name"
-                                    required
-                                />
-                                <div
-                                    v-if="editEntryForm.errors.name"
-                                    class="text-sm text-red-500"
-                                >
+                                <Input id="edit-name" v-model="editEntryForm.name" required />
+                                <div v-if="editEntryForm.errors.name" class="text-sm text-red-500">
                                     {{ editEntryForm.errors.name }}
                                 </div>
                             </div>
@@ -754,26 +614,17 @@ const submitEditEntry = () => {
                                 <Label for="edit-source">Source Type</Label>
                                 <Select v-model="editEntrySource">
                                     <SelectTrigger>
-                                        <SelectValue
-                                            placeholder="Select source"
-                                        />
+                                        <SelectValue placeholder="Select source" />
                                     </SelectTrigger>
                                     <SelectContent>
-                                        <SelectItem value="url"
-                                            >Remote URL</SelectItem
-                                        >
-                                        <SelectItem
-                                            v-if="can.uploadFiles"
-                                            value="file"
+                                        <SelectItem value="url">Remote URL</SelectItem>
+                                        <SelectItem v-if="can.uploadFiles" value="file"
                                             >Upload File</SelectItem
                                         >
                                     </SelectContent>
                                 </Select>
                             </div>
-                            <div
-                                v-if="editEntrySource === 'url'"
-                                class="grid gap-2"
-                            >
+                            <div v-if="editEntrySource === 'url'" class="grid gap-2">
                                 <Label for="edit-audio_url">Audio URL</Label>
                                 <Input
                                     id="edit-audio_url"
@@ -787,10 +638,7 @@ const submitEditEntry = () => {
                                     {{ editEntryForm.errors.audio_url }}
                                 </div>
                             </div>
-                            <div
-                                v-if="editEntrySource === 'file'"
-                                class="grid gap-2"
-                            >
+                            <div v-if="editEntrySource === 'file'" class="grid gap-2">
                                 <Label for="edit-file">Audio File</Label>
                                 <div
                                     v-if="
@@ -801,16 +649,12 @@ const submitEditEntry = () => {
                                     "
                                     class="flex items-center gap-4"
                                 >
-                                    <span class="text-sm text-gray-500"
-                                        >Current file attached</span
-                                    >
+                                    <span class="text-sm text-gray-500">Current file attached</span>
                                     <Button
                                         type="button"
                                         variant="destructive"
                                         size="sm"
-                                        @click="
-                                            editEntryForm.delete_file = true
-                                        "
+                                        @click="editEntryForm.delete_file = true"
                                     >
                                         Delete
                                     </Button>
@@ -819,10 +663,7 @@ const submitEditEntry = () => {
                                     <Input
                                         id="edit-file"
                                         type="file"
-                                        @input="
-                                            editEntryForm.file =
-                                                $event.target.files[0]
-                                        "
+                                        @input="editEntryForm.file = $event.target.files[0]"
                                         accept="audio/*"
                                     />
                                     <div
@@ -834,9 +675,7 @@ const submitEditEntry = () => {
                                     <Button
                                         v-if="
                                             editEntryForm.delete_file &&
-                                            !isExternal(
-                                                editingEntry?.audio_url,
-                                            ) &&
+                                            !isExternal(editingEntry?.audio_url) &&
                                             editingEntry?.audio_url
                                         "
                                         type="button"
@@ -853,31 +692,20 @@ const submitEditEntry = () => {
                                 </div>
                             </div>
                             <div class="grid gap-2">
-                                <Label for="editEntryImageSource"
-                                    >Image Source</Label
-                                >
+                                <Label for="editEntryImageSource">Image Source</Label>
                                 <Select v-model="editEntryImageSource">
                                     <SelectTrigger>
-                                        <SelectValue
-                                            placeholder="Select source"
-                                        />
+                                        <SelectValue placeholder="Select source" />
                                     </SelectTrigger>
                                     <SelectContent>
-                                        <SelectItem value="url"
-                                            >Remote URL</SelectItem
-                                        >
-                                        <SelectItem
-                                            v-if="can.uploadFiles"
-                                            value="file"
+                                        <SelectItem value="url">Remote URL</SelectItem>
+                                        <SelectItem v-if="can.uploadFiles" value="file"
                                             >Upload File</SelectItem
                                         >
                                     </SelectContent>
                                 </Select>
                             </div>
-                            <div
-                                v-if="editEntryImageSource === 'url'"
-                                class="grid gap-2"
-                            >
+                            <div v-if="editEntryImageSource === 'url'" class="grid gap-2">
                                 <Label for="edit-image_url">Image URL</Label>
                                 <Input
                                     id="edit-image_url"
@@ -891,10 +719,7 @@ const submitEditEntry = () => {
                                     {{ editEntryForm.errors.image_url }}
                                 </div>
                             </div>
-                            <div
-                                v-if="editEntryImageSource === 'file'"
-                                class="grid gap-2"
-                            >
+                            <div v-if="editEntryImageSource === 'file'" class="grid gap-2">
                                 <Label for="edit-image_file">Image File</Label>
                                 <div
                                     v-if="
@@ -912,9 +737,7 @@ const submitEditEntry = () => {
                                         type="button"
                                         variant="destructive"
                                         size="sm"
-                                        @click="
-                                            editEntryForm.delete_image_file = true
-                                        "
+                                        @click="editEntryForm.delete_image_file = true"
                                     >
                                         Delete
                                     </Button>
@@ -923,10 +746,7 @@ const submitEditEntry = () => {
                                     <Input
                                         id="edit-image_file"
                                         type="file"
-                                        @input="
-                                            editEntryForm.image_file =
-                                                $event.target.files[0]
-                                        "
+                                        @input="editEntryForm.image_file = $event.target.files[0]"
                                         accept="image/*"
                                     />
                                     <div
@@ -938,9 +758,7 @@ const submitEditEntry = () => {
                                     <Button
                                         v-if="
                                             editEntryForm.delete_image_file &&
-                                            !isExternal(
-                                                editingEntry?.image_url,
-                                            ) &&
+                                            !isExternal(editingEntry?.image_url) &&
                                             editingEntry?.image_url
                                         "
                                         type="button"
@@ -958,10 +776,7 @@ const submitEditEntry = () => {
                             </div>
                         </div>
                         <DialogFooter>
-                            <Button
-                                type="submit"
-                                :disabled="editEntryForm.processing"
-                            >
+                            <Button type="submit" :disabled="editEntryForm.processing">
                                 Update Entry
                             </Button>
                         </DialogFooter>
@@ -969,10 +784,7 @@ const submitEditEntry = () => {
                 </DialogContent>
             </Dialog>
 
-            <Dialog
-                :open="viewingSyncFailure"
-                @update:open="viewingSyncFailure = false"
-            >
+            <Dialog :open="viewingSyncFailure" @update:open="viewingSyncFailure = false">
                 <DialogContent class="max-w-2xl">
                     <DialogHeader>
                         <DialogTitle>Synchronization Failed</DialogTitle>
@@ -986,9 +798,8 @@ const submitEditEntry = () => {
                         <pre
                             class="text-xs leading-relaxed whitespace-pre-wrap text-red-800 dark:text-red-300"
                             >{{
-                                feed.latest_job_batch?.job_batch
-                                    ?.failed_job_details?.[0]?.exception ??
-                                'No exception details available.'
+                                feed.latest_job_batch?.job_batch?.failed_job_details?.[0]
+                                    ?.exception ?? 'No exception details available.'
                             }}</pre
                         >
                     </div>
@@ -1004,52 +815,34 @@ const submitEditEntry = () => {
                         </DialogDescription>
                     </DialogHeader>
                     <div class="max-h-[60vh] space-y-4 overflow-y-auto">
-                        <div
-                            v-if="viewingEntry?.absolute_audio_url"
-                            class="rounded-md border p-4"
-                        >
+                        <div v-if="viewingEntry?.absolute_audio_url" class="rounded-md border p-4">
                             <audio controls class="w-full">
-                                <source
-                                    :src="viewingEntry.absolute_audio_url"
-                                    type="audio/mpeg"
-                                />
+                                <source :src="viewingEntry.absolute_audio_url" type="audio/mpeg" />
                                 Your browser does not support the audio element.
                             </audio>
                         </div>
 
                         <div v-if="viewingEntry?.summary">
-                            <h4 class="mb-2 text-sm font-semibold">
-                                AI Summary
-                            </h4>
+                            <h4 class="mb-2 text-sm font-semibold">AI Summary</h4>
                             <div
                                 class="text-sm leading-relaxed text-muted-foreground [&_a]:text-blue-600 dark:[&_a]:text-blue-400 [&_a:hover]:underline [&_ol]:list-decimal [&_ol]:pl-5 [&_p]:mb-4 [&_ul]:list-disc [&_ul]:pl-5"
                                 v-html="formatSummary(viewingEntry.summary)"
                             ></div>
                         </div>
 
-                        <Separator
-                            v-if="
-                                viewingEntry?.summary &&
-                                viewingEntry?.original_summary
-                            "
-                        />
+                        <Separator v-if="viewingEntry?.summary && viewingEntry?.original_summary" />
 
                         <div v-if="viewingEntry?.original_summary">
-                            <h4 class="mb-2 text-sm font-semibold">
-                                Original Description
-                            </h4>
+                            <h4 class="mb-2 text-sm font-semibold">Original Description</h4>
                             <div
                                 class="text-sm leading-relaxed text-muted-foreground [&_a]:text-blue-600 dark:[&_a]:text-blue-400 [&_a:hover]:underline [&_ol]:list-decimal [&_ol]:pl-5 [&_p]:mb-4 [&_ul]:list-disc [&_ul]:pl-5"
-                                v-html="
-                                    formatSummary(viewingEntry.original_summary)
-                                "
+                                v-html="formatSummary(viewingEntry.original_summary)"
                             ></div>
                         </div>
 
                         <Separator
                             v-if="
-                                (viewingEntry?.summary ||
-                                    viewingEntry?.original_summary) &&
+                                (viewingEntry?.summary || viewingEntry?.original_summary) &&
                                 viewingEntry?.chapters?.length
                             "
                         />
@@ -1058,22 +851,15 @@ const submitEditEntry = () => {
                             <h4 class="mb-2 text-sm font-semibold">Chapters</h4>
                             <ul class="space-y-2">
                                 <li
-                                    v-for="(
-                                        chapter, index
-                                    ) in viewingEntry.chapters"
+                                    v-for="(chapter, index) in viewingEntry.chapters"
                                     :key="index"
                                     class="flex items-center gap-3"
                                 >
-                                    <Badge
-                                        variant="secondary"
-                                        class="shrink-0 font-mono text-xs"
-                                    >
+                                    <Badge variant="secondary" class="shrink-0 font-mono text-xs">
                                         <Clock class="mr-1 h-3 w-3" />
                                         {{ formatTimestamp(chapter.startTime) }}
                                     </Badge>
-                                    <span class="text-sm">{{
-                                        chapter.title
-                                    }}</span>
+                                    <span class="text-sm">{{ chapter.title }}</span>
                                 </li>
                             </ul>
                         </div>
@@ -1088,29 +874,18 @@ const submitEditEntry = () => {
                         />
 
                         <div v-if="parsedTranscription(viewingEntry)">
-                            <h4 class="mb-2 text-sm font-semibold">
-                                Transcription
-                            </h4>
+                            <h4 class="mb-2 text-sm font-semibold">Transcription</h4>
                             <div class="rounded-md border p-4">
                                 <div
-                                    v-for="(
-                                        segment, index
-                                    ) in parsedTranscription(viewingEntry)"
+                                    v-for="(segment, index) in parsedTranscription(viewingEntry)"
                                     :key="index"
                                     class="mb-2 last:mb-0"
                                 >
-                                    <span
-                                        class="mr-2 text-xs font-medium text-muted-foreground"
-                                    >
-                                        [{{
-                                            formatTimestamp(
-                                                segment.start_seconds,
-                                            )
-                                        }}] {{ segment.speaker }}:
+                                    <span class="mr-2 text-xs font-medium text-muted-foreground">
+                                        [{{ formatTimestamp(segment.start_seconds) }}]
+                                        {{ segment.speaker }}:
                                     </span>
-                                    <span class="text-sm leading-relaxed">{{
-                                        segment.text
-                                    }}</span>
+                                    <span class="text-sm leading-relaxed">{{ segment.text }}</span>
                                 </div>
                             </div>
                         </div>
@@ -1127,9 +902,7 @@ const submitEditEntry = () => {
                             <TableHead class="w-[12%]">Published</TableHead>
                             <TableHead class="w-[20%]">Enhancements</TableHead>
                             <TableHead class="w-[10%]">Details</TableHead>
-                            <TableHead
-                                v-if="can.update || can.delete"
-                                class="text-right"
+                            <TableHead v-if="can.update || can.delete" class="text-right"
                                 >Actions</TableHead
                             >
                         </TableRow>
@@ -1139,14 +912,8 @@ const submitEditEntry = () => {
                             <TableRow>
                                 <TableCell>
                                     <img
-                                        v-if="
-                                            entry.absolute_image_url ||
-                                            feed.absolute_image_url
-                                        "
-                                        :src="
-                                            entry.absolute_image_url ||
-                                            feed.absolute_image_url
-                                        "
+                                        v-if="entry.absolute_image_url || feed.absolute_image_url"
+                                        :src="entry.absolute_image_url || feed.absolute_image_url"
                                         alt="Entry image"
                                         class="h-10 w-10 rounded object-cover"
                                     />
@@ -1159,20 +926,13 @@ const submitEditEntry = () => {
                                 </TableCell>
                                 <TableCell class="align-top font-medium">
                                     <Link
-                                        :href="
-                                            showEntryAction.url([
-                                                props.feed.slug,
-                                                entry.slug,
-                                            ])
-                                        "
+                                        :href="showEntryAction.url([props.feed.slug, entry.slug])"
                                         class="hover:underline"
                                     >
                                         {{ entry.name }}
                                     </Link>
                                 </TableCell>
-                                <TableCell
-                                    class="align-top text-sm text-muted-foreground"
-                                >
+                                <TableCell class="align-top text-sm text-muted-foreground">
                                     {{ formatPublishedAt(entry) }}
                                 </TableCell>
                                 <TableCell class="align-top">
@@ -1194,53 +954,29 @@ const submitEditEntry = () => {
                                 >
                                     <DropdownMenu>
                                         <DropdownMenuTrigger as-child>
-                                            <Button
-                                                variant="ghost"
-                                                class="h-8 w-8 p-0"
-                                            >
-                                                <span class="sr-only"
-                                                    >Open menu</span
-                                                >
-                                                <MoreHorizontal
-                                                    class="h-4 w-4"
-                                                />
+                                            <Button variant="ghost" class="h-8 w-8 p-0">
+                                                <span class="sr-only">Open menu</span>
+                                                <MoreHorizontal class="h-4 w-4" />
                                             </Button>
                                         </DropdownMenuTrigger>
                                         <DropdownMenuContent align="end">
-                                            <template
-                                                v-if="
-                                                    !feed.rss_url && can.update
-                                                "
-                                            >
-                                                <DropdownMenuItem
-                                                    @click="
-                                                        startEditEntry(entry)
-                                                    "
-                                                >
+                                            <template v-if="!feed.rss_url && can.update">
+                                                <DropdownMenuItem @click="startEditEntry(entry)">
                                                     Edit
                                                 </DropdownMenuItem>
                                             </template>
 
                                             <EntryEnhancementActions
-                                                v-if="
-                                                    entry.can?.produce ||
-                                                    entry.can?.regenerate
-                                                "
+                                                v-if="entry.can?.produce || entry.can?.regenerate"
                                                 :feed="feed"
                                                 :entry="entry"
                                                 type="dropdown-items"
                                             />
 
-                                            <template
-                                                v-if="
-                                                    !feed.rss_url && can.delete
-                                                "
-                                            >
+                                            <template v-if="!feed.rss_url && can.delete">
                                                 <DropdownMenuItem
                                                     class="text-red-600"
-                                                    @click="
-                                                        deleteEntry(entry.slug)
-                                                    "
+                                                    @click="deleteEntry(entry.slug)"
                                                 >
                                                     Delete
                                                 </DropdownMenuItem>

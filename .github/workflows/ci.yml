@@ -25,15 +25,16 @@ jobs:
           coverage: xdebug
 
       - name: Setup Node
-        uses: actions/setup-node@v4
+        uses: voidzero-dev/setup-vp@v1
         with:
-          node-version: '22'
+          node-version-file: '.node-version'
+          cache: true
 
       - name: Install Node Dependencies
-        run: npm i
+        run: vp install
 
       - name: Install Playwright Dependencies
-        run: npx playwright install
+        run: vp exec playwright install
 
       - name: Install Dependencies
         run: composer install --no-interaction --prefer-dist --optimize-autoloader
@@ -45,7 +46,7 @@ jobs:
         run: php artisan key:generate
 
       - name: Build Assets
-        run: npm run build
+        run: vp build
 
       - name: Tests
         run: ./vendor/bin/pest
@@ -63,29 +64,24 @@ jobs:
 
   lint:
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
     steps:
       - uses: actions/checkout@v6
-
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
           php-version: '8.5'
-
+      - uses: voidzero-dev/setup-vp@v1
+        with:
+          node-version-file: '.node-version'
+          cache: true
       - name: Install Dependencies
         run: |
           composer install -q --no-ansi --no-interaction --no-scripts --no-progress --prefer-dist
-          npm install
-
-      - name: Run Pint
-        run: composer lint
-
-      - name: Format Frontend
-        run: npm run format
-
-      - name: Lint Frontend
-        run: npm run lint
+          vp install
+      - run: php artisan wayfinder:generate --with-form
+      - run: composer lint
+      - run: vp check
+      - run: vp run types:check
 
   deploy:
     runs-on: ubuntu-latest

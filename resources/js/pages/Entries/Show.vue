@@ -8,12 +8,7 @@ import EntryEnhancementStatus from '@/components/EntryEnhancementStatus.vue';
 import { Badge } from '@/components/ui/badge';
 import { useEntryPolling } from '@/composables/useEntryPolling';
 import AppLayout from '@/layouts/AppLayout.vue';
-import {
-    formatSummary,
-    formatTimestamp,
-    getBatchStatus,
-    parsedTranscription,
-} from '@/lib/entries';
+import { formatSummary, formatTimestamp, getBatchStatus, parsedTranscription } from '@/lib/entries';
 import { dashboard } from '@/routes';
 import type { BreadcrumbItem } from '@/types';
 
@@ -50,21 +45,13 @@ useEntryPolling(isProcessing);
     <Head :title="entry.name" />
 
     <AppLayout :breadcrumbs="breadcrumbs">
-        <div
-            class="mx-auto flex h-full w-full max-w-5xl flex-1 flex-col gap-6 p-4"
-        >
+        <div class="mx-auto flex h-full w-full max-w-5xl flex-1 flex-col gap-6 p-4">
             <div class="flex flex-col gap-2">
                 <div class="flex items-start justify-between gap-4">
                     <div class="flex items-center gap-4">
                         <img
-                            v-if="
-                                entry.absolute_image_url ||
-                                entry.feed.absolute_image_url
-                            "
-                            :src="
-                                entry.absolute_image_url ||
-                                entry.feed.absolute_image_url
-                            "
+                            v-if="entry.absolute_image_url || entry.feed.absolute_image_url"
+                            :src="entry.absolute_image_url || entry.feed.absolute_image_url"
                             alt="Entry image"
                             class="h-16 w-16 rounded object-cover shadow-sm"
                         />
@@ -77,11 +64,7 @@ useEntryPolling(isProcessing);
                                 class="mt-1 text-sm text-muted-foreground"
                             >
                                 Published:
-                                {{
-                                    new Date(
-                                        entry.published_at,
-                                    ).toLocaleDateString()
-                                }}
+                                {{ new Date(entry.published_at).toLocaleDateString() }}
                             </div>
                         </div>
                     </div>
@@ -101,11 +84,7 @@ useEntryPolling(isProcessing);
                 v-if="entry.absolute_audio_url"
                 class="flex items-center justify-between rounded-xl border bg-white p-4 dark:bg-zinc-950"
             >
-                <audio
-                    controls
-                    class="w-full max-w-2xl"
-                    :src="entry.absolute_audio_url"
-                >
+                <audio controls class="w-full max-w-2xl" :src="entry.absolute_audio_url">
                     Your browser does not support the audio element.
                 </audio>
                 <a
@@ -119,10 +98,7 @@ useEntryPolling(isProcessing);
             </div>
 
             <div class="grid gap-6">
-                <div
-                    v-if="entry.summary"
-                    class="rounded-xl border bg-white p-6 dark:bg-zinc-950"
-                >
+                <div v-if="entry.summary" class="rounded-xl border bg-white p-6 dark:bg-zinc-950">
                     <h3 class="mb-4 text-lg font-semibold">AI Summary</h3>
                     <div
                         class="text-sm leading-relaxed text-muted-foreground [&_a]:text-blue-600 dark:[&_a]:text-blue-400 [&_a:hover]:underline [&_ol]:list-decimal [&_ol]:pl-5 [&_p]:mb-4 [&_ul]:list-disc [&_ul]:pl-5"
@@ -134,9 +110,7 @@ useEntryPolling(isProcessing);
                     v-if="entry.original_summary"
                     class="rounded-xl border bg-white p-6 dark:bg-zinc-950"
                 >
-                    <h3 class="mb-4 text-lg font-semibold">
-                        Original Description
-                    </h3>
+                    <h3 class="mb-4 text-lg font-semibold">Original Description</h3>
                     <div
                         class="text-sm leading-relaxed text-muted-foreground [&_a]:text-blue-600 dark:[&_a]:text-blue-400 [&_a:hover]:underline [&_ol]:list-decimal [&_ol]:pl-5 [&_p]:mb-4 [&_ul]:list-disc [&_ul]:pl-5"
                         v-html="formatSummary(entry.original_summary)"
@@ -154,10 +128,7 @@ useEntryPolling(isProcessing);
                             :key="index"
                             class="flex items-center gap-3"
                         >
-                            <Badge
-                                variant="secondary"
-                                class="shrink-0 font-mono text-xs"
-                            >
+                            <Badge variant="secondary" class="shrink-0 font-mono text-xs">
                                 <Clock class="mr-1 h-3 w-3" />
                                 {{ formatTimestamp(chapter.startTime) }}
                             </Badge>
@@ -172,21 +143,12 @@ useEntryPolling(isProcessing);
                 >
                     <h3 class="mb-4 text-lg font-semibold">Transcription</h3>
                     <div class="space-y-4">
-                        <div
-                            v-for="(segment, index) in parsedTranscription(
-                                entry,
-                            )"
-                            :key="index"
-                        >
-                            <span
-                                class="mr-2 text-xs font-medium text-muted-foreground"
-                            >
+                        <div v-for="(segment, index) in parsedTranscription(entry)" :key="index">
+                            <span class="mr-2 text-xs font-medium text-muted-foreground">
                                 [{{ formatTimestamp(segment.start_seconds) }}]
                                 {{ segment.speaker }}:
                             </span>
-                            <span class="text-sm leading-relaxed">{{
-                                segment.text
-                            }}</span>
+                            <span class="text-sm leading-relaxed">{{ segment.text }}</span>
                         </div>
                     </div>
                 </div>

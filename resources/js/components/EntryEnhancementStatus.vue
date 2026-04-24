@@ -58,8 +58,7 @@ const viewingFailure = ref(false);
                     <pre
                         class="text-xs leading-relaxed whitespace-pre-wrap text-red-800 dark:text-red-300"
                         >{{
-                            entry.latest_job_batch?.job_batch
-                                ?.failed_job_details?.[0]?.exception ??
+                            entry.latest_job_batch?.job_batch?.failed_job_details?.[0]?.exception ??
                             'No exception details available.'
                         }}</pre
                     >

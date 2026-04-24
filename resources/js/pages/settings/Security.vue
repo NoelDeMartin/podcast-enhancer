@@ -62,11 +62,7 @@ onUnmounted(() => clearTwoFactorAuthData());
                         preserveScroll: true,
                     }"
                     reset-on-success
-                    :reset-on-error="[
-                        'password',
-                        'password_confirmation',
-                        'current_password',
-                    ]"
+                    :reset-on-error="['password', 'password_confirmation', 'current_password']"
                     class="space-y-6"
                     v-slot="{ errors, processing, recentlySuccessful }"
                 >
@@ -95,9 +91,7 @@ onUnmounted(() => clearTwoFactorAuthData());
                     </div>
 
                     <div class="grid gap-2">
-                        <Label for="password_confirmation"
-                            >Confirm password</Label
-                        >
+                        <Label for="password_confirmation">Confirm password</Label>
                         <PasswordInput
                             id="password_confirmation"
                             name="password_confirmation"
@@ -109,10 +103,7 @@ onUnmounted(() => clearTwoFactorAuthData());
                     </div>
 
                     <div class="flex items-center gap-4">
-                        <Button
-                            :disabled="processing"
-                            data-test="update-password-button"
-                        >
+                        <Button :disabled="processing" data-test="update-password-button">
                             Save password
                         </Button>
 
@@ -122,10 +113,7 @@ onUnmounted(() => clearTwoFactorAuthData());
                             leave-active-class="transition ease-in-out"
                             leave-to-class="opacity-0"
                         >
-                            <p
-                                v-show="recentlySuccessful"
-                                class="text-sm text-neutral-600"
-                            >
+                            <p v-show="recentlySuccessful" class="text-sm text-neutral-600">
                                 Saved.
                             </p>
                         </Transition>
@@ -145,17 +133,13 @@ onUnmounted(() => clearTwoFactorAuthData());
                     class="flex flex-col items-start justify-start space-y-4"
                 >
                     <p class="text-sm text-muted-foreground">
-                        When you enable two-factor authentication, you will be
-                        prompted for a secure pin during login. This pin can be
-                        retrieved from a TOTP-supported application on your
-                        phone.
+                        When you enable two-factor authentication, you will be prompted for a secure
+                        pin during login. This pin can be retrieved from a TOTP-supported
+                        application on your phone.
                     </p>
 
                     <div>
-                        <Button
-                            v-if="hasSetupData"
-                            @click="showSetupModal = true"
-                        >
+                        <Button v-if="hasSetupData" @click="showSetupModal = true">
                             <ShieldCheck />Continue setup
                         </Button>
                         <Form
@@ -164,30 +148,20 @@ onUnmounted(() => clearTwoFactorAuthData());
                             @success="showSetupModal = true"
                             #default="{ processing }"
                         >
-                            <Button type="submit" :disabled="processing">
-                                Enable 2FA
-                            </Button>
+                            <Button type="submit" :disabled="processing"> Enable 2FA </Button>
                         </Form>
                     </div>
                 </div>
 
-                <div
-                    v-else
-                    class="flex flex-col items-start justify-start space-y-4"
-                >
+                <div v-else class="flex flex-col items-start justify-start space-y-4">
                     <p class="text-sm text-muted-foreground">
-                        You will be prompted for a secure, random pin during
-                        login, which you can retrieve from the TOTP-supported
-                        application on your phone.
+                        You will be prompted for a secure, random pin during login, which you can
+                        retrieve from the TOTP-supported application on your phone.
                     </p>
 
                     <div class="relative inline">
                         <Form v-bind="disable.form()" #default="{ processing }">
-                            <Button
-                                variant="destructive"
-                                type="submit"
-                                :disabled="processing"
-                            >
+                            <Button variant="destructive" type="submit" :disabled="processing">
                                 Disable 2FA
                             </Button>
                         </Form>

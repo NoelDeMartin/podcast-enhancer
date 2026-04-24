@@ -33,9 +33,7 @@ const passwordInput = useTemplateRef('passwordInput');
         >
             <div class="relative space-y-0.5 text-red-600 dark:text-red-100">
                 <p class="font-medium">Warning</p>
-                <p class="text-sm">
-                    Please proceed with caution, this cannot be undone.
-                </p>
+                <p class="text-sm">Please proceed with caution, this cannot be undone.</p>
             </div>
             <Dialog>
                 <DialogTrigger as-child>
@@ -55,23 +53,16 @@ const passwordInput = useTemplateRef('passwordInput');
                         v-slot="{ errors, processing, reset, clearErrors }"
                     >
                         <DialogHeader class="space-y-3">
-                            <DialogTitle
-                                >Are you sure you want to delete your
-                                account?</DialogTitle
-                            >
+                            <DialogTitle>Are you sure you want to delete your account?</DialogTitle>
                             <DialogDescription>
-                                Once your account is deleted, all of its
-                                resources and data will also be permanently
-                                deleted. Please enter your password to confirm
-                                you would like to permanently delete your
-                                account.
+                                Once your account is deleted, all of its resources and data will
+                                also be permanently deleted. Please enter your password to confirm
+                                you would like to permanently delete your account.
                             </DialogDescription>
                         </DialogHeader>
 
                         <div class="grid gap-2">
-                            <Label for="password" class="sr-only"
-                                >Password</Label
-                            >
+                            <Label for="password" class="sr-only">Password</Label>
                             <PasswordInput
                                 id="password"
                                 name="password"

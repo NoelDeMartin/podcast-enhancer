@@ -4,13 +4,7 @@ import { Eye, EyeOff, LockKeyhole, RefreshCw } from 'lucide-vue-next';
 import { nextTick, onMounted, ref, useTemplateRef } from 'vue';
 import AlertError from '@/components/AlertError.vue';
 import { Button } from '@/components/ui/button';
-import {
-    Card,
-    CardContent,
-    CardDescription,
-    CardHeader,
-    CardTitle,
-} from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useTwoFactorAuth } from '@/composables/useTwoFactorAuth';
 import { regenerateRecoveryCodes } from '@/routes/two-factor';
 
@@ -45,8 +39,8 @@ onMounted(async () => {
                 <LockKeyhole class="size-4" />2FA recovery codes
             </CardTitle>
             <CardDescription>
-                Recovery codes let you regain access if you lose your 2FA
-                device. Store them in a secure password manager.
+                Recovery codes let you regain access if you lose your 2FA device. Store them in a
+                secure password manager.
             </CardDescription>
         </CardHeader>
         <CardContent>
@@ -54,12 +48,8 @@ onMounted(async () => {
                 class="flex flex-col gap-3 select-none sm:flex-row sm:items-center sm:justify-between"
             >
                 <Button @click="toggleRecoveryCodesVisibility" class="w-fit">
-                    <component
-                        :is="isRecoveryCodesVisible ? EyeOff : Eye"
-                        class="size-4"
-                    />
-                    {{ isRecoveryCodesVisible ? 'Hide' : 'View' }} recovery
-                    codes
+                    <component :is="isRecoveryCodesVisible ? EyeOff : Eye" class="size-4" />
+                    {{ isRecoveryCodesVisible ? 'Hide' : 'View' }} recovery codes
                 </Button>
 
                 <Form
@@ -70,11 +60,7 @@ onMounted(async () => {
                     @success="fetchRecoveryCodes"
                     #default="{ processing }"
                 >
-                    <Button
-                        variant="secondary"
-                        type="submit"
-                        :disabled="processing"
-                    >
+                    <Button variant="secondary" type="submit" :disabled="processing">
                         <RefreshCw /> Regenerate codes
                     </Button>
                 </Form>
@@ -82,9 +68,7 @@ onMounted(async () => {
             <div
                 :class="[
                     'relative overflow-hidden transition-all duration-300',
-                    isRecoveryCodesVisible
-                        ? 'h-auto opacity-100'
-                        : 'h-0 opacity-0',
+                    isRecoveryCodesVisible ? 'h-auto opacity-100' : 'h-0 opacity-0',
                 ]"
             >
                 <div v-if="errors?.length" class="mt-6">
@@ -102,18 +86,13 @@ onMounted(async () => {
                                 class="h-4 animate-pulse rounded bg-muted-foreground/20"
                             ></div>
                         </div>
-                        <div
-                            v-else
-                            v-for="(code, index) in recoveryCodesList"
-                            :key="index"
-                        >
+                        <div v-else v-for="(code, index) in recoveryCodesList" :key="index">
                             {{ code }}
                         </div>
                     </div>
                     <p class="text-xs text-muted-foreground select-none">
-                        Each recovery code can be used once to access your
-                        account and will be removed after use. If you need more,
-                        click
+                        Each recovery code can be used once to access your account and will be
+                        removed after use. If you need more, click
                         <span class="font-bold">Regenerate codes</span> above.
                     </p>
                 </div>

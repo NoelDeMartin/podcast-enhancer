@@ -3,12 +3,7 @@ import { Head, Link } from '@inertiajs/vue3';
 import { useForm } from '@inertiajs/vue3';
 import { MoreHorizontal, Plus, Rss, Loader2 } from 'lucide-vue-next';
 import { ref } from 'vue';
-import {
-    store,
-    destroy,
-    show,
-    update,
-} from '@/actions/App/Http/Controllers/FeedController';
+import { store, destroy, show, update } from '@/actions/App/Http/Controllers/FeedController';
 import { store as syncStore } from '@/actions/App/Http/Controllers/FeedSyncController';
 import { Button } from '@/components/ui/button';
 import {
@@ -205,9 +200,7 @@ const getSyncStatus = (feed: any) => {
 
     const lastSynced = new Date(feed.last_synced_at);
     const now = new Date();
-    const threshold = new Date(
-        lastSynced.getTime() + (feed.sync_frequency ?? 0) * 1000,
-    );
+    const threshold = new Date(lastSynced.getTime() + (feed.sync_frequency ?? 0) * 1000);
 
     if (now > threshold) {
         return {
@@ -252,21 +245,15 @@ const formatLastSynced = (date: string) => {
                         <DialogContent>
                             <form @submit.prevent="submitImportRss">
                                 <DialogHeader>
-                                    <DialogTitle
-                                        >Import Feed from RSS</DialogTitle
-                                    >
+                                    <DialogTitle>Import Feed from RSS</DialogTitle>
                                     <DialogDescription>
-                                        Create a synchronized feed automatically
-                                        from an RSS URL.
+                                        Create a synchronized feed automatically from an RSS URL.
                                     </DialogDescription>
                                 </DialogHeader>
                                 <div class="grid gap-4 py-4">
                                     <div class="grid gap-2">
                                         <Label for="rss_url"
-                                            >RSS URL
-                                            <span class="text-red-500"
-                                                >*</span
-                                            ></Label
+                                            >RSS URL <span class="text-red-500">*</span></Label
                                         >
                                         <Input
                                             id="rss_url"
@@ -282,64 +269,36 @@ const formatLastSynced = (date: string) => {
                                         </div>
                                     </div>
                                     <div class="grid gap-2">
-                                        <Label for="sync_frequency"
-                                            >Sync Frequency</Label
-                                        >
-                                        <Select
-                                            v-model="
-                                                importRssForm.sync_frequency
-                                            "
-                                        >
+                                        <Label for="sync_frequency">Sync Frequency</Label>
+                                        <Select v-model="importRssForm.sync_frequency">
                                             <SelectTrigger id="sync_frequency">
-                                                <SelectValue
-                                                    placeholder="Select frequency"
-                                                />
+                                                <SelectValue placeholder="Select frequency" />
                                             </SelectTrigger>
                                             <SelectContent>
-                                                <SelectItem value="0"
-                                                    >Manual only</SelectItem
-                                                >
-                                                <SelectItem value="3600"
-                                                    >Every hour</SelectItem
-                                                >
-                                                <SelectItem value="21600"
-                                                    >Every 6 hours</SelectItem
-                                                >
+                                                <SelectItem value="0">Manual only</SelectItem>
+                                                <SelectItem value="3600">Every hour</SelectItem>
+                                                <SelectItem value="21600">Every 6 hours</SelectItem>
                                                 <SelectItem value="43200"
                                                     >Every 12 hours</SelectItem
                                                 >
-                                                <SelectItem value="86400"
-                                                    >Daily</SelectItem
-                                                >
-                                                <SelectItem value="604800"
-                                                    >Weekly</SelectItem
-                                                >
+                                                <SelectItem value="86400">Daily</SelectItem>
+                                                <SelectItem value="604800">Weekly</SelectItem>
                                             </SelectContent>
                                         </Select>
                                         <div
-                                            v-if="
-                                                importRssForm.errors
-                                                    .sync_frequency
-                                            "
+                                            v-if="importRssForm.errors.sync_frequency"
                                             class="text-sm text-red-500"
                                         >
-                                            {{
-                                                importRssForm.errors
-                                                    .sync_frequency
-                                            }}
+                                            {{ importRssForm.errors.sync_frequency }}
                                         </div>
                                     </div>
                                     <div class="text-xs text-muted-foreground">
-                                        Note: Synchronized feeds will not
-                                        automatically transcribe imported
-                                        episodes to reduce server load.
+                                        Note: Synchronized feeds will not automatically transcribe
+                                        imported episodes to reduce server load.
                                     </div>
                                 </div>
                                 <DialogFooter>
-                                    <Button
-                                        type="submit"
-                                        :disabled="importRssForm.processing"
-                                    >
+                                    <Button type="submit" :disabled="importRssForm.processing">
                                         <Loader2
                                             v-if="importRssForm.processing"
                                             class="mr-2 h-4 w-4 animate-spin"
@@ -362,8 +321,7 @@ const formatLastSynced = (date: string) => {
                                 <DialogHeader>
                                     <DialogTitle>Create New Feed</DialogTitle>
                                     <DialogDescription>
-                                        Add a new feed to start tracking
-                                        entries.
+                                        Add a new feed to start tracking entries.
                                     </DialogDescription>
                                 </DialogHeader>
                                 <div class="grid gap-4 py-4">
@@ -375,17 +333,12 @@ const formatLastSynced = (date: string) => {
                                             placeholder="Enter feed title..."
                                             required
                                         />
-                                        <div
-                                            v-if="form.errors.title"
-                                            class="text-sm text-red-500"
-                                        >
+                                        <div v-if="form.errors.title" class="text-sm text-red-500">
                                             {{ form.errors.title }}
                                         </div>
                                     </div>
                                     <div class="grid gap-2">
-                                        <Label for="description"
-                                            >Description</Label
-                                        >
+                                        <Label for="description">Description</Label>
                                         <Textarea
                                             id="description"
                                             v-model="form.description"
@@ -400,31 +353,20 @@ const formatLastSynced = (date: string) => {
                                         </div>
                                     </div>
                                     <div class="grid gap-2">
-                                        <Label for="feedImageSource"
-                                            >Image Source</Label
-                                        >
+                                        <Label for="feedImageSource">Image Source</Label>
                                         <Select v-model="feedImageSource">
                                             <SelectTrigger>
-                                                <SelectValue
-                                                    placeholder="Select source"
-                                                />
+                                                <SelectValue placeholder="Select source" />
                                             </SelectTrigger>
                                             <SelectContent>
-                                                <SelectItem value="url"
-                                                    >Remote URL</SelectItem
-                                                >
-                                                <SelectItem
-                                                    v-if="can?.uploadFiles"
-                                                    value="file"
+                                                <SelectItem value="url">Remote URL</SelectItem>
+                                                <SelectItem v-if="can?.uploadFiles" value="file"
                                                     >Upload File</SelectItem
                                                 >
                                             </SelectContent>
                                         </Select>
                                     </div>
-                                    <div
-                                        v-if="feedImageSource === 'url'"
-                                        class="grid gap-2"
-                                    >
+                                    <div v-if="feedImageSource === 'url'" class="grid gap-2">
                                         <Label for="image_url">Image URL</Label>
                                         <Input
                                             id="image_url"
@@ -438,20 +380,12 @@ const formatLastSynced = (date: string) => {
                                             {{ form.errors.image_url }}
                                         </div>
                                     </div>
-                                    <div
-                                        v-if="feedImageSource === 'file'"
-                                        class="grid gap-2"
-                                    >
-                                        <Label for="image_file"
-                                            >Image File</Label
-                                        >
+                                    <div v-if="feedImageSource === 'file'" class="grid gap-2">
+                                        <Label for="image_file">Image File</Label>
                                         <Input
                                             id="image_file"
                                             type="file"
-                                            @input="
-                                                form.image_file =
-                                                    $event.target.files[0]
-                                            "
+                                            @input="form.image_file = $event.target.files[0]"
                                             accept="image/*"
                                         />
                                         <div
@@ -463,10 +397,7 @@ const formatLastSynced = (date: string) => {
                                     </div>
                                 </div>
                                 <DialogFooter>
-                                    <Button
-                                        type="submit"
-                                        :disabled="form.processing"
-                                    >
+                                    <Button type="submit" :disabled="form.processing">
                                         Create Feed
                                     </Button>
                                 </DialogFooter>
@@ -492,14 +423,11 @@ const formatLastSynced = (date: string) => {
                             >
                                 <div class="flex items-center gap-2">
                                     <Rss class="h-4 w-4" />
-                                    <span class="font-medium"
-                                        >External Feed</span
-                                    >
+                                    <span class="font-medium">External Feed</span>
                                 </div>
                                 <p>
-                                    Title, description, and image are
-                                    automatically managed from the RSS feed.
-                                    Sync frequency can still be adjusted.
+                                    Title, description, and image are automatically managed from the
+                                    RSS feed. Sync frequency can still be adjusted.
                                 </p>
                             </div>
                             <div v-if="editingFeed?.rss_url" class="grid gap-2">
@@ -518,22 +446,16 @@ const formatLastSynced = (date: string) => {
                                     v-model="editFeedForm.title"
                                     :readonly="!!editingFeed?.rss_url"
                                     :class="{
-                                        'bg-muted text-muted-foreground':
-                                            !!editingFeed?.rss_url,
+                                        'bg-muted text-muted-foreground': !!editingFeed?.rss_url,
                                     }"
                                     required
                                 />
-                                <div
-                                    v-if="editFeedForm.errors.title"
-                                    class="text-sm text-red-500"
-                                >
+                                <div v-if="editFeedForm.errors.title" class="text-sm text-red-500">
                                     {{ editFeedForm.errors.title }}
                                 </div>
                             </div>
                             <div class="grid gap-2">
-                                <Label for="edit-description"
-                                    >Description</Label
-                                >
+                                <Label for="edit-description">Description</Label>
                                 <Textarea
                                     id="edit-description"
                                     v-model="editFeedForm.description"
@@ -541,8 +463,7 @@ const formatLastSynced = (date: string) => {
                                     rows="3"
                                     :readonly="!!editingFeed?.rss_url"
                                     :class="{
-                                        'bg-muted text-muted-foreground':
-                                            !!editingFeed?.rss_url,
+                                        'bg-muted text-muted-foreground': !!editingFeed?.rss_url,
                                     }"
                                 />
                                 <div
@@ -553,34 +474,18 @@ const formatLastSynced = (date: string) => {
                                 </div>
                             </div>
                             <div v-if="editingFeed?.rss_url" class="grid gap-2">
-                                <Label for="edit-sync_frequency"
-                                    >Sync Frequency</Label
-                                >
+                                <Label for="edit-sync_frequency">Sync Frequency</Label>
                                 <Select v-model="editFeedForm.sync_frequency">
                                     <SelectTrigger id="edit-sync_frequency">
-                                        <SelectValue
-                                            placeholder="Select frequency"
-                                        />
+                                        <SelectValue placeholder="Select frequency" />
                                     </SelectTrigger>
                                     <SelectContent>
-                                        <SelectItem value="0"
-                                            >Manual only</SelectItem
-                                        >
-                                        <SelectItem value="3600"
-                                            >Every hour</SelectItem
-                                        >
-                                        <SelectItem value="21600"
-                                            >Every 6 hours</SelectItem
-                                        >
-                                        <SelectItem value="43200"
-                                            >Every 12 hours</SelectItem
-                                        >
-                                        <SelectItem value="86400"
-                                            >Daily</SelectItem
-                                        >
-                                        <SelectItem value="604800"
-                                            >Weekly</SelectItem
-                                        >
+                                        <SelectItem value="0">Manual only</SelectItem>
+                                        <SelectItem value="3600">Every hour</SelectItem>
+                                        <SelectItem value="21600">Every 6 hours</SelectItem>
+                                        <SelectItem value="43200">Every 12 hours</SelectItem>
+                                        <SelectItem value="86400">Daily</SelectItem>
+                                        <SelectItem value="604800">Weekly</SelectItem>
                                     </SelectContent>
                                 </Select>
                                 <div
@@ -592,34 +497,21 @@ const formatLastSynced = (date: string) => {
                             </div>
                             <template v-if="!editingFeed?.rss_url">
                                 <div class="grid gap-2">
-                                    <Label for="editFeedImageSource"
-                                        >Image Source</Label
-                                    >
+                                    <Label for="editFeedImageSource">Image Source</Label>
                                     <Select v-model="editFeedImageSource">
                                         <SelectTrigger>
-                                            <SelectValue
-                                                placeholder="Select source"
-                                            />
+                                            <SelectValue placeholder="Select source" />
                                         </SelectTrigger>
                                         <SelectContent>
-                                            <SelectItem value="url"
-                                                >Remote URL</SelectItem
-                                            >
-                                            <SelectItem
-                                                v-if="can?.uploadFiles"
-                                                value="file"
+                                            <SelectItem value="url">Remote URL</SelectItem>
+                                            <SelectItem v-if="can?.uploadFiles" value="file"
                                                 >Upload File</SelectItem
                                             >
                                         </SelectContent>
                                     </Select>
                                 </div>
-                                <div
-                                    v-if="editFeedImageSource === 'url'"
-                                    class="grid gap-2"
-                                >
-                                    <Label for="edit-image_url"
-                                        >Image URL</Label
-                                    >
+                                <div v-if="editFeedImageSource === 'url'" class="grid gap-2">
+                                    <Label for="edit-image_url">Image URL</Label>
                                     <Input
                                         id="edit-image_url"
                                         v-model="editFeedForm.image_url"
@@ -632,18 +524,11 @@ const formatLastSynced = (date: string) => {
                                         {{ editFeedForm.errors.image_url }}
                                     </div>
                                 </div>
-                                <div
-                                    v-if="editFeedImageSource === 'file'"
-                                    class="grid gap-2"
-                                >
-                                    <Label for="edit-image_file"
-                                        >Image File</Label
-                                    >
+                                <div v-if="editFeedImageSource === 'file'" class="grid gap-2">
+                                    <Label for="edit-image_file">Image File</Label>
                                     <div
                                         v-if="
-                                            !isExternal(
-                                                editingFeed?.image_url,
-                                            ) &&
+                                            !isExternal(editingFeed?.image_url) &&
                                             editingFeed?.image_url &&
                                             !editFeedForm.delete_image_file &&
                                             !editFeedForm.image_file
@@ -657,9 +542,7 @@ const formatLastSynced = (date: string) => {
                                             type="button"
                                             variant="destructive"
                                             size="sm"
-                                            @click="
-                                                editFeedForm.delete_image_file = true
-                                            "
+                                            @click="editFeedForm.delete_image_file = true"
                                         >
                                             Delete
                                         </Button>
@@ -669,15 +552,12 @@ const formatLastSynced = (date: string) => {
                                             id="edit-image_file"
                                             type="file"
                                             @input="
-                                                editFeedForm.image_file =
-                                                    $event.target.files[0]
+                                                editFeedForm.image_file = $event.target.files[0]
                                             "
                                             accept="image/*"
                                         />
                                         <div
-                                            v-if="
-                                                editFeedForm.errors.image_file
-                                            "
+                                            v-if="editFeedForm.errors.image_file"
                                             class="text-sm text-red-500"
                                         >
                                             {{ editFeedForm.errors.image_file }}
@@ -685,9 +565,7 @@ const formatLastSynced = (date: string) => {
                                         <Button
                                             v-if="
                                                 editFeedForm.delete_image_file &&
-                                                !isExternal(
-                                                    editingFeed?.image_url,
-                                                ) &&
+                                                !isExternal(editingFeed?.image_url) &&
                                                 editingFeed?.image_url
                                             "
                                             type="button"
@@ -726,10 +604,7 @@ const formatLastSynced = (date: string) => {
                             </div>
                         </div>
                         <DialogFooter>
-                            <Button
-                                type="submit"
-                                :disabled="editFeedForm.processing"
-                            >
+                            <Button type="submit" :disabled="editFeedForm.processing">
                                 Update Feed
                             </Button>
                         </DialogFooter>
@@ -743,8 +618,7 @@ const formatLastSynced = (date: string) => {
                         <DialogHeader class="space-y-3">
                             <DialogTitle>Delete feed</DialogTitle>
                             <DialogDescription>
-                                This is a dangerous operation and cannot be
-                                undone.
+                                This is a dangerous operation and cannot be undone.
                             </DialogDescription>
                         </DialogHeader>
 
@@ -752,9 +626,7 @@ const formatLastSynced = (date: string) => {
                             class="space-y-3 rounded-lg border border-red-100 bg-red-50 p-4 text-sm text-red-700 dark:border-red-200/10 dark:bg-red-700/10 dark:text-red-100"
                         >
                             <div class="space-y-1">
-                                <div class="font-medium">
-                                    You are about to permanently delete:
-                                </div>
+                                <div class="font-medium">You are about to permanently delete:</div>
                                 <div class="font-semibold">
                                     {{ deletingFeed?.title ?? 'This feed' }}
                                 </div>
@@ -765,9 +637,7 @@ const formatLastSynced = (date: string) => {
                                     {{ deletingFeed?.entries_count ?? 0 }}
                                 </span>
                                 {{
-                                    (deletingFeed?.entries_count ?? 0) === 1
-                                        ? 'entry'
-                                        : 'entries'
+                                    (deletingFeed?.entries_count ?? 0) === 1 ? 'entry' : 'entries'
                                 }}.
                             </div>
                         </div>
@@ -823,10 +693,7 @@ const formatLastSynced = (date: string) => {
                                 </div>
                             </TableCell>
                             <TableCell class="font-medium">
-                                <Link
-                                    :href="show.url(feed.slug)"
-                                    class="hover:underline"
-                                >
+                                <Link :href="show.url(feed.slug)" class="hover:underline">
                                     {{ feed.title }}
                                 </Link>
                             </TableCell>
@@ -846,42 +713,24 @@ const formatLastSynced = (date: string) => {
                                     </div>
                                     <div class="text-muted-foreground">
                                         Freq:
-                                        {{
-                                            SYNC_FREQUENCIES[
-                                                feed.sync_frequency ?? 0
-                                            ] ?? 'Manual'
-                                        }}
+                                        {{ SYNC_FREQUENCIES[feed.sync_frequency ?? 0] ?? 'Manual' }}
                                     </div>
-                                    <div
-                                        v-if="feed.last_synced_at"
-                                        class="text-muted-foreground"
-                                    >
+                                    <div v-if="feed.last_synced_at" class="text-muted-foreground">
                                         Last:
-                                        {{
-                                            formatLastSynced(
-                                                feed.last_synced_at,
-                                            )
-                                        }}
+                                        {{ formatLastSynced(feed.last_synced_at) }}
                                     </div>
                                 </div>
                             </TableCell>
                             <TableCell class="text-right">
                                 <DropdownMenu>
                                     <DropdownMenuTrigger as-child>
-                                        <Button
-                                            variant="ghost"
-                                            class="h-8 w-8 p-0"
-                                        >
-                                            <span class="sr-only"
-                                                >Open menu</span
-                                            >
+                                        <Button variant="ghost" class="h-8 w-8 p-0">
+                                            <span class="sr-only">Open menu</span>
                                             <MoreHorizontal class="h-4 w-4" />
                                         </Button>
                                     </DropdownMenuTrigger>
                                     <DropdownMenuContent align="end">
-                                        <DropdownMenuItem
-                                            @click="startEditFeed(feed)"
-                                        >
+                                        <DropdownMenuItem @click="startEditFeed(feed)">
                                             Edit
                                         </DropdownMenuItem>
                                         <DropdownMenuItem

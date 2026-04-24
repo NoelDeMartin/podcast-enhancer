@@ -27,9 +27,7 @@ const regenerateTranscription = () => {
 };
 
 const regenerateMetadata = () => {
-    useForm({ reuse_transcript: true }).submit(
-        produceEntry([props.feed.slug, props.entry.slug]),
-    );
+    useForm({ reuse_transcript: true }).submit(produceEntry([props.feed.slug, props.entry.slug]));
 };
 
 const isPending = () => getBatchStatus(props.entry) === 'pending';
@@ -42,17 +40,11 @@ const hasTranscription = () => !!props.entry.transcription_path;
             v-if="
                 entry.audio_url &&
                 !isPending() &&
-                (!hasTranscription()
-                    ? entry.can?.produce
-                    : entry.can?.regenerate)
+                (!hasTranscription() ? entry.can?.produce : entry.can?.regenerate)
             "
             @click="regenerateTranscription"
         >
-            {{
-                hasTranscription()
-                    ? 'Regenerate enhancements'
-                    : 'Generate enhancements'
-            }}
+            {{ hasTranscription() ? 'Regenerate enhancements' : 'Generate enhancements' }}
         </DropdownMenuItem>
 
         <DropdownMenuItem
@@ -64,11 +56,7 @@ const hasTranscription = () => !!props.entry.transcription_path;
     </template>
 
     <template v-else-if="!isPending() && entry.audio_url">
-        <DropdownMenu
-            v-if="
-                !hasTranscription() ? entry.can?.produce : entry.can?.regenerate
-            "
-        >
+        <DropdownMenu v-if="!hasTranscription() ? entry.can?.produce : entry.can?.regenerate">
             <DropdownMenuTrigger as-child>
                 <Button variant="outline">
                     <Sparkles class="mr-2 h-4 w-4" />
@@ -77,18 +65,10 @@ const hasTranscription = () => !!props.entry.transcription_path;
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
                 <DropdownMenuItem
-                    v-if="
-                        !hasTranscription()
-                            ? entry.can?.produce
-                            : entry.can?.regenerate
-                    "
+                    v-if="!hasTranscription() ? entry.can?.produce : entry.can?.regenerate"
                     @click="regenerateTranscription"
                 >
-                    {{
-                        hasTranscription()
-                            ? 'Regenerate everything'
-                            : 'Generate enhancements'
-                    }}
+                    {{ hasTranscription() ? 'Regenerate everything' : 'Generate enhancements' }}
                 </DropdownMenuItem>
                 <DropdownMenuItem
                     v-if="hasTranscription() && entry.can?.regenerate"
