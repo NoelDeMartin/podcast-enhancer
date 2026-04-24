@@ -5,7 +5,7 @@ use Illuminate\Support\Facades\Hash;
 use Inertia\Testing\AssertableInertia as Assert;
 use Laravel\Fortify\Features;
 
-test('security page is displayed', function () {
+it('displays the security page', function () {
     $this->skipUnlessFortifyFeature(Features::twoFactorAuthentication());
 
     Features::twoFactorAuthentication([
@@ -25,7 +25,7 @@ test('security page is displayed', function () {
         );
 });
 
-test('security page requires password confirmation when enabled', function () {
+it('requires password confirmation for the security page when enabled', function () {
     $this->skipUnlessFortifyFeature(Features::twoFactorAuthentication());
 
     $user = User::factory()->create();
@@ -41,7 +41,7 @@ test('security page requires password confirmation when enabled', function () {
     $response->assertRedirect(route('password.confirm'));
 });
 
-test('security page does not require password confirmation when disabled', function () {
+it('does not require password confirmation for the security page when disabled', function () {
     $this->skipUnlessFortifyFeature(Features::twoFactorAuthentication());
 
     $user = User::factory()->create();
@@ -59,7 +59,7 @@ test('security page does not require password confirmation when disabled', funct
         );
 });
 
-test('security page renders without two factor when feature is disabled', function () {
+it('renders the security page without two factor when feature is disabled', function () {
     $this->skipUnlessFortifyFeature(Features::twoFactorAuthentication());
 
     config(['fortify.features' => []]);
@@ -77,7 +77,7 @@ test('security page renders without two factor when feature is disabled', functi
         );
 });
 
-test('password can be updated', function () {
+it('can update the password', function () {
     $user = User::factory()->create();
 
     $response = $this
@@ -96,7 +96,7 @@ test('password can be updated', function () {
     expect(Hash::check('new-password', $user->refresh()->password))->toBeTrue();
 });
 
-test('correct password must be provided to update password', function () {
+it('validates the password before updates', function () {
     $user = User::factory()->create();
 
     $response = $this

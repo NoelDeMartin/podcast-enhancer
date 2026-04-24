@@ -183,13 +183,13 @@ class EntryController extends Controller
 
         if ($reuseTranscript) {
             $this->dispatchMetadataBatch($entry);
-        } else {
-            $this->dispatchTranscriptionBatch($entry);
+
+            return redirect()->back()->with('success', 'Chapters and summary regeneration queued successfully.');
         }
 
-        return redirect()->back()->with('success', $reuseTranscript
-            ? 'Chapters and summary regeneration queued successfully.'
-            : 'Transcription queued successfully.');
+        $this->dispatchTranscriptionBatch($entry);
+
+        return redirect()->back()->with('success', 'Transcription queued successfully.');
     }
 
     private function shouldUpdateAudio(array $validated, Entry $entry): bool
