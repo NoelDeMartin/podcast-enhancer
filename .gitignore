@@ -11,6 +11,7 @@
 /resources/js/routes
 /resources/js/wayfinder
 /vendor
+/storybook-static
 .DS_Store
 .env
 .env.backup
@@ -22,6 +23,7 @@ Homestead.yaml
 npm-debug.log
 yarn-error.log
 *.local.json
+*storybook.log
 /auth.json
 /.fleet
 /.idea
