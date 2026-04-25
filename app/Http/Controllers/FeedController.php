@@ -46,7 +46,7 @@ class FeedController extends Controller
 
         $feed->load(['entries.latestJobBatch', 'latestJobBatch']);
 
-        $this->loadFeedFailedJobDetails($feed);
+        $this->loadModelFailedJobDetails($feed);
 
         $user = auth()->user();
 
@@ -78,7 +78,7 @@ class FeedController extends Controller
             $validated = Arr::except($validated, ['title', 'description', 'image_url', 'image_file', 'delete_image_file']);
         }
 
-        if ($this->shouldUpdateImage($validated, $feed)) {
+        if ($feed->shouldUpdateImage($validated)) {
             if (isset($validated['image_file'])) {
                 Gate::authorize('uploadFiles', $feed);
             }
@@ -109,27 +109,5 @@ class FeedController extends Controller
         $feed->delete();
 
         return redirect()->route('dashboard')->with('success', 'Feed deleted successfully.');
-    }
-
-    private function loadFeedFailedJobDetails(Feed $feed): void
-    {
-        $jobBatches = $feed->entries
-            ->pluck('latestJobBatch.jobBatch')
-            ->filter();
-
-        if ($feed->latestJobBatch?->jobBatch) {
-            $jobBatches->push($feed->latestJobBatch->jobBatch);
-        }
-
-        if ($jobBatches->isNotEmpty()) {
-            $this->loadFailedJobDetails($jobBatches);
-        }
-    }
-
-    private function shouldUpdateImage(array $validated, Feed $feed): bool
-    {
-        return array_key_exists('image_file', $validated)
-            || ! empty($validated['delete_image_file'])
-            || (array_key_exists('image_url', $validated) && $validated['image_url'] !== $feed->image_url);
     }
 }

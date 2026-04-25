@@ -3,13 +3,19 @@
 namespace App\Concerns;
 
 use App\Models\FailedJob;
+use App\Models\Feed;
 use App\Models\JobBatch;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Collection;
 
 trait LoadsFailedJobs
 {
-    protected function loadFailedJobDetails(Collection|JobBatch $batches): void
+    protected function loadFailedJobDetails(Collection|JobBatch|null $batches): void
     {
+        if (! $batches) {
+            return;
+        }
+
         $batches = Collection::wrap($batches);
 
         $failedJobIds = $batches
@@ -33,5 +39,30 @@ trait LoadsFailedJobs
                     ->values(),
             );
         });
+    }
+
+    protected function loadModelFailedJobDetails(Model|Collection $models): void
+    {
+        $batches = Collection::wrap($models)
+            ->flatMap(function ($model) {
+                $batches = collect();
+
+                if ($model->relationLoaded('latestJobBatch') && $model->latestJobBatch?->jobBatch) {
+                    $batches->push($model->latestJobBatch->jobBatch);
+                }
+
+                if ($model instanceof Feed && $model->relationLoaded('entries')) {
+                    $model->entries->each(function ($entry) use ($batches) {
+                        if ($entry->relationLoaded('latestJobBatch') && $entry->latestJobBatch?->jobBatch) {
+                            $batches->push($entry->latestJobBatch->jobBatch);
+                        }
+                    });
+                }
+
+                return $batches;
+            })
+            ->filter();
+
+        $this->loadFailedJobDetails($batches);
     }
 }

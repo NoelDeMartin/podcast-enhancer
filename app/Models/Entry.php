@@ -41,6 +41,13 @@ class Entry extends Model
         'transcription',
     ];
 
+    public function shouldUpdateAudio(array $validated): bool
+    {
+        return array_key_exists('file', $validated)
+            || ! empty($validated['delete_file'])
+            || (array_key_exists('audio_url', $validated) && $validated['audio_url'] !== $this->audio_url);
+    }
+
     protected function casts(): array
     {
         return [

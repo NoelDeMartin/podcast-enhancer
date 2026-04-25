@@ -25,9 +25,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
         'store' => 'entries.store',
         'update' => 'entries.update',
         'destroy' => 'entries.destroy',
-    ]);
+    ])->scoped();
 
-    Route::post('feeds/{feed}/entries/{entry}/produce', [EntryController::class, 'produce'])->name('entries.produce');
+    Route::post('feeds/{feed}/entries/{entry}/produce', [EntryController::class, 'produce'])
+        ->name('entries.produce')
+        ->scopeBindings();
 
     Route::prefix('feeds/{feed}')->group(function () {
         Route::post('import-rss/fetch', [RssImportController::class, 'fetch'])->name('feeds.import-rss.fetch');

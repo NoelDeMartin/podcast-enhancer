@@ -27,18 +27,15 @@ class EntryController extends Controller
             ->where('slug', $feed)
             ->firstOrFail();
 
-        $entry = Entry::withoutGlobalScope(UserScope::class)
+        $entry = $feed->entries()
             ->where('slug', $entry)
-            ->where('feed_id', $feed->id)
             ->firstOrFail();
 
         Gate::authorize('view', $entry);
 
         $entry->load(['feed' => fn ($query) => $query->withoutGlobalScope(UserScope::class), 'latestJobBatch']);
 
-        if ($entry->latestJobBatch?->jobBatch) {
-            $this->loadFailedJobDetails($entry->latestJobBatch->jobBatch);
-        }
+        $this->loadModelFailedJobDetails($entry);
 
         $user = auth()->user();
 
@@ -88,10 +85,8 @@ class EntryController extends Controller
         return redirect()->back()->with('success', 'Entry created successfully.');
     }
 
-    public function update(UpdateEntryRequest $request, Feed $feed, string $entry): RedirectResponse
+    public function update(UpdateEntryRequest $request, Feed $feed, Entry $entry): RedirectResponse
     {
-        $entry = $feed->entries()->where('slug', $entry)->firstOrFail();
-
         Gate::authorize('update', $entry);
 
         if ($feed->rss_url) {
@@ -101,7 +96,7 @@ class EntryController extends Controller
         $validated = $request->validated();
         $fileChanged = false;
 
-        if ($this->shouldUpdateAudio($validated, $entry)) {
+        if ($entry->shouldUpdateAudio($validated)) {
             if (isset($validated['file'])) {
                 Gate::authorize('uploadFiles', $entry);
             }
@@ -123,7 +118,7 @@ class EntryController extends Controller
             $fileChanged = empty($validated['delete_file']);
         }
 
-        if ($this->shouldUpdateImage($validated, $entry)) {
+        if ($entry->shouldUpdateImage($validated)) {
             if (isset($validated['image_file'])) {
                 Gate::authorize('uploadFiles', $entry);
             }
@@ -145,10 +140,8 @@ class EntryController extends Controller
         return redirect()->back()->with('success', 'Entry updated successfully.');
     }
 
-    public function destroy(Feed $feed, string $entry): RedirectResponse
+    public function destroy(Feed $feed, Entry $entry): RedirectResponse
     {
-        $entry = $feed->entries()->where('slug', $entry)->firstOrFail();
-
         Gate::authorize('delete', $entry);
 
         if ($feed->rss_url) {
@@ -167,10 +160,8 @@ class EntryController extends Controller
         return redirect()->back()->with('success', 'Entry deleted successfully.');
     }
 
-    public function produce(Feed $feed, string $entry): RedirectResponse
+    public function produce(Feed $feed, Entry $entry): RedirectResponse
     {
-        $entry = $feed->entries()->where('slug', $entry)->firstOrFail();
-
         Gate::authorize($entry->transcription_path ? 'regenerate' : 'produce', $entry);
 
         $reuseTranscript = request()->boolean('reuse_transcript');
@@ -192,19 +183,5 @@ class EntryController extends Controller
         $this->dispatchTranscriptionBatch($entry);
 
         return redirect()->back()->with('success', 'Transcription queued successfully.');
-    }
-
-    private function shouldUpdateAudio(array $validated, Entry $entry): bool
-    {
-        return array_key_exists('file', $validated)
-            || ! empty($validated['delete_file'])
-            || (array_key_exists('audio_url', $validated) && $validated['audio_url'] !== $entry->audio_url);
-    }
-
-    private function shouldUpdateImage(array $validated, Entry $entry): bool
-    {
-        return array_key_exists('image_file', $validated)
-            || ! empty($validated['delete_image_file'])
-            || (array_key_exists('image_url', $validated) && $validated['image_url'] !== $entry->image_url);
     }
 }
