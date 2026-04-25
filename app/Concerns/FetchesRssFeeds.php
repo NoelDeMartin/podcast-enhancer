@@ -7,13 +7,6 @@ use Illuminate\Support\Facades\Http;
 
 trait FetchesRssFeeds
 {
-    /**
-     * Fetch and parse an RSS feed URL.
-     *
-     * @return array{title: string, description: string, episodes: array}
-     *
-     * @throws \Exception
-     */
     protected function fetchAndParseRss(string $url): array
     {
         $response = Http::get($url);
@@ -37,9 +30,9 @@ trait FetchesRssFeeds
         $episodes = [];
 
         foreach ($xml->channel->item as $item) {
-            $audioUrl = null;
-            if ($item->enclosure && $item->enclosure['url']) {
-                $audioUrl = (string) $item->enclosure['url'];
+            $audioUrl = (string) ($item->enclosure['url'] ?? '');
+            if (empty($audioUrl)) {
+                $audioUrl = null;
             }
 
             $episodeImageUrl = null;
@@ -49,11 +42,8 @@ trait FetchesRssFeeds
                 $episodeImageUrl = (string) $item->image->url;
             }
 
-            $publishedAt = null;
             $pubDate = trim((string) ($item->pubDate ?? ''));
-            if ($pubDate !== '') {
-                $publishedAt = CarbonImmutable::parse($pubDate);
-            }
+            $publishedAt = $pubDate !== '' ? CarbonImmutable::parse($pubDate) : null;
 
             $episodes[] = [
                 'name' => (string) $item->title,

@@ -92,13 +92,6 @@ class ProduceEntryJob implements ShouldQueue
     }
 
     /**
-     * Build a condensed transcript for the LLM prompt.
-     *
-     * The raw transcription can contain thousands of short segments with long
-     * decimal timestamps, which can exceed model context and cause the agent to
-     * guess chapter times. We merge segments into fixed time windows and round
-     * timestamps to whole seconds to keep the prompt compact and anchorable.
-     *
      * @param  array<int, array{text: string, start_seconds: float|int|string}>  $segments
      */
     private function buildPromptTranscript(array $segments, int $windowSeconds = 15): string
@@ -123,11 +116,7 @@ class ProduceEntryJob implements ShouldQueue
         ksort($windows);
 
         return collect($windows)
-            ->map(function (array $texts, int $windowStart) {
-                $lineText = preg_replace('/\s+/', ' ', implode(' ', $texts)) ?? implode(' ', $texts);
-
-                return "[{$windowStart}] {$lineText}";
-            })
+            ->map(fn (array $texts, int $windowStart) => "[{$windowStart}] ".preg_replace('/\s+/', ' ', implode(' ', $texts)))
             ->implode("\n");
     }
 }

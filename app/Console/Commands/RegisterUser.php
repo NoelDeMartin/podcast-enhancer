@@ -17,9 +17,6 @@ use function Laravel\Prompts\text;
 #[Description('Register a new user manually')]
 class RegisterUser extends Command
 {
-    /**
-     * Execute the console command.
-     */
     public function handle(CreateNewUser $creator): int
     {
         info('Register a new user');

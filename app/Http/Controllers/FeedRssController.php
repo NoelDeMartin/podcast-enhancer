@@ -13,11 +13,13 @@ class FeedRssController extends Controller
     {
         $feed = Feed::withoutGlobalScope(UserScope::class)->where('slug', $feed)->firstOrFail();
 
-        if ($feed->rss_url && $feed->sync_frequency) {
-            if (! $feed->last_synced_at || $feed->last_synced_at->addSeconds($feed->sync_frequency)->isPast()) {
-                (new SyncFeedJob($feed))->handle();
-                $feed = Feed::withoutGlobalScope(UserScope::class)->findOrFail($feed->id);
-            }
+        $shouldSync = $feed->rss_url &&
+            $feed->sync_frequency &&
+            (! $feed->last_synced_at || $feed->last_synced_at->addSeconds($feed->sync_frequency)->isPast());
+
+        if ($shouldSync) {
+            (new SyncFeedJob($feed))->handle();
+            $feed = Feed::withoutGlobalScope(UserScope::class)->findOrFail($feed->id);
         }
 
         $entries = $feed->entries;

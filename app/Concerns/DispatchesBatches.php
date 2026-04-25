@@ -30,15 +30,17 @@ trait DispatchesBatches
                 /** @var Entry|null $entry */
                 $entry = Entry::find($entryId);
 
-                if ($entry) {
-                    $productionBatch = $this->dispatchProductionBatch($entry, $batch->id);
-
-                    Cache::put(
-                        $this->transcriptionTmpCleanupDeferralCacheKey($batch->id),
-                        $productionBatch->id,
-                        now()->addHours(6),
-                    );
+                if (! $entry) {
+                    return;
                 }
+
+                $productionBatch = $this->dispatchProductionBatch($entry, $batch->id);
+
+                Cache::put(
+                    $this->transcriptionTmpCleanupDeferralCacheKey($batch->id),
+                    $productionBatch->id,
+                    now()->addHours(6),
+                );
             })
             ->finally(function (Batch $batch) {
                 $this->cleanupTranscriptionTmpDirectoryUnlessDeferred($batch->id);

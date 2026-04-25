@@ -16,14 +16,8 @@ class SyncFeedJob implements ShouldQueue
 {
     use Batchable, Dispatchable, FetchesRssFeeds, InteractsWithQueue, Queueable, SerializesModels;
 
-    /**
-     * Create a new job instance.
-     */
     public function __construct(public Feed $feed) {}
 
-    /**
-     * Execute the job.
-     */
     public function handle(): void
     {
         if (! $this->feed->rss_url) {

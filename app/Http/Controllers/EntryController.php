@@ -40,17 +40,19 @@ class EntryController extends Controller
             $this->loadFailedJobDetails($entry->latestJobBatch->jobBatch);
         }
 
+        $user = auth()->user();
+
         $entry->can = [
-            'produce' => request()->user()?->can('produce', $entry) ?? false,
-            'regenerate' => request()->user()?->can('regenerate', $entry) ?? false,
+            'produce' => $user?->can('produce', $entry) ?? false,
+            'regenerate' => $user?->can('regenerate', $entry) ?? false,
         ];
 
         return Inertia::render('Entries/Show', [
             'entry' => $entry,
             'can' => [
-                'update' => request()->user()?->can('update', $entry) ?? false,
-                'delete' => request()->user()?->can('delete', $entry) ?? false,
-                'uploadFiles' => request()->user()?->can('uploadFiles', Entry::class) ?? false,
+                'update' => $user?->can('update', $entry) ?? false,
+                'delete' => $user?->can('delete', $entry) ?? false,
+                'uploadFiles' => $user?->can('uploadFiles', Entry::class) ?? false,
             ],
         ]);
     }

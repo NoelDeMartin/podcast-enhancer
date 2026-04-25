@@ -8,8 +8,6 @@ use Laravel\Ai\Exceptions\RateLimitedException;
 trait HandlesAiRateLimits
 {
     /**
-     * Handle a rate limited exception by postponing the job.
-     *
      * @throws RateLimitedException
      */
     protected function postponeIfRateLimited(RateLimitedException $exception, array $context = []): void

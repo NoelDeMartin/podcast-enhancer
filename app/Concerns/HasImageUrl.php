@@ -7,9 +7,6 @@ use Illuminate\Database\Eloquent\Casts\Attribute;
 
 trait HasImageUrl
 {
-    /**
-     * Get the image's absolute URL.
-     */
     protected function absoluteImageUrl(): Attribute
     {
         return Attribute::make(
@@ -17,9 +14,6 @@ trait HasImageUrl
         );
     }
 
-    /**
-     * Determine if the image is external.
-     */
     protected function imageIsExternal(): Attribute
     {
         return Attribute::make(

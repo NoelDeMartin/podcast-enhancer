@@ -48,20 +48,22 @@ class FeedController extends Controller
 
         $this->loadFeedFailedJobDetails($feed);
 
-        $feed->entries->each(function ($entry) {
+        $user = auth()->user();
+
+        $feed->entries->each(function ($entry) use ($user) {
             $entry->can = [
-                'produce' => request()->user()?->can('produce', $entry) ?? false,
-                'regenerate' => request()->user()?->can('regenerate', $entry) ?? false,
+                'produce' => $user?->can('produce', $entry) ?? false,
+                'regenerate' => $user?->can('regenerate', $entry) ?? false,
             ];
         });
 
         return Inertia::render('Feeds/Show', [
             'feed' => $feed,
             'can' => [
-                'update' => request()->user()?->can('update', $feed) ?? false,
-                'delete' => request()->user()?->can('delete', $feed) ?? false,
-                'sync' => request()->user()?->can('sync', $feed) ?? false,
-                'uploadFiles' => request()->user()?->can('uploadFiles', Feed::class) ?? false,
+                'update' => $user?->can('update', $feed) ?? false,
+                'delete' => $user?->can('delete', $feed) ?? false,
+                'sync' => $user?->can('sync', $feed) ?? false,
+                'uploadFiles' => $user?->can('uploadFiles', Feed::class) ?? false,
             ],
         ]);
     }
@@ -89,8 +91,8 @@ class FeedController extends Controller
             );
         }
 
-        if (isset($validated['sync_frequency']) && (int) $validated['sync_frequency'] === 0) {
-            $validated['sync_frequency'] = null;
+        if (array_key_exists('sync_frequency', $validated)) {
+            $validated['sync_frequency'] = $validated['sync_frequency'] ?: null;
         }
 
         $feed->update(Arr::except($validated, ['image_file', 'delete_image_file']));

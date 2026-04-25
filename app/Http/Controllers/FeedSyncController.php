@@ -38,23 +38,21 @@ class FeedSyncController extends Controller
                 'sync_frequency' => $request->sync_frequency ?: null,
             ]);
 
-            $importedCount = 0;
+            $episodes = collect($data['episodes'])
+                ->filter(fn ($episode) => ! empty($episode['audio_url']));
 
-            foreach ($data['episodes'] as $episodeData) {
-                if ($episodeData['audio_url']) {
-                    $feed->entries()->create([
-                        'name' => $episodeData['name'],
-                        'slug' => Entry::generateUniqueSlug($episodeData['name']),
-                        'audio_url' => $episodeData['audio_url'],
-                        'image_url' => $episodeData['image_url'] ?? null,
-                        'original_summary' => $episodeData['summary'] ?? null,
-                        'published_at' => $episodeData['published_at'],
-                    ]);
-                    $importedCount++;
-                }
+            foreach ($episodes as $episode) {
+                $feed->entries()->create([
+                    'name' => $episode['name'],
+                    'slug' => Entry::generateUniqueSlug($episode['name']),
+                    'audio_url' => $episode['audio_url'],
+                    'image_url' => $episode['image_url'] ?? null,
+                    'original_summary' => $episode['summary'] ?? null,
+                    'published_at' => $episode['published_at'],
+                ]);
             }
 
-            return redirect()->back()->with('success', "Feed created and {$importedCount} episodes imported successfully.");
+            return redirect()->back()->with('success', "Feed created and {$episodes->count()} episodes imported successfully.");
         } catch (\Exception $e) {
             $errorMessage = $e->getMessage() === 'Failed to fetch RSS feed.' ? 'Failed to fetch RSS feed.' : 'Invalid RSS feed format.';
 
