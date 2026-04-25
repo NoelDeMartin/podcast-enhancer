@@ -230,7 +230,7 @@ const formatLastSynced = (date: string) => {
 
     <AppLayout :breadcrumbs="breadcrumbs">
         <div
-            class="mx-auto flex h-full w-full max-w-5xl flex-1 flex-col gap-6 overflow-x-auto rounded-xl p-4"
+            class="mx-auto flex h-full w-full max-w-5xl flex-1 flex-col gap-6 overflow-x-auto rounded-none p-4"
         >
             <div class="flex items-center justify-between">
                 <h2 class="text-2xl font-bold tracking-tight">Feeds</h2>
@@ -419,7 +419,7 @@ const formatLastSynced = (date: string) => {
                         <div class="grid gap-4 py-4">
                             <div
                                 v-if="editingFeed?.rss_url"
-                                class="space-y-4 rounded-lg border border-yellow-100 bg-yellow-50 p-4 text-sm text-yellow-700 dark:border-yellow-200/10 dark:bg-yellow-700/10 dark:text-yellow-100"
+                                class="space-y-4 rounded-none border-3 border-neo-dark border-yellow-100 bg-yellow-50 p-4 text-sm text-yellow-700 dark:border-3 border-neo-dark border-yellow-200/10 dark:bg-yellow-700/10 dark:text-yellow-100"
                             >
                                 <div class="flex items-center gap-2">
                                     <Rss class="h-4 w-4" />
@@ -434,7 +434,7 @@ const formatLastSynced = (date: string) => {
                                 <Label for="edit-rss-url">RSS URL</Label>
                                 <div
                                     id="edit-rss-url"
-                                    class="rounded-md border bg-muted px-3 py-2 text-sm break-all text-muted-foreground select-all"
+                                    class="rounded-none border-3 border-neo-dark bg-muted px-3 py-2 text-sm break-all text-muted-foreground select-all"
                                 >
                                     {{ editingFeed.rss_url }}
                                 </div>
@@ -589,11 +589,11 @@ const formatLastSynced = (date: string) => {
                                         v-if="editingFeed.absolute_image_url"
                                         :src="editingFeed.absolute_image_url"
                                         alt="Feed image"
-                                        class="h-16 w-16 rounded border object-cover"
+                                        class="h-16 w-16 rounded-none border-3 border-neo-dark object-cover"
                                     />
                                     <div
                                         v-else
-                                        class="flex h-16 w-16 items-center justify-center rounded border bg-muted"
+                                        class="flex h-16 w-16 items-center justify-center rounded-none border-3 border-neo-dark bg-muted"
                                     >
                                         <Rss class="h-8 w-8 text-muted" />
                                     </div>
@@ -623,7 +623,7 @@ const formatLastSynced = (date: string) => {
                         </DialogHeader>
 
                         <div
-                            class="space-y-3 rounded-lg border border-red-100 bg-red-50 p-4 text-sm text-red-700 dark:border-red-200/10 dark:bg-red-700/10 dark:text-red-100"
+                            class="space-y-3 rounded-none border-3 border-neo-dark border-red-100 bg-red-50 p-4 text-sm text-red-700 dark:border-3 border-neo-dark border-red-200/10 dark:bg-red-700/10 dark:text-red-100"
                         >
                             <div class="space-y-1">
                                 <div class="font-medium">You are about to permanently delete:</div>
@@ -665,7 +665,7 @@ const formatLastSynced = (date: string) => {
                 </DialogContent>
             </Dialog>
 
-            <div class="rounded-md border bg-white dark:bg-zinc-950">
+            <div class="border-3 bg-background shadow-neo-hard-hard">
                 <Table>
                     <TableHeader>
                         <TableRow>
@@ -683,11 +683,11 @@ const formatLastSynced = (date: string) => {
                                     v-if="feed.absolute_image_url"
                                     :src="feed.absolute_image_url"
                                     alt="Feed image"
-                                    class="h-10 w-10 rounded object-cover"
+                                    class="h-10 w-10 rounded-none object-cover"
                                 />
                                 <div
                                     v-else
-                                    class="flex h-10 w-10 items-center justify-center rounded bg-gray-100 dark:bg-zinc-800"
+                                    class="flex h-10 w-10 items-center justify-center rounded-none bg-gray-100 dark:bg-zinc-800"
                                 >
                                     <Rss class="h-5 w-5 text-gray-400" />
                                 </div>

@@ -301,7 +301,7 @@ const submitEditEntry = () => {
 
     <AppLayout :breadcrumbs="breadcrumbs">
         <div
-            class="mx-auto flex h-full w-full max-w-5xl flex-1 flex-col gap-6 overflow-x-auto rounded-xl p-4"
+            class="mx-auto flex h-full w-full max-w-5xl flex-1 flex-col gap-6 overflow-x-auto rounded-none p-4"
         >
             <div class="flex items-center justify-between">
                 <div class="flex items-center gap-3">
@@ -535,7 +535,7 @@ const submitEditEntry = () => {
                                         </DialogDescription>
                                     </DialogHeader>
                                     <div
-                                        class="my-4 max-h-[400px] overflow-y-auto rounded-md border"
+                                        class="my-4 max-h-[400px] overflow-y-auto rounded-none border-3 border-neo-dark"
                                     >
                                         <Table>
                                             <TableHeader>
@@ -793,7 +793,7 @@ const submitEditEntry = () => {
                         </DialogDescription>
                     </DialogHeader>
                     <div
-                        class="max-h-[60vh] overflow-y-auto rounded-md border bg-red-50 p-4 dark:bg-red-950/20"
+                        class="max-h-[60vh] overflow-y-auto rounded-none border-3 border-neo-dark bg-red-50 p-4 dark:bg-red-950/20"
                     >
                         <pre
                             class="text-xs leading-relaxed whitespace-pre-wrap text-red-800 dark:text-red-300"
@@ -815,7 +815,10 @@ const submitEditEntry = () => {
                         </DialogDescription>
                     </DialogHeader>
                     <div class="max-h-[60vh] space-y-4 overflow-y-auto">
-                        <div v-if="viewingEntry?.absolute_audio_url" class="rounded-md border p-4">
+                        <div
+                            v-if="viewingEntry?.absolute_audio_url"
+                            class="rounded-none border-3 border-neo-dark p-4"
+                        >
                             <audio controls class="w-full">
                                 <source :src="viewingEntry.absolute_audio_url" type="audio/mpeg" />
                                 Your browser does not support the audio element.
@@ -875,7 +878,7 @@ const submitEditEntry = () => {
 
                         <div v-if="parsedTranscription(viewingEntry)">
                             <h4 class="mb-2 text-sm font-semibold">Transcription</h4>
-                            <div class="rounded-md border p-4">
+                            <div class="rounded-none border-3 border-neo-dark p-4">
                                 <div
                                     v-for="(segment, index) in parsedTranscription(viewingEntry)"
                                     :key="index"
@@ -893,7 +896,7 @@ const submitEditEntry = () => {
                 </DialogContent>
             </Dialog>
 
-            <div class="rounded-md border bg-white dark:bg-zinc-950">
+            <div class="border-3 bg-background shadow-neo-hard-hard">
                 <Table>
                     <TableHeader>
                         <TableRow>
@@ -915,11 +918,11 @@ const submitEditEntry = () => {
                                         v-if="entry.absolute_image_url || feed.absolute_image_url"
                                         :src="entry.absolute_image_url || feed.absolute_image_url"
                                         alt="Entry image"
-                                        class="h-10 w-10 rounded object-cover"
+                                        class="h-10 w-10 rounded-none object-cover"
                                     />
                                     <div
                                         v-else
-                                        class="flex h-10 w-10 items-center justify-center rounded bg-gray-100 dark:bg-zinc-800"
+                                        class="flex h-10 w-10 items-center justify-center rounded-none bg-gray-100 dark:bg-zinc-800"
                                     >
                                         <Rss class="h-5 w-5 text-gray-400" />
                                     </div>

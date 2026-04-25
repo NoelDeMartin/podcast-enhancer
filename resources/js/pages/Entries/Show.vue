@@ -53,7 +53,7 @@ useEntryPolling(isProcessing);
                             v-if="entry.absolute_image_url || entry.feed.absolute_image_url"
                             :src="entry.absolute_image_url || entry.feed.absolute_image_url"
                             alt="Entry image"
-                            class="h-16 w-16 rounded object-cover shadow-sm"
+                            class="h-16 w-16 border-3 border-neo-dark object-cover shadow-neo-hard-hard"
                         />
                         <div>
                             <h2 class="text-2xl font-bold tracking-tight">
@@ -82,7 +82,7 @@ useEntryPolling(isProcessing);
 
             <div
                 v-if="entry.absolute_audio_url"
-                class="flex items-center justify-between rounded-xl border bg-white p-4 dark:bg-zinc-950"
+                class="flex items-center justify-between border-3 bg-background p-4 shadow-neo-hard-hard"
             >
                 <audio controls class="w-full max-w-2xl" :src="entry.absolute_audio_url">
                     Your browser does not support the audio element.
@@ -98,7 +98,7 @@ useEntryPolling(isProcessing);
             </div>
 
             <div class="grid gap-6">
-                <div v-if="entry.summary" class="rounded-xl border bg-white p-6 dark:bg-zinc-950">
+                <div v-if="entry.summary" class="border-3 bg-background p-6 shadow-neo-hard-hard">
                     <h3 class="mb-4 text-lg font-semibold">AI Summary</h3>
                     <div
                         class="text-sm leading-relaxed text-muted-foreground [&_a]:text-blue-600 dark:[&_a]:text-blue-400 [&_a:hover]:underline [&_ol]:list-decimal [&_ol]:pl-5 [&_p]:mb-4 [&_ul]:list-disc [&_ul]:pl-5"
@@ -108,7 +108,7 @@ useEntryPolling(isProcessing);
 
                 <div
                     v-if="entry.original_summary"
-                    class="rounded-xl border bg-white p-6 dark:bg-zinc-950"
+                    class="border-3 bg-background p-6 shadow-neo-hard-hard"
                 >
                     <h3 class="mb-4 text-lg font-semibold">Original Description</h3>
                     <div
@@ -119,7 +119,7 @@ useEntryPolling(isProcessing);
 
                 <div
                     v-if="entry.chapters?.length"
-                    class="rounded-xl border bg-white p-6 dark:bg-zinc-950"
+                    class="border-3 bg-background p-6 shadow-neo-hard-hard"
                 >
                     <h3 class="mb-4 text-lg font-semibold">Chapters</h3>
                     <ul class="space-y-3">
@@ -139,7 +139,7 @@ useEntryPolling(isProcessing);
 
                 <div
                     v-if="parsedTranscription(entry)"
-                    class="rounded-xl border bg-white p-6 dark:bg-zinc-950"
+                    class="border-3 bg-background p-6 shadow-neo-hard-hard"
                 >
                     <h3 class="mb-4 text-lg font-semibold">Transcription</h3>
                     <div class="space-y-4">

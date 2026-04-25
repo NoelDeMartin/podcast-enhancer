@@ -53,7 +53,7 @@ const viewingFailure = ref(false);
                     </DialogDescription>
                 </DialogHeader>
                 <div
-                    class="max-h-[60vh] overflow-y-auto rounded-md border bg-red-50 p-4 dark:bg-red-950/20"
+                    class="max-h-[60vh] overflow-y-auto rounded-none border-3 border-neo-dark bg-red-50 p-4 dark:bg-red-950/20"
                 >
                     <pre
                         class="text-xs leading-relaxed whitespace-pre-wrap text-red-800 dark:text-red-300"
