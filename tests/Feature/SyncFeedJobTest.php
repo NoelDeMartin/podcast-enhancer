@@ -118,3 +118,37 @@ it('does not update last_synced_at if rss_url is missing', function () {
     $feed->refresh();
     expect($feed->last_synced_at)->toBeNull();
 });
+
+it('can handle long audio and image urls', function () {
+    $feed = Feed::factory()->create([
+        'rss_url' => 'https://example.com/rss.xml',
+    ]);
+
+    $longUrl = 'https://example.com/'.str_repeat('a', 1000).'.mp3';
+    $longImageUrl = 'https://example.com/'.str_repeat('b', 1000).'.jpg';
+
+    $rssContent = '<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:itunes="http://www.itunes.com/dtds/podcast-1.0.dtd">
+    <channel>
+        <title>Test Feed</title>
+        <description>Test Description</description>
+        <item>
+            <title>Test Episode</title>
+            <description>Test Summary</description>
+            <enclosure url="'.$longUrl.'" length="12345" type="audio/mpeg" />
+            <itunes:image href="'.$longImageUrl.'" />
+            <pubDate>Mon, 27 Apr 2026 10:00:00 +0000</pubDate>
+        </item>
+    </channel>
+</rss>';
+
+    Http::fake([
+        'https://example.com/rss.xml' => Http::response($rssContent, 200),
+    ]);
+
+    (new SyncFeedJob($feed))->handle();
+
+    $entry = $feed->entries()->first();
+    expect($entry->audio_url)->toBe($longUrl);
+    expect($entry->image_url)->toBe($longImageUrl);
+});

@@ -8,7 +8,7 @@ trait HasSlug
 {
     public static function generateUniqueSlug(string $value): string
     {
-        $base = Str::slug($value);
+        $base = Str::of($value)->slug()->limit(240, '')->toString();
 
         do {
             $slug = $base.'-'.bin2hex(random_bytes(3));

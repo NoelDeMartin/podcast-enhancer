@@ -428,3 +428,18 @@ it('does not show original description section if it is empty or whitespace', fu
     $entry->original_summary = '';
     expect($entry->rss_description)->not->toContain('<h2>Original Description</h2>');
 });
+
+it('generates a slug that does not exceed 255 characters even for very long names', function () {
+    $feed = Feed::factory()->for($this->user)->create();
+    $longName = str_repeat('a', 500);
+
+    $entry = Entry::create([
+        'feed_id' => $feed->id,
+        'name' => $longName,
+        'slug' => Entry::generateUniqueSlug($longName),
+        'audio_url' => 'https://example.com/audio.mp3',
+        'published_at' => now(),
+    ]);
+
+    expect(strlen($entry->slug))->toBeLessThanOrEqual(255);
+});
