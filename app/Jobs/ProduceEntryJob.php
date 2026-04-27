@@ -3,7 +3,7 @@
 namespace App\Jobs;
 
 use App\Ai\Agents\PodcastEditorAgent;
-use App\Concerns\HandlesAiRateLimits;
+use App\Concerns\HandlesAiErrors;
 use App\Models\Entry;
 use Illuminate\Bus\Batchable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -13,13 +13,14 @@ use Illuminate\Queue\Attributes\Tries;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
+use Laravel\Ai\Exceptions\ProviderOverloadedException;
 use Laravel\Ai\Exceptions\RateLimitedException;
 
 #[Timeout(300)]
 #[Tries(8)]
 class ProduceEntryJob implements ShouldQueue
 {
-    use Batchable, HandlesAiRateLimits, InteractsWithQueue, Queueable;
+    use Batchable, HandlesAiErrors, InteractsWithQueue, Queueable;
 
     public function __construct(public int $entryId) {}
 
@@ -62,9 +63,16 @@ class ProduceEntryJob implements ShouldQueue
         }
 
         try {
-            $response = (new PodcastEditorAgent)->prompt($prompt, timeout: 300);
+            $response = (new PodcastEditorAgent)->prompt($prompt, timeout: 300, provider: $this->provider());
         } catch (RateLimitedException $e) {
             $this->postponeIfRateLimited($e, [
+                'entry_id' => $entry->id,
+                'batch_id' => $this->batchId,
+            ]);
+
+            return;
+        } catch (ProviderOverloadedException $e) {
+            $this->postponeIfOverloaded($e, [
                 'entry_id' => $entry->id,
                 'batch_id' => $this->batchId,
             ]);
@@ -90,6 +98,13 @@ class ProduceEntryJob implements ShouldQueue
             'batch_id' => $this->batchId,
             'exception' => $exception,
         ]);
+    }
+
+    protected function provider(): string|array
+    {
+        return $this->attempts() >= 4
+            ? [config('ai.default'), config('ai.default_failover')]
+            : config('ai.default');
     }
 
     /**

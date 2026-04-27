@@ -2,7 +2,7 @@
 
 namespace App\Jobs;
 
-use App\Concerns\HandlesAiRateLimits;
+use App\Concerns\HandlesAiErrors;
 use App\Models\Entry;
 use Illuminate\Bus\Batchable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -19,7 +19,7 @@ use Laravel\Ai\Transcription;
 #[Tries(8)]
 class TranscribeAudioJob implements ShouldQueue
 {
-    use Batchable, HandlesAiRateLimits, InteractsWithQueue, Queueable;
+    use Batchable, HandlesAiErrors, InteractsWithQueue, Queueable;
 
     public function __construct(
         public int $entryId,

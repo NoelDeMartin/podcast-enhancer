@@ -14,6 +14,7 @@ return [
     */
 
     'default' => env('AI_DEFAULT_PROVIDER', 'mistral'),
+    'default_failover' => env('AI_DEFAULT_FAILOVER_PROVIDER', 'mistral'),
     'default_for_images' => env('AI_DEFAULT_PROVIDER_FOR_IMAGES', 'gemini'),
     'default_for_audio' => env('AI_DEFAULT_PROVIDER_FOR_AUDIO', 'openai'),
     'default_for_transcription' => env('AI_DEFAULT_PROVIDER_FOR_TRANSCRIPTION', 'mistral'),
