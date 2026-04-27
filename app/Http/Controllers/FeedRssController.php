@@ -18,7 +18,7 @@ class FeedRssController extends Controller
             (! $feed->last_synced_at || $feed->last_synced_at->addSeconds($feed->sync_frequency)->isPast());
 
         if ($shouldSync) {
-            (new SyncFeedJob($feed))->handle();
+            (new SyncFeedJob($feed->id))->handle();
             $feed = Feed::withoutGlobalScope(UserScope::class)->findOrFail($feed->id);
         }
 

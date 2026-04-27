@@ -22,7 +22,7 @@ class TranscribeAudioJob implements ShouldQueue
     use Batchable, HandlesAiRateLimits, InteractsWithQueue, Queueable;
 
     public function __construct(
-        public Entry $entry,
+        public int $entryId,
         public string $chunkPath,
         public int $chunkIndex,
         public int $offsetSeconds,
@@ -31,9 +31,11 @@ class TranscribeAudioJob implements ShouldQueue
 
     public function handle(): void
     {
+        $entry = Entry::findOrFail($this->entryId);
+
         if ($this->batch()?->cancelled()) {
             Log::info(static::class.' skipped (batch cancelled)', [
-                'entry_id' => $this->entry->id,
+                'entry_id' => $entry->id,
                 'chunk_path' => $this->chunkPath,
                 'chunk_index' => $this->chunkIndex,
                 'offset_seconds' => $this->offsetSeconds,
@@ -45,7 +47,7 @@ class TranscribeAudioJob implements ShouldQueue
 
         if (! Storage::exists($this->chunkPath)) {
             Log::info(static::class.' skipped (chunk missing)', [
-                'entry_id' => $this->entry->id,
+                'entry_id' => $entry->id,
                 'chunk_path' => $this->chunkPath,
                 'chunk_index' => $this->chunkIndex,
                 'offset_seconds' => $this->offsetSeconds,
@@ -57,7 +59,7 @@ class TranscribeAudioJob implements ShouldQueue
 
         $displayIndex = $this->chunkIndex + 1;
         Log::info(static::class." started (chunk #{$displayIndex} of {$this->chunksCount})", [
-            'entry_id' => $this->entry->id,
+            'entry_id' => $entry->id,
             'chunk_path' => $this->chunkPath,
             'chunk_index' => $this->chunkIndex,
             'offset_seconds' => $this->offsetSeconds,
@@ -71,7 +73,7 @@ class TranscribeAudioJob implements ShouldQueue
                 ->generate();
         } catch (RateLimitedException $e) {
             $this->postponeIfRateLimited($e, [
-                'entry_id' => $this->entry->id,
+                'entry_id' => $entry->id,
                 'chunk_path' => $this->chunkPath,
                 'chunk_index' => $this->chunkIndex,
                 'batch_id' => $this->batchId,
@@ -96,7 +98,7 @@ class TranscribeAudioJob implements ShouldQueue
         Storage::delete($this->chunkPath);
 
         Log::info(static::class." finished (saved transcription chunk #{$displayIndex} of {$this->chunksCount} and deleted chunk file)", [
-            'entry_id' => $this->entry->id,
+            'entry_id' => $entry->id,
             'chunk_path' => $this->chunkPath,
             'chunk_index' => $this->chunkIndex,
             'offset_seconds' => $this->offsetSeconds,
@@ -107,7 +109,7 @@ class TranscribeAudioJob implements ShouldQueue
     public function failed(\Throwable $exception): void
     {
         Log::error(static::class.' failed: '.$exception->getMessage(), [
-            'entry_id' => $this->entry->id,
+            'entry_id' => $this->entryId,
             'chunk_path' => $this->chunkPath,
             'chunk_index' => $this->chunkIndex,
             'offset_seconds' => $this->offsetSeconds,

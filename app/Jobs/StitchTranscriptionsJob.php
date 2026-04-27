@@ -17,13 +17,15 @@ class StitchTranscriptionsJob implements ShouldQueue
 {
     use Batchable, Queueable;
 
-    public function __construct(public Entry $entry, public string $transcriptionBatchId) {}
+    public function __construct(public int $entryId, public string $transcriptionBatchId) {}
 
     public function handle(): void
     {
+        $entry = Entry::findOrFail($this->entryId);
+
         if ($this->batch()?->cancelled()) {
             Log::info(static::class.' skipped (batch cancelled)', [
-                'entry_id' => $this->entry->id,
+                'entry_id' => $entry->id,
                 'transcription_batch_id' => $this->transcriptionBatchId,
                 'batch_id' => $this->batchId,
             ]);
@@ -36,7 +38,7 @@ class StitchTranscriptionsJob implements ShouldQueue
 
         if (empty($files)) {
             Log::info(static::class.' skipped (no transcription chunks found)', [
-                'entry_id' => $this->entry->id,
+                'entry_id' => $entry->id,
                 'transcriptions_dir' => $transcriptionsDir,
                 'transcription_batch_id' => $this->transcriptionBatchId,
                 'batch_id' => $this->batchId,
@@ -46,7 +48,7 @@ class StitchTranscriptionsJob implements ShouldQueue
         }
 
         Log::info(static::class.' started', [
-            'entry_id' => $this->entry->id,
+            'entry_id' => $entry->id,
             'transcriptions_dir' => $transcriptionsDir,
             'files_count' => count($files),
             'transcription_batch_id' => $this->transcriptionBatchId,
@@ -60,7 +62,7 @@ class StitchTranscriptionsJob implements ShouldQueue
             return (int) ($matches[1] ?? 0);
         });
 
-        $path = "transcriptions/{$this->entry->id}.json";
+        $path = "transcriptions/{$entry->id}.json";
         $chunkSize = 1800;
 
         $tempFile = tempnam(sys_get_temp_dir(), 'stitch');
@@ -93,10 +95,10 @@ class StitchTranscriptionsJob implements ShouldQueue
         Storage::put($path, fopen($tempFile, 'r'));
         unlink($tempFile);
 
-        $this->entry->update(['transcription_path' => $path]);
+        $entry->update(['transcription_path' => $path]);
 
         Log::info(static::class.' finished (saved stitched transcription)', [
-            'entry_id' => $this->entry->id,
+            'entry_id' => $entry->id,
             'transcription_path' => $path,
             'transcription_batch_id' => $this->transcriptionBatchId,
             'batch_id' => $this->batchId,
@@ -106,7 +108,7 @@ class StitchTranscriptionsJob implements ShouldQueue
     public function failed(\Throwable $exception): void
     {
         Log::error(static::class.' failed: '.$exception->getMessage(), [
-            'entry_id' => $this->entry->id,
+            'entry_id' => $this->entryId,
             'transcription_batch_id' => $this->transcriptionBatchId,
             'batch_id' => $this->batchId,
             'exception' => $exception,

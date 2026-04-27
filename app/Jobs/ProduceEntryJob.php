@@ -21,22 +21,24 @@ class ProduceEntryJob implements ShouldQueue
 {
     use Batchable, HandlesAiRateLimits, InteractsWithQueue, Queueable;
 
-    public function __construct(public Entry $entry) {}
+    public function __construct(public int $entryId) {}
 
     public function handle(): void
     {
+        $entry = Entry::findOrFail($this->entryId);
+
         if ($this->batch()?->cancelled()) {
             Log::info(static::class.' skipped (batch cancelled)', [
-                'entry_id' => $this->entry->id,
+                'entry_id' => $entry->id,
                 'batch_id' => $this->batchId,
             ]);
 
             return;
         }
 
-        if (! $this->entry->transcription_path) {
+        if (! $entry->transcription_path) {
             Log::info(static::class.' skipped (no transcription_path)', [
-                'entry_id' => $this->entry->id,
+                'entry_id' => $entry->id,
                 'batch_id' => $this->batchId,
             ]);
 
@@ -44,39 +46,39 @@ class ProduceEntryJob implements ShouldQueue
         }
 
         Log::info(static::class.' started', [
-            'entry_id' => $this->entry->id,
-            'transcription_path' => $this->entry->transcription_path,
+            'entry_id' => $entry->id,
+            'transcription_path' => $entry->transcription_path,
             'batch_id' => $this->batchId,
         ]);
 
-        $segments = json_decode(Storage::get($this->entry->transcription_path), true);
+        $segments = json_decode(Storage::get($entry->transcription_path), true);
 
         $transcription = $this->buildPromptTranscript($segments);
 
         $prompt = $transcription;
 
-        if ($this->entry->original_summary) {
-            $prompt = "ORIGINAL EPISODE SUMMARY:\n{$this->entry->original_summary}\n\nTRANSCRIPT:\n".$transcription;
+        if ($entry->original_summary) {
+            $prompt = "ORIGINAL EPISODE SUMMARY:\n{$entry->original_summary}\n\nTRANSCRIPT:\n".$transcription;
         }
 
         try {
             $response = (new PodcastEditorAgent)->prompt($prompt, timeout: 300);
         } catch (RateLimitedException $e) {
             $this->postponeIfRateLimited($e, [
-                'entry_id' => $this->entry->id,
+                'entry_id' => $entry->id,
                 'batch_id' => $this->batchId,
             ]);
 
             return;
         }
 
-        $this->entry->update([
+        $entry->update([
             'summary' => $response['summary'],
             'chapters' => $response['chapters'],
         ]);
 
         Log::info(static::class.' finished (updated entry)', [
-            'entry_id' => $this->entry->id,
+            'entry_id' => $entry->id,
             'batch_id' => $this->batchId,
         ]);
     }
@@ -84,8 +86,7 @@ class ProduceEntryJob implements ShouldQueue
     public function failed(\Throwable $exception): void
     {
         Log::error(static::class.' failed: '.$exception->getMessage(), [
-            'entry_id' => $this->entry->id,
-            'transcription_path' => $this->entry->transcription_path,
+            'entry_id' => $this->entryId,
             'batch_id' => $this->batchId,
             'exception' => $exception,
         ]);

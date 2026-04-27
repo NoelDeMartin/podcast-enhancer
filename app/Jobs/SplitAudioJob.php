@@ -19,7 +19,7 @@ class SplitAudioJob implements ShouldQueue
     use Batchable, Queueable;
 
     public function __construct(
-        public Entry $entry,
+        public int $entryId,
         public string $audioPath,
         public int $chunkIndex,
         public int $startTime,
@@ -30,9 +30,11 @@ class SplitAudioJob implements ShouldQueue
 
     public function handle(): void
     {
+        $entry = Entry::findOrFail($this->entryId);
+
         if ($this->batch()?->cancelled()) {
             Log::info(static::class.' skipped (batch cancelled)', [
-                'entry_id' => $this->entry->id,
+                'entry_id' => $entry->id,
                 'audio_path' => $this->audioPath,
                 'batch_id' => $this->batchId,
             ]);
@@ -42,7 +44,7 @@ class SplitAudioJob implements ShouldQueue
 
         if (! Storage::disk('local')->exists($this->audioPath)) {
             Log::info(static::class.' skipped (local audio missing)', [
-                'entry_id' => $this->entry->id,
+                'entry_id' => $entry->id,
                 'audio_path' => $this->audioPath,
                 'batch_id' => $this->batchId,
             ]);
@@ -52,7 +54,7 @@ class SplitAudioJob implements ShouldQueue
 
         $displayIndex = $this->chunkIndex + 1;
         Log::info(static::class." started (chunk #{$displayIndex} of {$this->chunksCount})", [
-            'entry_id' => $this->entry->id,
+            'entry_id' => $entry->id,
             'audio_path' => $this->audioPath,
             'chunk_index' => $this->chunkIndex,
             'start_seconds' => $this->startTime,
@@ -63,7 +65,7 @@ class SplitAudioJob implements ShouldQueue
         $chunkFile = "tmp/batch-{$this->batchId}/chunks/chunk_{$this->chunkIndex}.{$extension}";
 
         Log::info(static::class." exporting chunk #{$displayIndex} of {$this->chunksCount} to remote disk", [
-            'entry_id' => $this->entry->id,
+            'entry_id' => $entry->id,
             'audio_path' => $this->audioPath,
             'chunk_index' => $this->chunkIndex,
             'start_seconds' => $this->startTime,
@@ -80,7 +82,7 @@ class SplitAudioJob implements ShouldQueue
 
         if ($batch = $this->batch()) {
             $batch->add(new TranscribeAudioJob(
-                $this->entry,
+                $entry->id,
                 $chunkFile,
                 $this->chunkIndex,
                 (int) $this->startTime,
@@ -89,7 +91,7 @@ class SplitAudioJob implements ShouldQueue
 
             if ($this->chunkIndex + 1 < $this->chunksCount) {
                 $batch->add(new SplitAudioJob(
-                    $this->entry,
+                    $entry->id,
                     $this->audioPath,
                     $this->chunkIndex + 1,
                     ($this->chunkIndex + 1) * $this->chunkDuration,
@@ -107,7 +109,7 @@ class SplitAudioJob implements ShouldQueue
         }
 
         Log::info(static::class." finished (queued TranscribeAudioJob chunk #{$displayIndex} of {$this->chunksCount})", [
-            'entry_id' => $this->entry->id,
+            'entry_id' => $entry->id,
             'audio_path' => $this->audioPath,
             'chunk_index' => $this->chunkIndex,
             'batch_id' => $this->batchId,
@@ -117,7 +119,7 @@ class SplitAudioJob implements ShouldQueue
     public function failed(\Throwable $exception): void
     {
         Log::error(static::class.' failed: '.$exception->getMessage(), [
-            'entry_id' => $this->entry->id,
+            'entry_id' => $this->entryId,
             'audio_path' => $this->audioPath,
             'batch_id' => $this->batchId,
             'exception' => $exception,

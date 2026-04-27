@@ -16,7 +16,7 @@ it('postpones transcription when rate limited', function () {
     });
 
     $entry = Entry::factory()->create();
-    $job = new TranscribeAudioJob($entry, 'chunks/test.wav', 0, 0, 1);
+    $job = new TranscribeAudioJob($entry->id, 'chunks/test.wav', 0, 0, 1);
     $job->withFakeQueueInteractions();
 
     Log::shouldReceive('info')->withArgs(fn ($message) => str_contains($message, 'started'))->once();
@@ -40,7 +40,7 @@ it('throws exception when rate limited and attempts are exhausted', function () 
     // We need to simulate attempts. Laravel stores this in the job's connection if it's actually queued.
     // For manual testing we can try to set it via reflection if needed, but ShouldQueue jobs have attempts() method.
 
-    $job = Mockery::mock(TranscribeAudioJob::class, [$entry, 'chunks/test.wav', 0, 0, 1])->makePartial();
+    $job = Mockery::mock(TranscribeAudioJob::class, [$entry->id, 'chunks/test.wav', 0, 0, 1])->makePartial();
     $job->shouldReceive('attempts')->andReturn(8);
 
     Log::shouldReceive('info')->withArgs(fn ($message) => str_contains($message, 'started'))->once();

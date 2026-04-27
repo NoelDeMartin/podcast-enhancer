@@ -24,7 +24,7 @@ trait DispatchesBatches
         }
 
         $batch = Bus::batch([
-            new PrepareTranscriptionJob($entry, $entry->feed->user_id),
+            new PrepareTranscriptionJob($entry->id, $entry->feed->user_id),
         ])
             ->then(function (Batch $batch) use ($entryId) {
                 /** @var Entry|null $entry */
@@ -55,8 +55,8 @@ trait DispatchesBatches
     {
         $batch = Bus::batch([
             [
-                new StitchTranscriptionsJob($entry, $transcriptionBatchId),
-                new ProduceEntryJob($entry),
+                new StitchTranscriptionsJob($entry->id, $transcriptionBatchId),
+                new ProduceEntryJob($entry->id),
             ],
         ])
             ->finally(function () use ($transcriptionBatchId) {
@@ -72,7 +72,7 @@ trait DispatchesBatches
     protected function dispatchMetadataBatch(Entry $entry): void
     {
         $batch = Bus::batch([
-            new ProduceEntryJob($entry),
+            new ProduceEntryJob($entry->id),
         ])->dispatch();
 
         $entry->jobBatches()->create(['batch_id' => $batch->id]);
@@ -81,7 +81,7 @@ trait DispatchesBatches
     protected function dispatchSyncBatch(Feed $feed): void
     {
         $batch = Bus::batch([
-            new SyncFeedJob($feed),
+            new SyncFeedJob($feed->id),
         ])
             ->name('Sync feed '.$feed->id)
             ->dispatch();

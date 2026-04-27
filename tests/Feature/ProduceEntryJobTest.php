@@ -29,7 +29,7 @@ it('processes the transcript and saves summary and chapters', function () {
         'transcription_path' => 'transcriptions/fake.json',
     ]);
 
-    (new ProduceEntryJob($entry))->handle();
+    (new ProduceEntryJob($entry->id))->handle();
 
     $entry->refresh();
 
@@ -64,7 +64,7 @@ it('uses original_summary in the prompt if present', function () {
         'original_summary' => 'Original Summary.',
     ]);
 
-    (new ProduceEntryJob($entry))->handle();
+    (new ProduceEntryJob($entry->id))->handle();
 
     $entry->refresh();
 
@@ -80,7 +80,7 @@ it('does nothing when the entry has no transcription', function () {
         'transcription_path' => null,
     ]);
 
-    (new ProduceEntryJob($entry))->handle();
+    (new ProduceEntryJob($entry->id))->handle();
 
     expect($entry->fresh()->summary)->toBeNull();
     expect($entry->fresh()->chapters)->toBeNull();

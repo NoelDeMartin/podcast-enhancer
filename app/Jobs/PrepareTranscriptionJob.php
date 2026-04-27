@@ -21,22 +21,24 @@ class PrepareTranscriptionJob implements ShouldQueue
 {
     use Batchable, Queueable;
 
-    public function __construct(public Entry $entry, public int $userId) {}
+    public function __construct(public int $entryId, public int $userId) {}
 
     public function handle(): void
     {
+        $entry = Entry::findOrFail($this->entryId);
+
         if ($this->batch()?->cancelled()) {
             Log::info(static::class.' skipped (batch cancelled)', [
-                'entry_id' => $this->entry->id,
+                'entry_id' => $entry->id,
                 'batch_id' => $this->batchId,
             ]);
 
             return;
         }
 
-        if (! $this->entry->audio_url) {
+        if (! $entry->audio_url) {
             Log::info(static::class.' skipped (no audio_url)', [
-                'entry_id' => $this->entry->id,
+                'entry_id' => $entry->id,
                 'batch_id' => $this->batchId,
             ]);
 
@@ -44,32 +46,32 @@ class PrepareTranscriptionJob implements ShouldQueue
         }
 
         Log::info(static::class.' started', [
-            'entry_id' => $this->entry->id,
-            'audio_url' => $this->entry->audio_url,
+            'entry_id' => $entry->id,
+            'audio_url' => $entry->audio_url,
             'batch_id' => $this->batchId,
         ]);
 
-        $extension = pathinfo(parse_url($this->entry->audio_url, PHP_URL_PATH), PATHINFO_EXTENSION) ?: 'mp3';
+        $extension = pathinfo(parse_url($entry->audio_url, PHP_URL_PATH), PATHINFO_EXTENSION) ?: 'mp3';
         $tmpPath = "tmp/batch-{$this->batchId}/audio.{$extension}";
 
-        if ($this->entry->audio_is_external) {
+        if ($entry->audio_is_external) {
             Log::info(static::class.' downloading audio to local disk', [
-                'entry_id' => $this->entry->id,
-                'audio_url' => $this->entry->audio_url,
+                'entry_id' => $entry->id,
+                'audio_url' => $entry->audio_url,
                 'tmp_path' => $tmpPath,
                 'batch_id' => $this->batchId,
             ]);
-            $response = Http::timeout(300)->get($this->entry->audio_url);
+            $response = Http::timeout(300)->get($entry->audio_url);
 
             Storage::disk('local')->writeStream($tmpPath, $response->resource());
         } else {
             Log::info(static::class.' copying audio to local disk', [
-                'entry_id' => $this->entry->id,
-                'audio_url' => $this->entry->audio_url,
+                'entry_id' => $entry->id,
+                'audio_url' => $entry->audio_url,
                 'tmp_path' => $tmpPath,
                 'batch_id' => $this->batchId,
             ]);
-            Storage::disk('local')->writeStream($tmpPath, Storage::disk('public')->readStream($this->entry->audio_url));
+            Storage::disk('local')->writeStream($tmpPath, Storage::disk('public')->readStream($entry->audio_url));
         }
 
         $media = FFMpeg::fromDisk('local')->open($tmpPath);
@@ -82,7 +84,7 @@ class PrepareTranscriptionJob implements ShouldQueue
 
         if ($user->credits < $creditsRequired) {
             Log::info(static::class.' failed (insufficient credits)', [
-                'entry_id' => $this->entry->id,
+                'entry_id' => $entry->id,
                 'user_id' => $user->id,
                 'credits_required' => $creditsRequired,
                 'user_credits' => $user->credits,
@@ -99,7 +101,7 @@ class PrepareTranscriptionJob implements ShouldQueue
         $chunksCount = (int) ceil($durationInSeconds / $chunkDuration);
 
         Log::info(static::class.' calculated chunks for transcription', [
-            'entry_id' => $this->entry->id,
+            'entry_id' => $entry->id,
             'audio_path' => $tmpPath,
             'duration_seconds' => $durationInSeconds,
             'chunk_duration_seconds' => $chunkDuration,
@@ -110,16 +112,16 @@ class PrepareTranscriptionJob implements ShouldQueue
         ]);
 
         if ($chunksCount > 0 && $batch = $this->batch()) {
-            DB::transaction(function () use ($user, $creditsRequired) {
+            DB::transaction(function () use ($entry, $user, $creditsRequired) {
                 $user->decrement('credits', $creditsRequired);
-                $this->entry->creditUsages()->create([
+                $entry->creditUsages()->create([
                     'user_id' => $user->id,
                     'credits' => $creditsRequired,
                 ]);
             });
 
             $batch->add(new SplitAudioJob(
-                $this->entry,
+                $entry->id,
                 $tmpPath,
                 0,
                 0,
@@ -130,7 +132,7 @@ class PrepareTranscriptionJob implements ShouldQueue
         }
 
         Log::info(static::class.' finished (queued first SplitAudioJob chunk #1 of '.$chunksCount.')', [
-            'entry_id' => $this->entry->id,
+            'entry_id' => $entry->id,
             'audio_path' => $tmpPath,
             'chunks_count' => $chunksCount,
             'batch_id' => $this->batchId,
@@ -140,8 +142,7 @@ class PrepareTranscriptionJob implements ShouldQueue
     public function failed(\Throwable $exception): void
     {
         Log::error(static::class.' failed: '.$exception->getMessage(), [
-            'entry_id' => $this->entry->id,
-            'audio_url' => $this->entry->audio_url,
+            'entry_id' => $this->entryId,
             'batch_id' => $this->batchId,
             'exception' => $exception,
         ]);

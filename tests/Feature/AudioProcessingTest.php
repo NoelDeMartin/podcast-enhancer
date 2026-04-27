@@ -64,7 +64,7 @@ it('prepare transcription job downloads file and adds next job', function () {
         ->once()
         ->andReturn(60); // 1 minute, so a single chunk
 
-    $job = new PrepareTranscriptionJob($entry, $user->id);
+    $job = new PrepareTranscriptionJob($entry->id, $user->id);
     $job->withBatchId($batch->id);
     $job->handle();
 
@@ -72,7 +72,7 @@ it('prepare transcription job downloads file and adds next job', function () {
     Storage::disk('local')->assertExists($tmpPath);
 
     Queue::assertPushed(SplitAudioJob::class, function (SplitAudioJob $job) use ($entry, $tmpPath) {
-        return $job->entry->is($entry)
+        return $job->entryId === $entry->id
             && $job->audioPath === $tmpPath
             && $job->chunkIndex === 0
             && $job->startTime === 0

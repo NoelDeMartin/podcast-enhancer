@@ -31,7 +31,7 @@ it('updates last_synced_at when SyncFeedJob runs', function () {
         'https://example.com/feed.xml' => Http::response($rssContent, 200),
     ]);
 
-    $job = new SyncFeedJob($feed);
+    $job = new SyncFeedJob($feed->id);
     $job->handle();
 
     $feed->refresh();
@@ -67,7 +67,7 @@ it('updates feed title, description and image_url when SyncFeedJob runs', functi
         'https://example.com/feed.xml' => Http::response($rssContent, 200),
     ]);
 
-    $job = new SyncFeedJob($feed);
+    $job = new SyncFeedJob($feed->id);
     $job->handle();
 
     $feed->refresh();
@@ -99,7 +99,7 @@ it('updates feed image_url from itunes:image when SyncFeedJob runs', function ()
         'https://example.com/feed.xml' => Http::response($rssContent, 200),
     ]);
 
-    $job = new SyncFeedJob($feed);
+    $job = new SyncFeedJob($feed->id);
     $job->handle();
 
     $feed->refresh();
@@ -112,7 +112,7 @@ it('does not update last_synced_at if rss_url is missing', function () {
         'last_synced_at' => null,
     ]);
 
-    $job = new SyncFeedJob($feed);
+    $job = new SyncFeedJob($feed->id);
     $job->handle();
 
     $feed->refresh();
@@ -146,7 +146,7 @@ it('can handle long audio and image urls', function () {
         'https://example.com/rss.xml' => Http::response($rssContent, 200),
     ]);
 
-    (new SyncFeedJob($feed))->handle();
+    (new SyncFeedJob($feed->id))->handle();
 
     $entry = $feed->entries()->first();
     expect($entry->audio_url)->toBe($longUrl);

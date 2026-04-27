@@ -115,7 +115,7 @@ it('can synchronize existing feed without duplicates via background job', functi
 
     Bus::assertBatched(function (PendingBatch $batch) use ($feed) {
         return $batch->jobs->count() === 1 &&
-               $batch->jobs->first()->feed->id === $feed->id &&
+               $batch->jobs->first()->feedId === $feed->id &&
                $batch->name === 'Sync feed '.$feed->id;
     });
 

@@ -16,25 +16,27 @@ class SyncFeedJob implements ShouldQueue
 {
     use Batchable, Dispatchable, FetchesRssFeeds, InteractsWithQueue, Queueable, SerializesModels;
 
-    public function __construct(public Feed $feed) {}
+    public function __construct(public int $feedId) {}
 
     public function handle(): void
     {
-        if (! $this->feed->rss_url) {
+        $feed = Feed::withoutGlobalScopes()->findOrFail($this->feedId);
+
+        if (! $feed->rss_url) {
             return;
         }
 
-        $data = $this->fetchAndParseRss($this->feed->rss_url);
+        $data = $this->fetchAndParseRss($feed->rss_url);
 
-        $existingAudioUrls = $this->feed->entries()->pluck('audio_url')->filter()->toArray();
-        $existingNames = $this->feed->entries()->pluck('name')->toArray();
+        $existingAudioUrls = $feed->entries()->pluck('audio_url')->filter()->toArray();
+        $existingNames = $feed->entries()->pluck('name')->toArray();
 
         foreach ($data['episodes'] as $episodeData) {
             $audioUrl = $episodeData['audio_url'];
             $name = $episodeData['name'];
 
             if ($audioUrl && ! in_array($audioUrl, $existingAudioUrls) && ! in_array($name, $existingNames)) {
-                $this->feed->entries()->create([
+                $feed->entries()->create([
                     'name' => $name,
                     'slug' => Entry::generateUniqueSlug($name),
                     'audio_url' => $audioUrl,
@@ -47,10 +49,10 @@ class SyncFeedJob implements ShouldQueue
             }
         }
 
-        $this->feed->update([
-            'title' => $data['title'] ?? $this->feed->title,
-            'description' => $data['description'] ?? $this->feed->description,
-            'image_url' => $data['image_url'] ?? $this->feed->image_url,
+        $feed->update([
+            'title' => $data['title'] ?? $feed->title,
+            'description' => $data['description'] ?? $feed->description,
+            'image_url' => $data['image_url'] ?? $feed->image_url,
             'last_synced_at' => now(),
         ]);
     }

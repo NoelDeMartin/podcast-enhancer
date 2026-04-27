@@ -33,7 +33,7 @@ it('consumes credits successfully when enough funds are available', function () 
     FFMpeg::shouldReceive('open')->andReturnSelf();
     FFMpeg::shouldReceive('getDurationInSeconds')->andReturn(125); // 2 minutes and 5 seconds -> 3 credits
 
-    $job = new PrepareTranscriptionJob($entry, $user->id);
+    $job = new PrepareTranscriptionJob($entry->id, $user->id);
     $job->withBatchId($batch->id);
     $job->handle();
 
@@ -62,7 +62,7 @@ it('fails and deletes temp file when insufficient credits', function () {
     FFMpeg::shouldReceive('open')->andReturnSelf();
     FFMpeg::shouldReceive('getDurationInSeconds')->andReturn(125); // 3 credits required
 
-    $job = new PrepareTranscriptionJob($entry, $user->id);
+    $job = new PrepareTranscriptionJob($entry->id, $user->id);
     $job->withBatchId($batch->id);
 
     $tmpPath = "tmp/batch-{$batch->id}/audio.mp3";
@@ -95,7 +95,7 @@ it('calculates credits by rounding up minutes', function ($seconds, $expectedCre
     FFMpeg::shouldReceive('open')->andReturnSelf();
     FFMpeg::shouldReceive('getDurationInSeconds')->andReturn($seconds);
 
-    $job = new PrepareTranscriptionJob($entry, $user->id);
+    $job = new PrepareTranscriptionJob($entry->id, $user->id);
     $job->withBatchId($batch->id);
     $job->handle();
 

@@ -27,7 +27,7 @@ it('stitches transcription chunks and saves the result', function () {
     Storage::put("{$transcriptionsDir}/chunk_0.json", json_encode($chunk0));
     Storage::put("{$transcriptionsDir}/chunk_1.json", json_encode($chunk1));
 
-    $job = new StitchTranscriptionsJob($entry, $batch->id);
+    $job = new StitchTranscriptionsJob($entry->id, $batch->id);
     $job->withBatchId($batch->id);
 
     $job->handle();
