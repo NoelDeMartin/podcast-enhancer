@@ -49,6 +49,35 @@ it('processes the transcript and saves summary and chapters', function () {
     PodcastEditorAgent::assertPrompted('[0] Welcome to the show. Today we discuss AI.');
 });
 
+it('strips control characters from AI-generated chapters and summary', function () {
+    $segments = [
+        ['text' => 'Hello.', 'speaker' => 'Speaker 1', 'start_seconds' => 0, 'end_seconds' => 5],
+    ];
+
+    Storage::put('transcriptions/fake.json', json_encode($segments));
+
+    PodcastEditorAgent::fake([
+        [
+            'summary' => "This summary contains a NUL \u{0000} character.",
+            'chapters' => [
+                ['title' => "Presentaci\u{0000} del convidat", 'startTime' => 0],
+            ],
+        ],
+    ]);
+
+    $entry = Entry::factory()->create([
+        'transcription_path' => 'transcriptions/fake.json',
+    ]);
+
+    (new ProduceEntryJob($entry->id))->handle();
+
+    $entry->refresh();
+
+    expect($entry->summary)->toBe('This summary contains a NUL  character.')
+        ->and($entry->chapters[0]['title'])->toBe('Presentaci del convidat')
+        ->and($entry->chapters[0]['startTime'])->toBe(0);
+});
+
 it('uses original_summary in the prompt if present', function () {
     $segments = [
         ['text' => 'Hello.', 'speaker' => 'Speaker 1', 'start_seconds' => 0, 'end_seconds' => 5],

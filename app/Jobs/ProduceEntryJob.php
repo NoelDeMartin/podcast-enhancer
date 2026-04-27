@@ -15,6 +15,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Laravel\Ai\Exceptions\ProviderOverloadedException;
 use Laravel\Ai\Exceptions\RateLimitedException;
+use Laravel\Ai\Responses\StructuredAgentResponse;
 
 #[Timeout(300)]
 #[Tries(8)]
@@ -80,10 +81,7 @@ class ProduceEntryJob implements ShouldQueue
             return;
         }
 
-        $entry->update([
-            'summary' => $response['summary'],
-            'chapters' => $response['chapters'],
-        ]);
+        $entry->update($this->sanitizeAiResponse($response));
 
         Log::info(static::class.' finished (updated entry)', [
             'entry_id' => $entry->id,
@@ -134,5 +132,35 @@ class ProduceEntryJob implements ShouldQueue
         return collect($windows)
             ->map(fn (array $texts, int $windowStart) => "[{$windowStart}] ".preg_replace('/\s+/', ' ', implode(' ', $texts)))
             ->implode("\n");
+    }
+
+    /**
+     * @return array{summary: string, chapters: array<int, array{title: string, startTime: int}>}
+     */
+    private function sanitizeAiResponse(StructuredAgentResponse|array $response): array
+    {
+        $response = $response instanceof StructuredAgentResponse ? $response->toArray() : $response;
+
+        $summary = trim($this->stripControlCharacters((string) ($response['summary'] ?? '')));
+
+        $chapters = collect((array) ($response['chapters'] ?? []))
+            ->filter(fn ($chapter) => is_array($chapter))
+            ->map(fn (array $chapter) => [
+                'title' => trim($this->stripControlCharacters((string) ($chapter['title'] ?? ''))),
+                'startTime' => (int) ($chapter['startTime'] ?? 0),
+            ])
+            ->filter(fn (array $chapter) => $chapter['title'] !== '')
+            ->values()
+            ->all();
+
+        return [
+            'summary' => $summary,
+            'chapters' => $chapters,
+        ];
+    }
+
+    private function stripControlCharacters(string $value): string
+    {
+        return (string) preg_replace('/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/u', '', $value);
     }
 }
