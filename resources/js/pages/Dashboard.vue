@@ -1,7 +1,10 @@
 <script setup lang="ts">
 import { Head, Link } from '@inertiajs/vue3';
 import { useForm } from '@inertiajs/vue3';
-import { MoreHorizontal, Plus, Rss, Loader2 } from 'lucide-vue-next';
+import Loader2 from '~icons/lucide/loader-2';
+import MoreHorizontal from '~icons/lucide/more-horizontal';
+import Plus from '~icons/lucide/plus';
+import Rss from '~icons/lucide/rss';
 import { ref } from 'vue';
 import { store, destroy, show, update } from '@/actions/App/Http/Controllers/FeedController';
 import { store as syncStore } from '@/actions/App/Http/Controllers/FeedSyncController';

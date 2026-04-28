@@ -26,6 +26,7 @@ yarn-error.log
 tsconfig.tsbuildinfo
 *.local.json
 *storybook.log
+components.d.ts
 /auth.json
 /.fleet
 /.idea

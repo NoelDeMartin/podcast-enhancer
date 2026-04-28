@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { Head, usePage } from '@inertiajs/vue3';
-import { Clock, ExternalLink } from 'lucide-vue-next';
+import Clock from '~icons/lucide/clock';
+import ExternalLink from '~icons/lucide/external-link';
 import { computed } from 'vue';
 import { show as showFeedAction } from '@/actions/App/Http/Controllers/FeedController';
 import EntryEnhancementActions from '@/components/EntryEnhancementActions.vue';

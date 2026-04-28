@@ -1,6 +1,10 @@
 <script setup lang="ts">
 import { Link, usePage } from '@inertiajs/vue3';
-import { BookOpen, Folder, LayoutGrid, Menu, Search } from 'lucide-vue-next';
+import BookOpen from '~icons/lucide/book-open';
+import Folder from '~icons/lucide/folder';
+import LayoutGrid from '~icons/lucide/layout-grid';
+import Menu from '~icons/lucide/menu';
+import Search from '~icons/lucide/search';
 import { computed } from 'vue';
 import AppLogo from '@/components/AppLogo.vue';
 import AppLogoIcon from '@/components/AppLogoIcon.vue';

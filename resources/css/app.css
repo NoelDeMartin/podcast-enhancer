@@ -8,9 +8,7 @@
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
-    --font-sans:
-        Instrument Sans, ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji',
-        'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+    --font-mono: 'Space Mono', monospace;
 
     /* High-contrast primary colors */
     --color-neo-yellow: #f5ef3a;
@@ -54,6 +52,15 @@
     --shadow-neo-hard: 4px 4px 0px 0px rgba(1, 1, 1, 1);
     --shadow-neo-hard-hover: 6px 6px 0px 0px rgba(1, 1, 1, 1);
 
+    --shadow-neo-hard-yellow: 4px 4px 0px 0px var(--color-neo-yellow);
+    --shadow-neo-hard-yellow-hover: 6px 6px 0px 0px var(--color-neo-yellow);
+
+    --shadow-neo-hard-pink: 4px 4px 0px 0px var(--color-neo-pink);
+    --shadow-neo-hard-pink-hover: 6px 6px 0px 0px var(--color-neo-pink);
+
+    --shadow-neo-hard-blue: 4px 4px 0px 0px var(--color-neo-blue);
+    --shadow-neo-hard-blue-hover: 6px 6px 0px 0px var(--color-neo-blue);
+
     /* Rigid Corners */
     --radius-lg: 0px;
     --radius-md: 0px;
@@ -91,9 +98,13 @@
 @layer utilities {
     body,
     html {
-        --font-sans:
-            'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji',
-            'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+        --font-mono: 'Space Mono', monospace;
+    }
+
+    .bg-neo-dots {
+        background-color: var(--color-neo-bg);
+        background-image: radial-gradient(#dcd9d9 1px, transparent 1px);
+        background-size: 20px 20px;
     }
 }
 

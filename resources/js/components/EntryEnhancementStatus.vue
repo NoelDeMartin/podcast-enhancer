@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Loader2 } from 'lucide-vue-next';
+import Loader2 from '~icons/lucide/loader-2';
 import { ref } from 'vue';
 import {
     Dialog,

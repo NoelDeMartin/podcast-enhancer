@@ -24,7 +24,6 @@
         "laravel-vite-plugin": "^3.0.0",
         "linkify-html": "^4.3.2",
         "linkifyjs": "^4.3.2",
-        "lucide-vue-next": "^0.468.0",
         "reka-ui": "^2.9.2",
         "tailwind-merge": "^3.2.0",
         "tailwindcss": "^4.1.1",
@@ -33,6 +32,7 @@
         "vue-input-otp": "^0.3.2"
     },
     "devDependencies": {
+        "@iconify/json": "^2.2.467",
         "@laravel/vite-plugin-wayfinder": "^0.1.3",
         "@storybook/vue3-vite": "^10.3.5",
         "@tailwindcss/vite": "^4.1.11",
@@ -43,6 +43,8 @@
         "playwriter": "^0.1.0",
         "storybook": "^10.3.5",
         "typescript": "^5.2.2",
+        "unplugin-icons": "^23.0.1",
+        "unplugin-vue-components": "^32.0.0",
         "vite": "npm:@voidzero-dev/vite-plus-core@latest",
         "vite-plus": "latest",
         "vue-tsc": "^2.2.4"

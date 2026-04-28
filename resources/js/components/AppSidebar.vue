@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { Link } from '@inertiajs/vue3';
-import { BookOpen, FolderGit2, LayoutGrid } from 'lucide-vue-next';
+import BookOpen from '~icons/lucide/book-open';
+import FolderGit2 from '~icons/lucide/folder-git-2';
+import LayoutGrid from '~icons/lucide/layout-grid';
 import AppLogo from '@/components/AppLogo.vue';
 import NavFooter from '@/components/NavFooter.vue';
 import NavMain from '@/components/NavMain.vue';

@@ -1,6 +1,9 @@
 <script setup lang="ts">
 import { Form } from '@inertiajs/vue3';
-import { Eye, EyeOff, LockKeyhole, RefreshCw } from 'lucide-vue-next';
+import Eye from '~icons/lucide/eye';
+import EyeOff from '~icons/lucide/eye-off';
+import LockKeyhole from '~icons/lucide/lock-keyhole';
+import RefreshCw from '~icons/lucide/refresh-cw';
 import { nextTick, onMounted, ref, useTemplateRef } from 'vue';
 import AlertError from '@/components/AlertError.vue';
 import { Button } from '@/components/ui/button';

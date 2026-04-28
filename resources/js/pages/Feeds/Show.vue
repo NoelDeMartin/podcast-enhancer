@@ -1,7 +1,12 @@
 <script setup lang="ts">
 import { Head, Link, usePoll, usePage } from '@inertiajs/vue3';
 import { useForm } from '@inertiajs/vue3';
-import { Clock, Loader2, MoreHorizontal, Plus, Rss, RefreshCw } from 'lucide-vue-next';
+import Clock from '~icons/lucide/clock';
+import Loader2 from '~icons/lucide/loader-2';
+import MoreHorizontal from '~icons/lucide/more-horizontal';
+import Plus from '~icons/lucide/plus';
+import RefreshCw from '~icons/lucide/refresh-cw';
+import Rss from '~icons/lucide/rss';
 import { computed, ref, watch } from 'vue';
 import {
     store as storeEntry,

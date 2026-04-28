@@ -1,5 +1,7 @@
 <script setup lang="ts">
-import { Monitor, Moon, Sun } from 'lucide-vue-next';
+import Monitor from '~icons/lucide/monitor';
+import Moon from '~icons/lucide/moon';
+import Sun from '~icons/lucide/sun';
 import { useAppearance } from '@/composables/useAppearance';
 
 const { appearance, updateAppearance } = useAppearance();
