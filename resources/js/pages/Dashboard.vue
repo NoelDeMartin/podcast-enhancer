@@ -591,7 +591,7 @@ const formatLastSynced = (date: string) => {
                                     <img
                                         v-if="editingFeed.absolute_image_url"
                                         :src="editingFeed.absolute_image_url"
-                                        alt="Feed image"
+                                        alt=""
                                         class="h-16 w-16 rounded-none border-3 border-neo-dark object-cover"
                                     />
                                     <div
@@ -685,7 +685,7 @@ const formatLastSynced = (date: string) => {
                                 <img
                                     v-if="feed.absolute_image_url"
                                     :src="feed.absolute_image_url"
-                                    alt="Feed image"
+                                    alt=""
                                     class="h-10 w-10 rounded-none object-cover"
                                 />
                                 <div

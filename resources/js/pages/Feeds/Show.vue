@@ -922,7 +922,7 @@ const submitEditEntry = () => {
                                     <img
                                         v-if="entry.absolute_image_url || feed.absolute_image_url"
                                         :src="entry.absolute_image_url || feed.absolute_image_url"
-                                        alt="Entry image"
+                                        alt=""
                                         class="h-10 w-10 rounded-none object-cover"
                                     />
                                     <div

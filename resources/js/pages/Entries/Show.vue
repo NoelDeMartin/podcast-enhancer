@@ -53,7 +53,7 @@ useEntryPolling(isProcessing);
                         <img
                             v-if="entry.absolute_image_url || entry.feed.absolute_image_url"
                             :src="entry.absolute_image_url || entry.feed.absolute_image_url"
-                            alt="Entry image"
+                            alt=""
                             class="h-16 w-16 border-3 border-neo-dark object-cover shadow-neo-hard-hard"
                         />
                         <div>

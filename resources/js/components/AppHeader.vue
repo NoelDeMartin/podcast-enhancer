@@ -212,7 +212,7 @@ const rightNavItems: NavItem[] = [
                                     <AvatarImage
                                         v-if="auth.user.avatar"
                                         :src="auth.user.avatar"
-                                        :alt="auth.user.name"
+                                        alt=""
                                     />
                                     <AvatarFallback
                                         class="rounded-none bg-neutral-200 font-semibold text-black dark:bg-neutral-700 dark:text-white"

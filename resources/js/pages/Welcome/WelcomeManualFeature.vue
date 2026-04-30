@@ -23,27 +23,27 @@ const resolvedIconWrapperClass = computed(() => {
 <template>
     <div
         :class="[
-            'group border-3 border-neo-dark bg-neo-bg p-8 text-neo-dark transition-shadow duration-300',
+            'group border-3 border-neo-dark bg-neo-bg p-4 text-neo-dark transition-shadow duration-300 sm:p-8',
             wrapperClass ?? 'hover:shadow-neo-hard',
         ]"
     >
         <div class="flex items-start justify-between gap-6">
             <div>
-                <h4 class="text-2xl font-black tracking-tight">
+                <h4 class="text-xl font-black tracking-tight sm:text-2xl">
                     {{ title }}
                 </h4>
-                <p class="mt-3 max-w-md text-sm font-bold text-neo-dark/70">
+                <p class="mt-3 max-w-md text-xs font-bold text-neo-dark/70 sm:text-sm">
                     {{ description }}
                 </p>
             </div>
 
             <div
                 :class="[
-                    'relative grid h-14 w-14 shrink-0 place-items-center border-3 border-neo-dark shadow-neo-hard rotate-2 transition-transform duration-300 group-hover:-rotate-2',
+                    'relative grid h-10 w-10 shrink-0 place-items-center border-3 border-neo-dark shadow-neo-hard rotate-2 transition-transform duration-300 group-hover:-rotate-2 sm:h-14 sm:w-14',
                     resolvedIconWrapperClass,
                 ]"
             >
-                <component :is="icon" class="size-8 text-white" />
+                <component :is="icon" class="size-6 text-white sm:size-8" />
             </div>
         </div>
     </div>

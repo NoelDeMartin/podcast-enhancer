@@ -30,17 +30,17 @@ defineProps<{
 
         <div
             :class="[
-                'group relative border-3 border-neo-dark bg-neo-bg p-8 pr-24 transition-shadow duration-300',
+                'group relative border-3 border-neo-dark bg-neo-bg p-4 pr-16 transition-shadow duration-300 sm:p-8 sm:pr-24',
                 wrapperClass ?? 'hover:shadow-neo-hard',
             ]"
         >
             <div
                 :class="[
-                    'absolute top-8 right-8 flex h-16 w-16 items-center justify-center border-3 border-neo-dark text-white shadow-neo-hard rotate-3 transition-transform duration-300 group-hover:-rotate-3 group-hover:translate-x-1 group-hover:translate-y-1',
+                    'absolute top-4 right-4 flex h-10 w-10 items-center justify-center border-3 border-neo-dark text-white shadow-neo-hard rotate-3 transition-transform duration-300 group-hover:-rotate-3 group-hover:translate-x-1 group-hover:translate-y-1 sm:top-8 sm:right-8 sm:h-16 sm:w-16',
                     iconWrapperClass ?? 'bg-neo-blue',
                 ]"
             >
-                <component :is="icon" class="size-10" />
+                <component :is="icon" class="size-6 sm:size-10" />
             </div>
 
             <h3 class="text-2xl font-black uppercase tracking-tight">

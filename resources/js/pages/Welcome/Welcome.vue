@@ -5,6 +5,7 @@ import WelcomeHero from './WelcomeHero.vue';
 import WelcomeManual from './WelcomeManual.vue';
 import WelcomeGetStarted from './WelcomeGetStarted.vue';
 import WelcomeAbout from './WelcomeAbout.vue';
+import WelcomeFooter from './WelcomeFooter.vue';
 </script>
 
 <template>
@@ -16,6 +17,7 @@ import WelcomeAbout from './WelcomeAbout.vue';
         <WelcomeManual />
         <WelcomeGetStarted />
         <WelcomeAbout />
+        <WelcomeFooter />
     </div>
 </template>
 
