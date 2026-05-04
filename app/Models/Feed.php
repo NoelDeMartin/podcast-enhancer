@@ -61,4 +61,11 @@ class Feed extends Model
     {
         return $this->hasOne(FeedJobBatch::class)->latestOfMany();
     }
+
+    public function scopeFilter($query, array $filters): void
+    {
+        $query->when($filters['search'] ?? null, function ($query, $search) {
+            $query->whereLike('title', "%{$search}%");
+        });
+    }
 }

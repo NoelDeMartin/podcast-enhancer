@@ -1,12 +1,14 @@
 <script setup lang="ts">
-import { Head, Link, usePoll, usePage } from '@inertiajs/vue3';
+import { Head, Link, usePoll, usePage, router } from '@inertiajs/vue3';
 import { useForm } from '@inertiajs/vue3';
+import { watchDebounced } from '@vueuse/core';
 import Clock from '~icons/lucide/clock';
 import Loader2 from '~icons/lucide/loader-2';
 import MoreHorizontal from '~icons/lucide/more-horizontal';
 import Plus from '~icons/lucide/plus';
 import RefreshCw from '~icons/lucide/refresh-cw';
 import Rss from '~icons/lucide/rss';
+import Search from '~icons/lucide/search';
 import { computed, ref, watch } from 'vue';
 import {
     store as storeEntry,
@@ -14,6 +16,7 @@ import {
     update as updateEntryAction,
     show as showEntryAction,
 } from '@/actions/App/Http/Controllers/EntryController';
+import { show as showFeed } from '@/actions/App/Http/Controllers/FeedController';
 import FeedRssController from '@/actions/App/Http/Controllers/FeedRssController';
 import { sync as syncFeedAction } from '@/actions/App/Http/Controllers/FeedSyncController';
 import {
@@ -70,6 +73,9 @@ const props = defineProps<{
         data: any[];
         links: any[];
     };
+    filters: {
+        search?: string;
+    };
     can: {
         update: boolean;
         delete: boolean;
@@ -94,6 +100,20 @@ const breadcrumbs = computed<BreadcrumbItem[]>(() => [
         href: '#',
     },
 ]);
+
+const search = ref(props.filters.search || '');
+
+watchDebounced(
+    search,
+    (value) => {
+        router.get(
+            showFeed(props.feed.slug).url,
+            { search: value },
+            { preserveState: true, replace: true },
+        );
+    },
+    { debounce: 300 },
+);
 
 const entryForm = useForm({
     feed_id: props.feed.id,
@@ -601,6 +621,10 @@ const submitEditEntry = () => {
                         </Dialog>
                     </template>
                 </div>
+            </div>
+
+            <div class="flex items-center gap-4">
+                <SearchInput v-model="search" placeholder="Search entries..." />
             </div>
 
             <Dialog v-model:open="isEditDialogOpen">

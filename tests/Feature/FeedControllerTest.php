@@ -27,6 +27,33 @@ it('paginates entries on show', function () {
     );
 });
 
+it('can filter entries by name', function () {
+    $feed = Feed::factory()->for($this->user)->create();
+    Entry::factory()->for($feed)->create(['name' => 'First Episode']);
+    Entry::factory()->for($feed)->create(['name' => 'Second Episode']);
+    Entry::factory()->for($feed)->create(['name' => 'Special Content']);
+
+    $response = $this->actingAs($this->user)
+        ->get(route('feeds.show', $feed).'?search=Episode');
+
+    $response->assertOk();
+    $response->assertInertia(fn ($page) => $page
+        ->component('Feeds/Show')
+        ->has('entries.data', 2)
+        ->where('filters.search', 'Episode')
+    );
+
+    $response = $this->actingAs($this->user)
+        ->get(route('feeds.show', $feed).'?search=Special');
+
+    $response->assertOk();
+    $response->assertInertia(fn ($page) => $page
+        ->component('Feeds/Show')
+        ->has('entries.data', 1)
+        ->where('filters.search', 'Special')
+    );
+});
+
 it('can update custom feed', function () {
     $feed = Feed::factory()->for($this->user)->create([
         'title' => 'Old Title',

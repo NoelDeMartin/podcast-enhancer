@@ -52,8 +52,10 @@ class FeedController extends Controller
 
         $entries = $feed->entries()
             ->with(['latestJobBatch'])
+            ->filter(request()->only('search'))
             ->latest('published_at')
-            ->paginate(10);
+            ->paginate(10)
+            ->withQueryString();
 
         $entries->getCollection()->each(function ($entry) use ($user) {
             $entry->can = [
@@ -65,6 +67,7 @@ class FeedController extends Controller
         return Inertia::render('Feeds/Show', [
             'feed' => $feed,
             'entries' => $entries,
+            'filters' => request()->only(['search']),
             'can' => [
                 'update' => $user?->can('update', $feed) ?? false,
                 'delete' => $user?->can('delete', $feed) ?? false,

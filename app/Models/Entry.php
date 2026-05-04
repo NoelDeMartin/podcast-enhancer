@@ -112,4 +112,11 @@ class Entry extends Model
     {
         return $this->hasMany(CreditUsage::class);
     }
+
+    public function scopeFilter($query, array $filters): void
+    {
+        $query->when($filters['search'] ?? null, function ($query, $search) {
+            $query->whereLike('name', "%{$search}%");
+        });
+    }
 }

@@ -1,10 +1,12 @@
 <script setup lang="ts">
-import { Head, Link } from '@inertiajs/vue3';
+import { Head, Link, router } from '@inertiajs/vue3';
 import { useForm } from '@inertiajs/vue3';
+import { watchDebounced } from '@vueuse/core';
 import Loader2 from '~icons/lucide/loader-2';
 import MoreHorizontal from '~icons/lucide/more-horizontal';
 import Plus from '~icons/lucide/plus';
 import Rss from '~icons/lucide/rss';
+import Search from '~icons/lucide/search';
 import { ref } from 'vue';
 import { store, destroy, show, update } from '@/actions/App/Http/Controllers/FeedController';
 import { store as syncStore } from '@/actions/App/Http/Controllers/FeedSyncController';
@@ -48,10 +50,13 @@ import Pagination from '@/components/Pagination.vue';
 import { dashboard } from '@/routes';
 import type { BreadcrumbItem } from '@/types';
 
-defineProps<{
+const props = defineProps<{
     feeds: {
         data: any[];
         links: any[];
+    };
+    filters: {
+        search?: string;
     };
     can?: {
         uploadFiles: boolean;
@@ -64,6 +69,16 @@ const breadcrumbs: BreadcrumbItem[] = [
         href: dashboard(),
     },
 ];
+
+const search = ref(props.filters.search || '');
+
+watchDebounced(
+    search,
+    (value) => {
+        router.get(dashboard(), { search: value }, { preserveState: true, replace: true });
+    },
+    { debounce: 300 },
+);
 
 const form = useForm({
     title: '',
@@ -412,6 +427,10 @@ const formatLastSynced = (date: string) => {
                         </DialogContent>
                     </Dialog>
                 </div>
+            </div>
+
+            <div class="flex items-center gap-4">
+                <SearchInput v-model="search" placeholder="Search feeds..." />
             </div>
 
             <Dialog v-model:open="isEditDialogOpen">

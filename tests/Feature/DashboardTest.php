@@ -30,3 +30,30 @@ it('paginates feeds on the dashboard', function () {
         ->has('feeds.links')
     );
 });
+
+it('can filter feeds by title', function () {
+    $user = User::factory()->create();
+    Feed::factory()->for($user)->create(['title' => 'Laravel News']);
+    Feed::factory()->for($user)->create(['title' => 'PHP Weekly']);
+    Feed::factory()->for($user)->create(['title' => 'Tech Talks']);
+
+    $response = $this->actingAs($user)
+        ->get(route('dashboard').'?search=Laravel');
+
+    $response->assertOk();
+    $response->assertInertia(fn ($page) => $page
+        ->component('Dashboard')
+        ->has('feeds.data', 1)
+        ->where('filters.search', 'Laravel')
+    );
+
+    $response = $this->actingAs($user)
+        ->get(route('dashboard').'?search=Weekly');
+
+    $response->assertOk();
+    $response->assertInertia(fn ($page) => $page
+        ->component('Dashboard')
+        ->has('feeds.data', 1)
+        ->where('filters.search', 'Weekly')
+    );
+});
