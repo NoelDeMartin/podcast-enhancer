@@ -44,11 +44,15 @@ import {
 } from '@/components/ui/table';
 import { Textarea } from '@/components/ui/textarea';
 import AppLayout from '@/layouts/AppLayout.vue';
+import Pagination from '@/components/Pagination.vue';
 import { dashboard } from '@/routes';
 import type { BreadcrumbItem } from '@/types';
 
 defineProps<{
-    feeds: any[];
+    feeds: {
+        data: any[];
+        links: any[];
+    };
     can?: {
         uploadFiles: boolean;
     };
@@ -680,7 +684,7 @@ const formatLastSynced = (date: string) => {
                         </TableRow>
                     </TableHeader>
                     <TableBody>
-                        <TableRow v-for="feed in feeds" :key="feed.id">
+                        <TableRow v-for="feed in feeds.data" :key="feed.id">
                             <TableCell>
                                 <img
                                     v-if="feed.absolute_image_url"
@@ -746,7 +750,7 @@ const formatLastSynced = (date: string) => {
                                 </DropdownMenu>
                             </TableCell>
                         </TableRow>
-                        <TableRow v-if="feeds.length === 0">
+                        <TableRow v-if="feeds.data.length === 0">
                             <TableCell colspan="5" class="h-24 text-center">
                                 No feeds created yet.
                             </TableCell>
@@ -754,6 +758,8 @@ const formatLastSynced = (date: string) => {
                     </TableBody>
                 </Table>
             </div>
+
+            <Pagination :links="feeds.links" />
         </div>
     </AppLayout>
 </template>

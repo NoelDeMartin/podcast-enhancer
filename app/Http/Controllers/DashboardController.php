@@ -11,7 +11,7 @@ class DashboardController extends Controller
     public function index(): Response
     {
         return Inertia::render('Dashboard', [
-            'feeds' => Feed::withCount('entries')->latest()->get(),
+            'feeds' => Feed::withCount('entries')->latest()->paginate(10),
             'can' => [
                 'uploadFiles' => request()->user()?->can('uploadFiles', Feed::class) ?? false,
             ],

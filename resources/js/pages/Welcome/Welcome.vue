@@ -1,11 +1,11 @@
 <script setup lang="ts">
 import { Head } from '@inertiajs/vue3';
+import AppFooter from '@/components/AppFooter.vue';
 import WelcomeNav from './WelcomeNav.vue';
 import WelcomeHero from './WelcomeHero.vue';
 import WelcomeManual from './WelcomeManual.vue';
 import WelcomeGetStarted from './WelcomeGetStarted.vue';
 import WelcomeAbout from './WelcomeAbout.vue';
-import WelcomeFooter from './WelcomeFooter.vue';
 </script>
 
 <template>
@@ -17,7 +17,7 @@ import WelcomeFooter from './WelcomeFooter.vue';
         <WelcomeManual />
         <WelcomeGetStarted />
         <WelcomeAbout />
-        <WelcomeFooter />
+        <AppFooter />
     </div>
 </template>
 

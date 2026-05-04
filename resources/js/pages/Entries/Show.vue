@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Head, usePage } from '@inertiajs/vue3';
+import { Head, Link, usePage } from '@inertiajs/vue3';
 import Clock from '~icons/lucide/clock';
 import ExternalLink from '~icons/lucide/external-link';
 import { computed } from 'vue';
@@ -57,6 +57,14 @@ useEntryPolling(isProcessing);
                             class="h-16 w-16 border-3 border-neo-dark object-cover shadow-neo-hard-hard"
                         />
                         <div>
+                            <div class="mb-1">
+                                <Link
+                                    :href="showFeedAction.url(entry.feed.slug)"
+                                    class="text-sm font-bold uppercase tracking-widest text-neo-pink hover:underline"
+                                >
+                                    {{ entry.feed.title }}
+                                </Link>
+                            </div>
                             <h2 class="text-2xl font-bold tracking-tight">
                                 {{ entry.name }}
                             </h2>

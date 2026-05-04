@@ -59,12 +59,17 @@ import {
     TableRow,
 } from '@/components/ui/table';
 import AppLayout from '@/layouts/AppLayout.vue';
+import Pagination from '@/components/Pagination.vue';
 import { formatSummary, formatTimestamp, getBatchStatus, parsedTranscription } from '@/lib/entries';
 import { dashboard } from '@/routes';
 import type { BreadcrumbItem } from '@/types';
 
 const props = defineProps<{
     feed: any;
+    entries: {
+        data: any[];
+        links: any[];
+    };
     can: {
         update: boolean;
         delete: boolean;
@@ -116,7 +121,7 @@ const submitEntry = () => {
 };
 
 const deleteEntry = (slug: string) => {
-    const entry = props.feed.entries.find((e: any) => e.slug === slug);
+    const entry = props.entries.data.find((e: any) => e.slug === slug);
 
     if (confirm('Are you sure you want to delete this entry?')) {
         useForm({}).submit(destroyEntry([props.feed, entry.slug]));
@@ -225,7 +230,7 @@ function getFeedSyncStatus(): 'pending' | 'failed' | 'completed' | null {
 
 const hasActiveJobs = computed(
     () =>
-        props.feed.entries.some((e: any) => getBatchStatus(e) === 'pending') ||
+        props.entries.data.some((e: any) => getBatchStatus(e) === 'pending') ||
         getFeedSyncStatus() === 'pending',
 );
 
@@ -916,7 +921,7 @@ const submitEditEntry = () => {
                         </TableRow>
                     </TableHeader>
                     <TableBody>
-                        <template v-for="entry in feed.entries" :key="entry.id">
+                        <template v-for="entry in entries.data" :key="entry.id">
                             <TableRow>
                                 <TableCell>
                                     <img
@@ -994,7 +999,7 @@ const submitEditEntry = () => {
                                 </TableCell>
                             </TableRow>
                         </template>
-                        <TableRow v-if="feed.entries.length === 0">
+                        <TableRow v-if="entries.data.length === 0">
                             <TableCell
                                 :colspan="can.update || can.delete ? 6 : 5"
                                 class="h-24 text-center"
@@ -1008,6 +1013,8 @@ const submitEditEntry = () => {
                     </TableBody>
                 </Table>
             </div>
+
+            <Pagination :links="entries.links" />
         </div>
     </AppLayout>
 </template>

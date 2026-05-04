@@ -1,12 +1,30 @@
 <?php
 
+use App\Models\Entry;
 use App\Models\Feed;
 use App\Models\User;
+use Illuminate\Foundation\Http\Middleware\PreventRequestForgery;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 
 beforeEach(function () {
+    $this->withoutMiddleware(PreventRequestForgery::class);
     $this->user = User::factory()->create();
+});
+
+it('paginates entries on show', function () {
+    $feed = Feed::factory()->for($this->user)->create();
+    Entry::factory()->count(15)->for($feed)->create();
+
+    $response = $this->actingAs($this->user)
+        ->get(route('feeds.show', $feed));
+
+    $response->assertOk();
+    $response->assertInertia(fn ($page) => $page
+        ->component('Feeds/Show')
+        ->has('entries.data', 10)
+        ->has('entries.links')
+    );
 });
 
 it('can update custom feed', function () {

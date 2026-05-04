@@ -44,13 +44,18 @@ class FeedController extends Controller
 
         Gate::authorize('view', $feed);
 
-        $feed->load(['entries.latestJobBatch', 'latestJobBatch']);
+        $feed->load(['latestJobBatch']);
 
         $this->loadModelFailedJobDetails($feed);
 
         $user = auth()->user();
 
-        $feed->entries->each(function ($entry) use ($user) {
+        $entries = $feed->entries()
+            ->with(['latestJobBatch'])
+            ->latest('published_at')
+            ->paginate(10);
+
+        $entries->getCollection()->each(function ($entry) use ($user) {
             $entry->can = [
                 'produce' => $user?->can('produce', $entry) ?? false,
                 'regenerate' => $user?->can('regenerate', $entry) ?? false,
@@ -59,6 +64,7 @@ class FeedController extends Controller
 
         return Inertia::render('Feeds/Show', [
             'feed' => $feed,
+            'entries' => $entries,
             'can' => [
                 'update' => $user?->can('update', $feed) ?? false,
                 'delete' => $user?->can('delete', $feed) ?? false,
