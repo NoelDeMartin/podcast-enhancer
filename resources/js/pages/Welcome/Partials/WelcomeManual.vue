@@ -11,8 +11,8 @@ import WelcomeManualFeature from './WelcomeManualFeature.vue';
 </script>
 
 <template>
-    <section id="how-it-works" class="px-4 pt-16 pb-16 sm:px-6 sm:pt-40 sm:pb-24">
-        <div class="mx-auto max-w-7xl">
+    <section id="how-it-works" class="pt-16 pb-16 sm:pt-40 sm:pb-24">
+        <div class="mx-auto max-w-7xl px-4 sm:px-6">
             <h2
                 class="inline-block border-3 border-neo-dark bg-neo-pink px-4 py-2 text-2xl font-black uppercase tracking-tighter shadow-neo-hard sm:text-5xl -rotate-2 hover:rotate-0 transition-transform duration-300"
             >

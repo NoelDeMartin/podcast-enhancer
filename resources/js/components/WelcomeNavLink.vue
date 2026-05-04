@@ -12,7 +12,7 @@ defineProps<{
     >
         <slot />
         <div
-            class="absolute -bottom-1 left-0 right-0 h-[3px] bg-neo-pink transition-transform duration-200 ease-out origin-right scale-x-0 group-hover:scale-x-100 group-hover:origin-left group-focus-visible:scale-x-100 group-focus-visible:origin-left"
+            class="absolute -bottom-1 left-0 right-0 h-[3px] origin-right scale-x-0 bg-neo-pink transition-transform duration-200 ease-out group-hover:origin-left group-hover:scale-x-100 group-focus-visible:origin-left group-focus-visible:scale-x-100"
         />
     </a>
 </template>

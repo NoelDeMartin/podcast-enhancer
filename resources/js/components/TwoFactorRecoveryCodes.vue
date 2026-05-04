@@ -80,7 +80,7 @@ onMounted(async () => {
                 <div v-else class="mt-3 space-y-3">
                     <div
                         ref="recoveryCodeSectionRef"
-                        class="grid gap-1 rounded-none bg-muted p-4 font-mono text-sm"
+                        class="grid gap-1 rounded-none bg-muted p-4 text-sm"
                     >
                         <div v-if="!recoveryCodesList.length" class="space-y-2">
                             <div

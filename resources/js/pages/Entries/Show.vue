@@ -10,8 +10,6 @@ import { Badge } from '@/components/ui/badge';
 import { useEntryPolling } from '@/composables/useEntryPolling';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { formatSummary, formatTimestamp, getBatchStatus, parsedTranscription } from '@/lib/entries';
-import { dashboard } from '@/routes';
-import type { BreadcrumbItem } from '@/types';
 
 const props = defineProps<{
     entry: any;
@@ -22,21 +20,6 @@ const props = defineProps<{
     };
 }>();
 
-const breadcrumbs = computed<BreadcrumbItem[]>(() => [
-    {
-        title: usePage().props.auth.user ? 'Dashboard' : 'Home',
-        href: usePage().props.auth.user ? dashboard() : '/',
-    },
-    {
-        title: props.entry.feed.title,
-        href: showFeedAction.url(props.entry.feed.slug),
-    },
-    {
-        title: props.entry.name,
-        href: '#',
-    },
-]);
-
 const isProcessing = computed(() => getBatchStatus(props.entry) === 'pending');
 
 useEntryPolling(isProcessing);
@@ -45,7 +28,7 @@ useEntryPolling(isProcessing);
 <template>
     <Head :title="entry.name" />
 
-    <AppLayout :breadcrumbs="breadcrumbs">
+    <AppLayout>
         <div class="mx-auto flex h-full w-full max-w-5xl flex-1 flex-col gap-6 p-4">
             <div class="flex flex-col gap-2">
                 <div class="flex items-start justify-between gap-4">
@@ -137,7 +120,7 @@ useEntryPolling(isProcessing);
                             :key="index"
                             class="flex items-center gap-3"
                         >
-                            <Badge variant="secondary" class="shrink-0 font-mono text-xs">
+                            <Badge variant="secondary" class="shrink-0 text-xs">
                                 <Clock class="mr-1 h-3 w-3" />
                                 {{ formatTimestamp(chapter.startTime) }}
                             </Badge>

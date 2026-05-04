@@ -6,7 +6,6 @@ import Loader2 from '~icons/lucide/loader-2';
 import MoreHorizontal from '~icons/lucide/more-horizontal';
 import Plus from '~icons/lucide/plus';
 import Rss from '~icons/lucide/rss';
-import Search from '~icons/lucide/search';
 import { ref } from 'vue';
 import { store, destroy, show, update } from '@/actions/App/Http/Controllers/FeedController';
 import { store as syncStore } from '@/actions/App/Http/Controllers/FeedSyncController';
@@ -48,7 +47,6 @@ import { Textarea } from '@/components/ui/textarea';
 import AppLayout from '@/layouts/AppLayout.vue';
 import Pagination from '@/components/Pagination.vue';
 import { dashboard } from '@/routes';
-import type { BreadcrumbItem } from '@/types';
 
 const props = defineProps<{
     feeds: {
@@ -62,13 +60,6 @@ const props = defineProps<{
         uploadFiles: boolean;
     };
 }>();
-
-const breadcrumbs: BreadcrumbItem[] = [
-    {
-        title: 'Dashboard',
-        href: dashboard(),
-    },
-];
 
 const search = ref(props.filters.search || '');
 
@@ -250,7 +241,7 @@ const formatLastSynced = (date: string) => {
 <template>
     <Head title="Dashboard" />
 
-    <AppLayout :breadcrumbs="breadcrumbs">
+    <AppLayout>
         <div
             class="mx-auto flex h-full w-full max-w-5xl flex-1 flex-col gap-6 overflow-x-auto rounded-none p-4"
         >
@@ -445,7 +436,7 @@ const formatLastSynced = (date: string) => {
                         <div class="grid gap-4 py-4">
                             <div
                                 v-if="editingFeed?.rss_url"
-                                class="space-y-4 rounded-none border-3 border-neo-dark border-yellow-100 bg-yellow-50 p-4 text-sm text-yellow-700 dark:border-3 border-neo-dark border-yellow-200/10 dark:bg-yellow-700/10 dark:text-yellow-100"
+                                class="space-y-4 rounded-none border-3 bg-yellow-50 p-4 text-sm text-yellow-700 dark:border-yellow-200/10 dark:bg-yellow-700/10 dark:text-yellow-100"
                             >
                                 <div class="flex items-center gap-2">
                                     <Rss class="h-4 w-4" />
@@ -649,7 +640,7 @@ const formatLastSynced = (date: string) => {
                         </DialogHeader>
 
                         <div
-                            class="space-y-3 rounded-none border-3 border-neo-dark border-red-100 bg-red-50 p-4 text-sm text-red-700 dark:border-3 border-neo-dark border-red-200/10 dark:bg-red-700/10 dark:text-red-100"
+                            class="space-y-3 rounded-none border-3 bg-red-50 p-4 text-sm text-red-700 dark:border-red-200/10 dark:bg-red-700/10 dark:text-red-100"
                         >
                             <div class="space-y-1">
                                 <div class="font-medium">You are about to permanently delete:</div>

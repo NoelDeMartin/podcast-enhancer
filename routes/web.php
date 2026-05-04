@@ -8,7 +8,7 @@ use App\Http\Controllers\FeedSyncController;
 use App\Http\Controllers\RssImportController;
 use Illuminate\Support\Facades\Route;
 
-Route::inertia('/', 'Welcome')->name('home');
+Route::inertia('/', 'Welcome/Index')->name('home');
 
 Route::get('feeds/{feed}.xml', FeedRssController::class)->name('feeds.rss');
 Route::get('feeds/{feed}', [FeedController::class, 'show'])->name('feeds.show');

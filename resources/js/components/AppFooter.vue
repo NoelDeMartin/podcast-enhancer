@@ -6,8 +6,10 @@ const currentYear = new Date().getFullYear();
 </script>
 
 <template>
-    <footer class="px-4 py-4 sm:px-6 bg-neo-dark text-white">
-        <div class="mx-auto flex max-w-7xl flex-col items-center justify-between gap-6 md:flex-row">
+    <footer class="bg-neo-dark py-4 text-white">
+        <div
+            class="mx-auto flex max-w-7xl flex-col items-center justify-between gap-6 px-4 sm:px-6 md:flex-row"
+        >
             <p class="text-sm font-bold opacity-70">&copy; {{ currentYear }} Noel De Martin</p>
 
             <div class="flex items-center gap-8">

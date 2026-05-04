@@ -1,18 +1,22 @@
 <script setup lang="ts">
-import AppLayout from '@/layouts/app/AppHeaderLayout.vue';
-import type { BreadcrumbItem } from '@/types';
+import AppHeaderLayout from '@/layouts/app/AppHeaderLayout.vue';
 
 type Props = {
-    breadcrumbs?: BreadcrumbItem[];
+    floatingHeader?: boolean;
+    logoUrl?: string | null;
 };
 
-withDefaults(defineProps<Props>(), {
-    breadcrumbs: () => [],
-});
+defineProps<Props>();
 </script>
 
 <template>
-    <AppLayout :breadcrumbs="breadcrumbs">
+    <AppHeaderLayout :floating-header :logo-url="logoUrl">
+        <template #header>
+            <slot name="header" />
+        </template>
+        <template #header-right>
+            <slot name="header-right" />
+        </template>
         <slot />
-    </AppLayout>
+    </AppHeaderLayout>
 </template>

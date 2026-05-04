@@ -64,8 +64,6 @@ import {
 import AppLayout from '@/layouts/AppLayout.vue';
 import Pagination from '@/components/Pagination.vue';
 import { formatSummary, formatTimestamp, getBatchStatus, parsedTranscription } from '@/lib/entries';
-import { dashboard } from '@/routes';
-import type { BreadcrumbItem } from '@/types';
 
 const props = defineProps<{
     feed: any;
@@ -89,17 +87,6 @@ function formatDatetimeLocalForInput(date: Date): string {
 
     return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
 }
-
-const breadcrumbs = computed<BreadcrumbItem[]>(() => [
-    {
-        title: usePage().props.auth.user ? 'Dashboard' : 'Home',
-        href: usePage().props.auth.user ? dashboard() : '/',
-    },
-    {
-        title: props.feed.title,
-        href: '#',
-    },
-]);
 
 const search = ref(props.filters.search || '');
 
@@ -329,7 +316,7 @@ const submitEditEntry = () => {
 <template>
     <Head :title="feed.title" />
 
-    <AppLayout :breadcrumbs="breadcrumbs">
+    <AppLayout>
         <div
             class="mx-auto flex h-full w-full max-w-5xl flex-1 flex-col gap-6 overflow-x-auto rounded-none p-4"
         >
@@ -892,7 +879,7 @@ const submitEditEntry = () => {
                                     :key="index"
                                     class="flex items-center gap-3"
                                 >
-                                    <Badge variant="secondary" class="shrink-0 font-mono text-xs">
+                                    <Badge variant="secondary" class="shrink-0 text-xs">
                                         <Clock class="mr-1 h-3 w-3" />
                                         {{ formatTimestamp(chapter.startTime) }}
                                     </Badge>

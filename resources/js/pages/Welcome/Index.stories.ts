@@ -1,10 +1,10 @@
 import type { Meta, StoryObj } from '@storybook/vue3-vite';
 
-import Welcome from './Welcome.vue';
+import Index from './Index.vue';
 
 const meta: Meta = {
     title: 'Pages/Welcome',
-    component: Welcome,
+    component: Index,
     parameters: {
         layout: 'fullscreen',
     },

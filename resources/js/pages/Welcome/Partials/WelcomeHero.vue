@@ -1,28 +1,17 @@
 <script setup lang="ts">
-import { ref } from 'vue';
-import { Button } from '@/components/ui/button';
 import { Link, usePage } from '@inertiajs/vue3';
+import { computed } from 'vue';
+import { Button } from '@/components/ui/button';
 import { dashboard } from '@/routes';
-import type { Auth } from '@/types';
 
-const el = ref<HTMLElement | null>(null);
-const page = usePage<{ auth: Auth }>();
-
-defineExpose({
-    getEl: () => el.value,
-});
+const page = usePage();
+const auth = computed(() => page.props.auth);
 </script>
 
 <template>
-    <header ref="el" class="relative overflow-visible">
-        <Button v-if="page.props.auth.user" as-child class="absolute top-4 right-4">
-            <Link :href="dashboard()">Dashboard</Link>
-        </Button>
-
-        <div
-            class="w-full bg-neo-yellow px-4 pt-16 pb-12 sm:px-6 sm:pt-20 sm:pb-24 lg:pt-32 lg:pb-28"
-        >
-            <div class="mx-auto max-w-7xl">
+    <header class="relative overflow-visible">
+        <div class="w-full bg-neo-yellow pt-16 pb-12 sm:pt-20 sm:pb-24 lg:pt-32 lg:pb-28">
+            <div class="mx-auto max-w-7xl px-4 sm:px-6">
                 <div class="max-w-3xl">
                     <h1
                         class="flex flex-col items-start text-balance uppercase text-3xl font-black leading-[0.9] tracking-tighter sm:text-7xl md:text-8xl"
@@ -35,6 +24,7 @@ defineExpose({
                         <span>experience.</span>
                     </h1>
                     <p
+                        v-if="!auth.user"
                         class="mt-8 text-pretty text-lg font-bold leading-relaxed text-neo-dark/80 sm:text-2xl"
                     >
                         There are many shows you love, but not enough time. Improve your feeds with
@@ -45,8 +35,22 @@ defineExpose({
 
                         All while keeping your favorite podcast app!
                     </p>
-                    <div class="mt-12">
-                        <Button as-child size="lg" class="h-16 px-10 text-xl">
+
+                    <div :class="auth.user ? 'mt-8 sm:mt-10' : 'mt-12'">
+                        <template v-if="auth.user">
+                            <p
+                                class="text-pretty text-lg font-bold leading-relaxed text-neo-dark sm:text-2xl"
+                            >
+                                Welcome back, {{ auth.user.name }}!
+                            </p>
+                            <Button as-child size="lg" class="mt-6 h-16 px-10 text-xl sm:mt-8">
+                                <Link :href="dashboard()">
+                                    Open dashboard
+                                    <i-carbon-arrow-right class="ml-2 size-6" />
+                                </Link>
+                            </Button>
+                        </template>
+                        <Button v-else as-child size="lg" class="h-16 px-10 text-xl">
                             <a href="#get-started" v-scroll-on-click>
                                 Get started
                                 <i-carbon-arrow-right class="ml-2 size-6" />

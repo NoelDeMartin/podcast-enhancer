@@ -36,7 +36,7 @@ defineProps<{
         >
             <div
                 :class="[
-                    'absolute top-4 right-4 flex h-10 w-10 items-center justify-center border-3 border-neo-dark text-white shadow-neo-hard rotate-3 transition-transform duration-300 group-hover:-rotate-3 group-hover:translate-x-1 group-hover:translate-y-1 sm:top-8 sm:right-8 sm:h-16 sm:w-16',
+                    'absolute top-4 right-4 flex h-10 w-10 items-center justify-center border-3 border-neo-dark text-white shadow-neo-hard rotate-6 transition-transform duration-300 group-hover:rotate-0 group-hover:translate-x-1 group-hover:translate-y-1 sm:top-8 sm:right-8 sm:h-16 sm:w-16',
                     iconWrapperClass ?? 'bg-neo-blue',
                 ]"
             >

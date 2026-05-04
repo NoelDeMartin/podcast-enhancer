@@ -3,8 +3,8 @@ import { Button } from '@/components/ui/button';
 </script>
 
 <template>
-    <section id="get-started" class="px-4 py-16 sm:px-6 sm:py-24">
-        <div class="mx-auto max-w-7xl">
+    <section id="get-started" class="py-16 sm:py-24">
+        <div class="mx-auto max-w-7xl px-4 sm:px-6">
             <h2
                 class="inline-block border-3 border-neo-dark bg-neo-blue px-4 py-2 text-2xl font-black uppercase tracking-tighter text-white shadow-neo-hard sm:text-5xl -rotate-2 hover:rotate-0 transition-transform duration-300"
             >
@@ -24,7 +24,7 @@ import { Button } from '@/components/ui/button';
                             </span>
 
                             <div
-                                class="flex h-10 w-10 items-center justify-center border-3 border-neo-dark bg-neo-dark text-neo-yellow shadow-neo-hard rotate-3 transition-transform duration-300 group-hover:-rotate-3 group-hover:translate-x-1 group-hover:translate-y-1 sm:h-14 sm:w-14"
+                                class="flex h-10 w-10 items-center justify-center border-3 border-neo-dark bg-neo-dark text-neo-yellow shadow-neo-hard rotate-6 transition-transform duration-300 group-hover:rotate-0 group-hover:translate-x-1 group-hover:translate-y-1 sm:h-14 sm:w-14"
                             >
                                 <i-carbon-cloud class="size-6 sm:size-8" />
                             </div>
@@ -82,7 +82,7 @@ import { Button } from '@/components/ui/button';
                         </span>
 
                         <div
-                            class="flex h-10 w-10 items-center justify-center border-3 border-neo-dark bg-neo-blue text-white shadow-neo-hard rotate-3 transition-transform duration-300 group-hover:-rotate-3 group-hover:translate-x-1 group-hover:translate-y-1 sm:h-14 sm:w-14"
+                            class="flex h-10 w-10 items-center justify-center border-3 border-neo-dark bg-neo-blue text-white shadow-neo-hard rotate-6 transition-transform duration-300 group-hover:rotate-0 group-hover:translate-x-1 group-hover:translate-y-1 sm:h-14 sm:w-14"
                         >
                             <i-carbon-bare-metal-server class="size-6 sm:size-8" />
                         </div>

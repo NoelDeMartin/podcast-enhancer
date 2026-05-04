@@ -3,8 +3,8 @@ import ExternalLink from '~icons/lucide/external-link';
 </script>
 
 <template>
-    <section id="who-made-this" class="border-b-3 border-neo-dark px-4 py-16 sm:px-6 sm:py-24">
-        <div class="mx-auto max-w-7xl">
+    <section id="who-made-this" class="py-16 sm:py-24">
+        <div class="mx-auto max-w-7xl px-4 sm:px-6">
             <h2
                 class="inline-block border-3 border-neo-dark bg-neo-pink px-4 py-2 text-2xl font-black uppercase tracking-tighter shadow-neo-hard sm:text-5xl -rotate-2 hover:rotate-0 transition-transform duration-300"
             >
