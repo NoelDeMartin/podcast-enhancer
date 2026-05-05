@@ -7,7 +7,7 @@ type TextLinkStoryArgs = {
 };
 
 const meta: Meta<TextLinkStoryArgs> = {
-    title: 'Components/TextLink',
+    title: 'UI/TextLink',
     component: TextLink,
     tags: ['autodocs'],
     argTypes: {

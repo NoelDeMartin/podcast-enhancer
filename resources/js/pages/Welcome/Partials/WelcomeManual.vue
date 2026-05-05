@@ -1,25 +1,26 @@
 <script setup lang="ts">
-import Rss from '~icons/carbon/rss';
 import AiGenerate from '~icons/carbon/ai-generate';
+import Cut from '~icons/carbon/cut';
 import Headphones from '~icons/carbon/headphones';
 import Idea from '~icons/carbon/idea';
-import Cut from '~icons/carbon/cut';
-import Search from '~icons/carbon/search';
 import LogoGithub from '~icons/carbon/logo-github';
-import WelcomeManualStep from './WelcomeManualStep.vue';
+import Rss from '~icons/carbon/rss';
+import Search from '~icons/carbon/search';
+
 import WelcomeManualFeature from './WelcomeManualFeature.vue';
+import WelcomeManualStep from './WelcomeManualStep.vue';
 </script>
 
 <template>
     <section id="how-it-works" class="pt-16 pb-16 sm:pt-40 sm:pb-24">
         <div class="mx-auto max-w-7xl px-4 sm:px-6">
             <h2
-                class="inline-block border-3 border-neo-dark bg-neo-pink px-4 py-2 text-2xl font-black uppercase tracking-tighter shadow-neo-hard sm:text-5xl -rotate-2 hover:rotate-0 transition-transform duration-300"
+                class="border-neo-dark bg-neo-pink shadow-neo-hard inline-block -rotate-2 border-3 px-4 py-2 text-2xl font-black tracking-tighter uppercase transition-transform duration-300 hover:rotate-0 sm:text-5xl"
             >
                 How does it work?
             </h2>
 
-            <div class="relative mt-20 mx-auto max-w-5xl">
+            <div class="relative mx-auto mt-20 max-w-5xl">
                 <div class="space-y-12">
                     <WelcomeManualStep
                         :icon="Rss"
@@ -53,12 +54,12 @@ import WelcomeManualFeature from './WelcomeManualFeature.vue';
 
             <div class="mt-32">
                 <h3
-                    class="inline-block border-3 border-neo-dark bg-neo-yellow px-4 py-2 text-xl font-black uppercase tracking-tighter shadow-neo-hard sm:text-3xl rotate-1 hover:rotate-0 transition-transform duration-300"
+                    class="border-neo-dark bg-neo-yellow shadow-neo-hard inline-block rotate-1 border-3 px-4 py-2 text-xl font-black tracking-tighter uppercase transition-transform duration-300 hover:rotate-0 sm:text-3xl"
                 >
                     And much more...
                 </h3>
 
-                <div class="mt-12 mx-auto grid max-w-6xl gap-8 sm:grid-cols-2 sm:gap-10">
+                <div class="mx-auto mt-12 grid max-w-6xl gap-8 sm:grid-cols-2 sm:gap-10">
                     <WelcomeManualFeature
                         :icon="Idea"
                         title="Catch the Gist"

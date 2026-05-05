@@ -9,7 +9,7 @@ defineProps<{
 <template>
     <Modal title="Synchronization Failed" :description="feed.title" class="max-w-2xl">
         <div
-            class="max-h-[60vh] overflow-y-auto rounded-none border-3 border-neo-dark bg-red-50 p-4 dark:bg-red-950/20"
+            class="border-neo-dark max-h-[60vh] overflow-y-auto rounded-none border-3 bg-red-50 p-4 dark:bg-red-950/20"
         >
             <pre
                 class="text-xs leading-relaxed whitespace-pre-wrap text-red-800 dark:text-red-300"

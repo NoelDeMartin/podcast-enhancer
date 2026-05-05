@@ -2,6 +2,7 @@
 import { Link, router } from '@inertiajs/vue3';
 import LogOut from '~icons/lucide/log-out';
 import Settings from '~icons/lucide/settings';
+
 import {
     DropdownMenuGroup,
     DropdownMenuItem,

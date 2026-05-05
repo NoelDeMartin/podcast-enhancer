@@ -39,12 +39,12 @@
 
         <link rel="preconnect" href="https://fonts.googleapis.com">
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-        <link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400;1,700&display=swap" rel="stylesheet">
+        <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300..700&family=Space+Mono:ital,wght@0,400;0,700;1,400;1,700&display=swap" rel="stylesheet">
 
         @vite(['resources/js/app.ts'])
         @inertiaHead
     </head>
-    <body class="font-mono antialiased">
+    <body class="bg-neo-dots font-grotesk text-neo-dark antialiased selection:bg-neo-pink selection:text-white">
         @inertia
     </body>
 </html>

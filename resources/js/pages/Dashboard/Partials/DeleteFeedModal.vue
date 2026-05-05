@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { useForm } from '@inertiajs/vue3';
+
 import { destroy } from '@/actions/App/Http/Controllers/FeedController';
 import { Button } from '@/components/ui/button';
 import { DialogFooter } from '@/components/ui/dialog';

@@ -1,6 +1,7 @@
 <script setup lang="ts">
-import AlertCircle from '~icons/lucide/alert-circle';
 import { computed } from 'vue';
+import AlertCircle from '~icons/lucide/alert-circle';
+
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
 type Props = {

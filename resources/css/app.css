@@ -8,6 +8,7 @@
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
+    --font-grotesk: 'Space Grotesk', sans-serif;
     --font-mono: 'Space Mono', monospace;
 
     /* High-contrast primary colors */
@@ -96,9 +97,13 @@
 }
 
 @layer utilities {
-    body,
-    html {
-        --font-mono: 'Space Mono', monospace;
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    h6 {
+        @apply font-mono;
     }
 
     .bg-neo-dots {

@@ -1,8 +1,9 @@
 <script setup lang="ts">
 import { showModal } from '@noeldemartin/vue-modals';
+
+import DeleteUserModal from '@/components/DeleteUserModal.vue';
 import Heading from '@/components/Heading.vue';
 import { Button } from '@/components/ui/button';
-import DeleteUserModal from '@/components/DeleteUserModal.vue';
 
 const deleteAccount = () => showModal(DeleteUserModal);
 </script>
@@ -15,7 +16,7 @@ const deleteAccount = () => showModal(DeleteUserModal);
             description="Delete your account and all of its resources"
         />
         <div
-            class="space-y-4 rounded-none border-3 border-neo-dark border-red-100 bg-red-50 p-4 dark:border-3 dark:border-neo-dark dark:border-red-200/10 dark:bg-red-700/10"
+            class="border-neo-dark dark:border-neo-dark space-y-4 rounded-none border-3 border-red-100 bg-red-50 p-4 dark:border-3 dark:border-red-200/10 dark:bg-red-700/10"
         >
             <div class="relative space-y-0.5 text-red-600 dark:text-red-100">
                 <p class="font-medium">Warning</p>

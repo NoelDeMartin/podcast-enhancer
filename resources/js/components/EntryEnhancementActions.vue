@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { useForm } from '@inertiajs/vue3';
 import Sparkles from '~icons/lucide/sparkles';
+
 import { produce as produceEntry } from '@/actions/App/Http/Controllers/EntryController';
 import { Button } from '@/components/ui/button';
 import {

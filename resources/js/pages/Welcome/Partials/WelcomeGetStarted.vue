@@ -6,40 +6,40 @@ import { Button } from '@/components/ui/button';
     <section id="get-started" class="py-16 sm:py-24">
         <div class="mx-auto max-w-7xl px-4 sm:px-6">
             <h2
-                class="inline-block border-3 border-neo-dark bg-neo-blue px-4 py-2 text-2xl font-black uppercase tracking-tighter text-white shadow-neo-hard sm:text-5xl -rotate-2 hover:rotate-0 transition-transform duration-300"
+                class="border-neo-dark bg-neo-blue shadow-neo-hard inline-block -rotate-2 border-3 px-4 py-2 text-2xl font-black tracking-tighter text-white uppercase transition-transform duration-300 hover:rotate-0 sm:text-5xl"
             >
                 Get Started
             </h2>
 
             <div class="mt-20 grid gap-10 lg:grid-cols-2 lg:items-stretch lg:px-8">
                 <div
-                    class="group relative border-3 border-neo-dark bg-neo-yellow text-neo-dark transition-shadow duration-300 hover:shadow-neo-hard"
+                    class="group border-neo-dark bg-neo-yellow text-neo-dark hover:shadow-neo-hard relative border-3 transition-shadow duration-300"
                 >
                     <div class="flex h-full flex-col p-3 sm:p-10">
                         <div class="flex items-center justify-between gap-6">
                             <span
-                                class="inline-flex items-center gap-2 border-3 border-neo-dark bg-neo-bg px-2 py-1 text-[10px] font-black uppercase tracking-wide sm:tracking-widest sm:text-xs"
+                                class="border-neo-dark bg-neo-bg inline-flex items-center gap-2 border-3 px-2 py-1 text-[10px] font-black tracking-wide uppercase sm:text-xs sm:tracking-widest"
                             >
                                 Invite-only
                             </span>
 
                             <div
-                                class="flex h-10 w-10 items-center justify-center border-3 border-neo-dark bg-neo-dark text-neo-yellow shadow-neo-hard rotate-6 transition-transform duration-300 group-hover:rotate-0 group-hover:translate-x-1 group-hover:translate-y-1 sm:h-14 sm:w-14"
+                                class="border-neo-dark bg-neo-dark text-neo-yellow shadow-neo-hard flex h-10 w-10 rotate-6 items-center justify-center border-3 transition-transform duration-300 group-hover:translate-x-1 group-hover:translate-y-1 group-hover:rotate-0 sm:h-14 sm:w-14"
                             >
                                 <i-carbon-cloud class="size-6 sm:size-8" />
                             </div>
                         </div>
 
                         <div class="mt-8">
-                            <h3 class="text-lg font-black uppercase tracking-tight sm:text-5xl">
+                            <h3 class="text-lg font-black tracking-tight uppercase sm:text-5xl">
                                 Create an account
                             </h3>
-                            <p class="mt-3 text-base font-bold text-neo-dark/80 sm:text-lg">
+                            <p class="text-neo-dark/80 mt-3 text-base font-bold sm:text-lg">
                                 Use it in the cloud, forget about headaches.
                             </p>
                         </div>
 
-                        <div class="mt-8 border-t-3 border-neo-dark pt-6">
+                        <div class="border-neo-dark mt-8 border-t-3 pt-6">
                             <p class="text-sm font-bold sm:text-base">
                                 The app is currently invite-only, but let me know if you want to
                                 give it a try!
@@ -60,7 +60,7 @@ import { Button } from '@/components/ui/button';
                         <div class="mt-auto pt-10">
                             <Button
                                 as-child
-                                class="h-14 w-full bg-neo-dark px-4 text-lg text-white sm:px-8"
+                                class="bg-neo-dark h-14 w-full px-4 text-lg text-white sm:px-8"
                             >
                                 <a href="mailto:hey@noeldemartin.com?subject=Podcast+Enhancer">
                                     <i-carbon-email class="mr-2 size-6" />
@@ -72,37 +72,37 @@ import { Button } from '@/components/ui/button';
                 </div>
 
                 <div
-                    class="group flex h-full flex-col border-3 border-neo-dark bg-neo-bg p-3 text-neo-dark transition-shadow duration-300 hover:shadow-neo-hard-pink sm:p-10"
+                    class="group border-neo-dark bg-neo-bg text-neo-dark hover:shadow-neo-hard-pink flex h-full flex-col border-3 p-3 transition-shadow duration-300 sm:p-10"
                 >
                     <div class="flex items-center justify-between gap-6">
                         <span
-                            class="inline-flex items-center gap-2 border-3 border-neo-dark bg-white px-2 py-1 text-[10px] font-black uppercase tracking-wide sm:tracking-widest sm:text-xs"
+                            class="border-neo-dark inline-flex items-center gap-2 border-3 bg-white px-2 py-1 text-[10px] font-black tracking-wide uppercase sm:text-xs sm:tracking-widest"
                         >
                             DIY
                         </span>
 
                         <div
-                            class="flex h-10 w-10 items-center justify-center border-3 border-neo-dark bg-neo-blue text-white shadow-neo-hard rotate-6 transition-transform duration-300 group-hover:rotate-0 group-hover:translate-x-1 group-hover:translate-y-1 sm:h-14 sm:w-14"
+                            class="border-neo-dark bg-neo-blue shadow-neo-hard flex h-10 w-10 rotate-6 items-center justify-center border-3 text-white transition-transform duration-300 group-hover:translate-x-1 group-hover:translate-y-1 group-hover:rotate-0 sm:h-14 sm:w-14"
                         >
                             <i-carbon-bare-metal-server class="size-6 sm:size-8" />
                         </div>
                     </div>
 
                     <div class="mt-8">
-                        <h3 class="text-lg font-black uppercase tracking-tight sm:text-5xl">
+                        <h3 class="text-lg font-black tracking-tight uppercase sm:text-5xl">
                             Self-Host
                         </h3>
-                        <p class="mt-3 text-base font-bold text-neo-dark/80 sm:text-lg">
+                        <p class="text-neo-dark/80 mt-3 text-base font-bold sm:text-lg">
                             Run it in your hardware, keep full control.
                         </p>
                     </div>
 
-                    <div class="mt-8 border-t-3 border-neo-dark pt-6">
+                    <div class="border-neo-dark mt-8 border-t-3 pt-6">
                         <p class="text-sm font-bold sm:text-base">
                             Use your own API keys via Mistral, Gemini, Anthropic, or any other
                             provider supported by
                             <a
-                                class="underline decoration-2 underline-offset-4 hover:decoration-neo-pink"
+                                class="hover:decoration-neo-pink underline decoration-2 underline-offset-4"
                                 href="https://laravel.com/docs/ai-sdk"
                                 target="_blank"
                                 rel="noreferrer"
@@ -119,7 +119,11 @@ import { Button } from '@/components/ui/button';
                     </div>
 
                     <div class="mt-auto pt-10">
-                        <Button as-child class="h-14 w-full border-3 px-4 text-lg sm:px-8">
+                        <Button
+                            variant="secondary"
+                            as-child
+                            class="h-14 w-full border-3 px-4 text-lg sm:px-8"
+                        >
                             <a
                                 href="https://github.com/noeldemartin/podcasts-enhancer"
                                 target="_blank"

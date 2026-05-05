@@ -1,7 +1,9 @@
 <script setup lang="ts">
 import { useForm } from '@inertiajs/vue3';
-import Loader2 from '~icons/lucide/loader-2';
 import { ref } from 'vue';
+import { computed } from 'vue';
+import Loader2 from '~icons/lucide/loader-2';
+
 import {
     fetch as fetchRssAction,
     store as storeRssAction,
@@ -20,7 +22,6 @@ import {
     TableHeader,
     TableRow,
 } from '@/components/ui/table';
-import { computed } from 'vue';
 
 const props = defineProps<{
     feed: any;
@@ -120,7 +121,7 @@ const toggleEpisode = (index: number) => {
             </DialogFooter>
         </div>
         <div v-else>
-            <div class="my-4 max-h-[400px] overflow-y-auto rounded-none border-3 border-neo-dark">
+            <div class="border-neo-dark my-4 max-h-[400px] overflow-y-auto rounded-none border-3">
                 <Table>
                     <TableHeader>
                         <TableRow>

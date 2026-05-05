@@ -1,7 +1,9 @@
 <script setup lang="ts">
 import { useForm } from '@inertiajs/vue3';
 import { ref } from 'vue';
+
 import { store } from '@/actions/App/Http/Controllers/FeedController';
+import InputError from '@/components/InputError.vue';
 import { Button } from '@/components/ui/button';
 import { DialogFooter } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
@@ -55,9 +57,7 @@ const submit = () => {
                         placeholder="Enter feed title..."
                         required
                     />
-                    <div v-if="form.errors.title" class="text-sm text-red-500">
-                        {{ form.errors.title }}
-                    </div>
+                    <InputError :message="form.errors.title" />
                 </div>
                 <div class="grid gap-2">
                     <Label for="description">Description</Label>
@@ -67,9 +67,7 @@ const submit = () => {
                         placeholder="Optional description for this podcast feed..."
                         rows="3"
                     />
-                    <div v-if="form.errors.description" class="text-sm text-red-500">
-                        {{ form.errors.description }}
-                    </div>
+                    <InputError :message="form.errors.description" />
                 </div>
                 <div class="grid gap-2">
                     <Label for="imageSource">Image Source</Label>
@@ -90,9 +88,7 @@ const submit = () => {
                         v-model="form.image_url"
                         placeholder="https://example.com/image.jpg"
                     />
-                    <div v-if="form.errors.image_url" class="text-sm text-red-500">
-                        {{ form.errors.image_url }}
-                    </div>
+                    <InputError :message="form.errors.image_url" />
                 </div>
                 <div v-if="imageSource === 'file'" class="grid gap-2">
                     <Label for="image_file">Image File</Label>
@@ -102,9 +98,7 @@ const submit = () => {
                         @input="form.image_file = $event.target.files[0]"
                         accept="image/*"
                     />
-                    <div v-if="form.errors.image_file" class="text-sm text-red-500">
-                        {{ form.errors.image_file }}
-                    </div>
+                    <InputError :message="form.errors.image_file" />
                 </div>
             </div>
             <DialogFooter>

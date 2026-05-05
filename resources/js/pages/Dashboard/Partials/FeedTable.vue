@@ -2,6 +2,7 @@
 import { Link } from '@inertiajs/vue3';
 import MoreHorizontal from '~icons/lucide/more-horizontal';
 import Rss from '~icons/lucide/rss';
+
 import { show } from '@/actions/App/Http/Controllers/FeedController';
 import { Button } from '@/components/ui/button';
 import {
@@ -87,7 +88,7 @@ const formatLastSynced = (date: string) => {
 </script>
 
 <template>
-    <div class="border-3 bg-background shadow-neo-hard-hard">
+    <div class="bg-background border-3">
         <Table>
             <TableHeader>
                 <TableRow>

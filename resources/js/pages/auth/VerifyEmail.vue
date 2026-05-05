@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { Form, Head } from '@inertiajs/vue3';
+
 import TextLink from '@/components/TextLink.vue';
 import { Button } from '@/components/ui/button';
 import { Spinner } from '@/components/ui/spinner';
@@ -16,6 +17,7 @@ defineProps<{
     <AuthLayout
         title="Verify email"
         description="Please verify your email address by clicking on the link we just emailed to you."
+        :logo-url="null"
     >
         <Head title="Email verification" />
 
@@ -27,13 +29,16 @@ defineProps<{
             registration.
         </div>
 
-        <Form v-bind="send.form()" class="space-y-6 text-center" v-slot="{ processing }">
-            <Button :disabled="processing" variant="secondary">
+        <Form v-bind="send.form()" class="grid gap-8 text-center" v-slot="{ processing }">
+            <Button
+                :disabled="processing"
+                class="border-neo-dark bg-neo-pink border-3 font-black tracking-wider text-white uppercase"
+            >
                 <Spinner v-if="processing" />
-                Resend verification email
+                Resend Verification Email
             </Button>
 
-            <TextLink :href="logout()" as="button" class="mx-auto block text-sm">
+            <TextLink :href="logout()" as="button" method="post" class="mx-auto block text-sm">
                 Log out
             </TextLink>
         </Form>

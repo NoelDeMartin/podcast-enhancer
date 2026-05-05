@@ -2,14 +2,16 @@
 import { Head, router } from '@inertiajs/vue3';
 import { showModal } from '@noeldemartin/vue-modals';
 import { watchDebounced } from '@vueuse/core';
+import { ref } from 'vue';
 import Plus from '~icons/lucide/plus';
 import Rss from '~icons/lucide/rss';
-import { ref } from 'vue';
+
 import Pagination from '@/components/Pagination.vue';
 import SearchInput from '@/components/SearchInput.vue';
 import { Button } from '@/components/ui/button';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { dashboard } from '@/routes';
+
 import CreateFeedModal from './Partials/CreateFeedModal.vue';
 import DeleteFeedModal from './Partials/DeleteFeedModal.vue';
 import EditFeedModal from './Partials/EditFeedModal.vue';

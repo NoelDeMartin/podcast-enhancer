@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { Form, Head } from '@inertiajs/vue3';
+
 import InputError from '@/components/InputError.vue';
 import PasswordInput from '@/components/PasswordInput.vue';
 import { Button } from '@/components/ui/button';
@@ -13,6 +14,7 @@ import { store } from '@/routes/password/confirm';
     <AuthLayout
         title="Confirm your password"
         description="This is a secure area of the application. Please confirm your password before continuing."
+        :logo-url="null"
     >
         <Head title="Confirm password" />
 

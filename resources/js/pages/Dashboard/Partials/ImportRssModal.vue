@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { useForm } from '@inertiajs/vue3';
 import Loader2 from '~icons/lucide/loader-2';
+
 import { store as syncStore } from '@/actions/App/Http/Controllers/FeedSyncController';
 import { Button } from '@/components/ui/button';
 import { DialogFooter } from '@/components/ui/dialog';
@@ -74,7 +75,7 @@ const submit = () => {
                         {{ form.errors.sync_frequency }}
                     </div>
                 </div>
-                <div class="text-xs text-muted-foreground">
+                <div class="text-muted-foreground text-xs">
                     Note: Synchronized feeds will not automatically transcribe imported episodes to
                     reduce server load.
                 </div>

@@ -1,10 +1,11 @@
 <script setup lang="ts">
 import { Form } from '@inertiajs/vue3';
+import { nextTick, onMounted, ref, useTemplateRef } from 'vue';
 import Eye from '~icons/lucide/eye';
 import EyeOff from '~icons/lucide/eye-off';
 import LockKeyhole from '~icons/lucide/lock-keyhole';
 import RefreshCw from '~icons/lucide/refresh-cw';
-import { nextTick, onMounted, ref, useTemplateRef } from 'vue';
+
 import AlertError from '@/components/AlertError.vue';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -80,20 +81,20 @@ onMounted(async () => {
                 <div v-else class="mt-3 space-y-3">
                     <div
                         ref="recoveryCodeSectionRef"
-                        class="grid gap-1 rounded-none bg-muted p-4 text-sm"
+                        class="bg-muted grid gap-1 rounded-none p-4 text-sm"
                     >
                         <div v-if="!recoveryCodesList.length" class="space-y-2">
                             <div
                                 v-for="n in 8"
                                 :key="n"
-                                class="h-4 animate-pulse rounded-none bg-muted-foreground/20"
+                                class="bg-muted-foreground/20 h-4 animate-pulse rounded-none"
                             ></div>
                         </div>
                         <div v-else v-for="(code, index) in recoveryCodesList" :key="index">
                             {{ code }}
                         </div>
                     </div>
-                    <p class="text-xs text-muted-foreground select-none">
+                    <p class="text-muted-foreground text-xs select-none">
                         Each recovery code can be used once to access your account and will be
                         removed after use. If you need more, click
                         <span class="font-bold">Regenerate codes</span> above.

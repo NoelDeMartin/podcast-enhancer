@@ -1,10 +1,11 @@
 <script setup lang="ts">
 import { Form } from '@inertiajs/vue3';
 import { useClipboard } from '@vueuse/core';
+import { computed, nextTick, onMounted, ref, useTemplateRef } from 'vue';
 import Check from '~icons/lucide/check';
 import Copy from '~icons/lucide/copy';
 import ScanLine from '~icons/lucide/scan-line';
-import { computed, nextTick, onMounted, ref, useTemplateRef } from 'vue';
+
 import AlertError from '@/components/AlertError.vue';
 import InputError from '@/components/InputError.vue';
 import { Button } from '@/components/ui/button';
@@ -86,27 +87,25 @@ onMounted(async () => {
 <template>
     <Modal class="sm:max-w-md">
         <DialogHeader class="flex items-center justify-center">
-            <div
-                class="mb-3 w-auto rounded-none border-3 border-neo-dark bg-card p-0.5 shadow-neo-hard-hard-sm"
-            >
+            <div class="border-neo-dark bg-card mb-3 w-auto rounded-none border-3 p-0.5">
                 <div
-                    class="relative overflow-hidden rounded-none border-3 border-neo-dark bg-muted p-2.5"
+                    class="border-neo-dark bg-muted relative overflow-hidden rounded-none border-3 p-2.5"
                 >
                     <div class="absolute inset-0 grid grid-cols-5 opacity-50">
                         <div
                             v-for="i in 5"
                             :key="`col-${i}`"
-                            class="border-r border-border last:border-r-0"
+                            class="border-border border-r last:border-r-0"
                         />
                     </div>
                     <div class="absolute inset-0 grid grid-rows-5 opacity-50">
                         <div
                             v-for="i in 5"
                             :key="`row-${i}`"
-                            class="border-b border-border last:border-b-0"
+                            class="border-border border-b last:border-b-0"
                         />
                     </div>
-                    <ScanLine class="relative z-20 size-6 text-foreground" />
+                    <ScanLine class="text-foreground relative z-20 size-6" />
                 </div>
             </div>
             <DialogTitle>{{ modalConfig.title }}</DialogTitle>
@@ -121,11 +120,11 @@ onMounted(async () => {
                 <template v-else>
                     <div class="relative mx-auto flex max-w-md items-center overflow-hidden">
                         <div
-                            class="relative mx-auto aspect-square w-64 overflow-hidden rounded-none border-3 border-neo-dark"
+                            class="border-neo-dark relative mx-auto aspect-square w-64 overflow-hidden rounded-none border-3"
                         >
                             <div
                                 v-if="!qrCodeSvg"
-                                class="absolute inset-0 z-10 flex aspect-square h-auto w-full animate-pulse items-center justify-center bg-background"
+                                class="bg-background absolute inset-0 z-10 flex aspect-square h-auto w-full animate-pulse items-center justify-center"
                             >
                                 <Spinner class="size-6" />
                             </div>
@@ -151,17 +150,17 @@ onMounted(async () => {
                     </div>
 
                     <div class="relative flex w-full items-center justify-center">
-                        <div class="absolute inset-0 top-1/2 h-px w-full bg-border" />
-                        <span class="relative bg-card px-2 py-1">or, enter the code manually</span>
+                        <div class="bg-border absolute inset-0 top-1/2 h-px w-full" />
+                        <span class="bg-card relative px-2 py-1">or, enter the code manually</span>
                     </div>
 
                     <div class="flex w-full items-center justify-center space-x-2">
                         <div
-                            class="flex w-full items-stretch overflow-hidden rounded-none border-3 border-neo-dark"
+                            class="border-neo-dark flex w-full items-stretch overflow-hidden rounded-none border-3"
                         >
                             <div
                                 v-if="!manualSetupKey"
-                                class="flex h-full w-full items-center justify-center bg-muted p-3"
+                                class="bg-muted flex h-full w-full items-center justify-center p-3"
                             >
                                 <Spinner />
                             </div>
@@ -170,11 +169,11 @@ onMounted(async () => {
                                     type="text"
                                     readonly
                                     :value="manualSetupKey"
-                                    class="h-full w-full bg-background p-3 text-foreground"
+                                    class="bg-background text-foreground h-full w-full p-3"
                                 />
                                 <button
                                     @click="copy(manualSetupKey || '')"
-                                    class="relative block h-auto border-l border-border px-3 hover:bg-muted"
+                                    class="border-border hover:bg-muted relative block h-auto border-l px-3"
                                 >
                                     <Check v-if="copied" class="w-4 text-green-500" />
                                     <Copy v-else class="w-4" />

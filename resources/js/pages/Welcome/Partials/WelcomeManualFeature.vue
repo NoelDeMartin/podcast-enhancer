@@ -23,7 +23,7 @@ const resolvedIconWrapperClass = computed(() => {
 <template>
     <div
         :class="[
-            'group border-3 border-neo-dark bg-neo-bg p-4 text-neo-dark transition-shadow duration-300 sm:p-8',
+            'group border-neo-dark bg-neo-bg text-neo-dark border-3 p-4 transition-shadow duration-300 sm:p-8',
             wrapperClass ?? 'hover:shadow-neo-hard',
         ]"
     >
@@ -32,14 +32,14 @@ const resolvedIconWrapperClass = computed(() => {
                 <h4 class="text-xl font-black tracking-tight sm:text-2xl">
                     {{ title }}
                 </h4>
-                <p class="mt-3 max-w-md text-xs font-bold text-neo-dark/70 sm:text-sm">
+                <p class="text-neo-dark/70 mt-3 max-w-md text-xs font-bold sm:text-sm">
                     {{ description }}
                 </p>
             </div>
 
             <div
                 :class="[
-                    'relative grid h-10 w-10 shrink-0 place-items-center border-3 border-neo-dark shadow-neo-hard rotate-6 transition-transform duration-300 group-hover:rotate-0 sm:h-14 sm:w-14',
+                    'border-neo-dark shadow-neo-hard relative grid h-10 w-10 shrink-0 rotate-6 place-items-center border-3 transition-transform duration-300 group-hover:rotate-0 sm:h-14 sm:w-14',
                     resolvedIconWrapperClass,
                 ]"
             >

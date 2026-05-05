@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import { useForm } from '@inertiajs/vue3';
-import Rss from '~icons/lucide/rss';
 import { ref, watch } from 'vue';
+import Rss from '~icons/lucide/rss';
+
 import { update } from '@/actions/App/Http/Controllers/FeedController';
 import { Button } from '@/components/ui/button';
 import { DialogFooter } from '@/components/ui/dialog';
@@ -94,7 +95,7 @@ const submit = () => {
                     <Label for="edit-rss-url">RSS URL</Label>
                     <div
                         id="edit-rss-url"
-                        class="select-all rounded-none border-3 border-neo-dark bg-muted px-3 py-2 text-sm break-all text-muted-foreground"
+                        class="border-neo-dark bg-muted text-muted-foreground rounded-none border-3 px-3 py-2 text-sm break-all select-all"
                     >
                         {{ feed.rss_url }}
                     </div>
@@ -233,15 +234,15 @@ const submit = () => {
                             v-if="feed.absolute_image_url"
                             :src="feed.absolute_image_url"
                             alt=""
-                            class="h-16 w-16 rounded-none border-3 border-neo-dark object-cover"
+                            class="border-neo-dark h-16 w-16 rounded-none border-3 object-cover"
                         />
                         <div
                             v-else
-                            class="flex h-16 w-16 items-center justify-center rounded-none border-3 border-neo-dark bg-muted"
+                            class="border-neo-dark bg-muted flex h-16 w-16 items-center justify-center rounded-none border-3"
                         >
-                            <Rss class="h-8 w-8 text-muted" />
+                            <Rss class="text-muted h-8 w-8" />
                         </div>
-                        <div class="text-xs text-muted-foreground">Managed by RSS feed</div>
+                        <div class="text-muted-foreground text-xs">Managed by RSS feed</div>
                     </div>
                 </div>
             </div>

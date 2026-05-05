@@ -2,7 +2,7 @@
 import type { CheckboxRootEmits, CheckboxRootProps } from "reka-ui"
 import type { HTMLAttributes } from "vue"
 import { reactiveOmit } from "@vueuse/core"
-import Check from "~icons/lucide/check"
+import Checkmark from "~icons/material-symbols/check-rounded"
 import { CheckboxIndicator, CheckboxRoot, useForwardPropsEmits } from "reka-ui"
 import { cn } from "@/lib/utils"
 
@@ -20,7 +20,7 @@ const forwarded = useForwardPropsEmits(delegatedProps, emits)
     data-slot="checkbox"
     v-bind="forwarded"
     :class="
-      cn('peer border-neo-dark data-[state=checked]:bg-neo-yellow data-[state=checked]:text-neo-dark focus-visible:ring-neo-blue size-4 shrink-0 rounded-none border-3 shadow-neo-hard transition-shadow-neo-hard outline-none focus-visible:ring-2 disabled:cursor-not-allowed disabled:opacity-50',
+      cn('peer border-neo-dark data-[state=checked]:bg-neo-pink data-[state=checked]:text-neo-dark focus-visible:ring-neo-pink size-5 shrink-0 rounded-none border-3 outline-none focus-visible:ring-2 disabled:cursor-not-allowed disabled:opacity-50',
          props.class)"
   >
     <CheckboxIndicator
@@ -28,7 +28,7 @@ const forwarded = useForwardPropsEmits(delegatedProps, emits)
       class="grid place-content-center text-current transition-none"
     >
       <slot v-bind="slotProps">
-        <Check class="size-3.5" />
+        <Checkmark class="size-4 text-current" />
       </slot>
     </CheckboxIndicator>
   </CheckboxRoot>

@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import Search from '~icons/lucide/search';
+
 import { Input } from '@/components/ui/input';
 
 defineProps<{
@@ -11,7 +12,7 @@ const modelValue = defineModel<string>();
 
 <template>
     <div class="relative w-full max-w-sm">
-        <Search class="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+        <Search class="text-muted-foreground absolute top-2.5 left-2.5 h-4 w-4" />
         <Input
             v-model="modelValue"
             type="search"

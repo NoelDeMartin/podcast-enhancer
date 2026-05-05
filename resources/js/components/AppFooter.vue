@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import LogoGithub from '~icons/carbon/logo-github';
 import Email from '~icons/carbon/email';
+import LogoGithub from '~icons/carbon/logo-github';
 
 const currentYear = new Date().getFullYear();
 </script>
@@ -17,14 +17,14 @@ const currentYear = new Date().getFullYear();
                     href="https://github.com/noeldemartin/podcasts-enhancer"
                     target="_blank"
                     rel="noreferrer"
-                    class="group flex items-center gap-2 text-sm font-black uppercase tracking-widest transition-colors hover:text-neo-pink"
+                    class="group hover:text-neo-pink flex items-center gap-2 text-sm font-black tracking-widest uppercase transition-colors"
                 >
                     <LogoGithub class="size-5" />
                     GitHub
                 </a>
                 <a
                     href="mailto:hey@noeldemartin.com?subject=Podcast+Enhancer"
-                    class="group flex items-center gap-2 text-sm font-black uppercase tracking-widest transition-colors hover:text-neo-pink"
+                    class="group hover:text-neo-pink flex items-center gap-2 text-sm font-black tracking-widest uppercase transition-colors"
                 >
                     <Email class="size-5" />
                     Contact

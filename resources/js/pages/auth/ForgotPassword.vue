@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { Form, Head } from '@inertiajs/vue3';
+
 import InputError from '@/components/InputError.vue';
 import TextLink from '@/components/TextLink.vue';
 import { Button } from '@/components/ui/button';
@@ -26,9 +27,9 @@ defineProps<{
             {{ status }}
         </div>
 
-        <div class="space-y-6">
-            <Form v-bind="email.form()" v-slot="{ errors, processing }">
-                <div class="grid gap-2">
+        <div class="grid gap-8">
+            <Form v-bind="email.form()" v-slot="{ errors, processing }" class="flex flex-col gap-8">
+                <div class="grid gap-3">
                     <Label for="email">Email address</Label>
                     <Input
                         id="email"
@@ -41,19 +42,19 @@ defineProps<{
                     <InputError :message="errors.email" />
                 </div>
 
-                <div class="my-6 flex items-center justify-start">
+                <div class="flex items-center justify-start">
                     <Button
-                        class="w-full"
+                        class="border-neo-dark bg-neo-pink w-full border-3 font-black tracking-wider text-white uppercase"
                         :disabled="processing"
                         data-test="email-password-reset-link-button"
                     >
                         <Spinner v-if="processing" />
-                        Email password reset link
+                        Email Password Reset Link
                     </Button>
                 </div>
             </Form>
 
-            <div class="space-x-1 text-center text-sm text-muted-foreground">
+            <div class="text-muted-foreground space-x-1 text-center text-sm">
                 <span>Or, return to</span>
                 <TextLink :href="login()">log in</TextLink>
             </div>

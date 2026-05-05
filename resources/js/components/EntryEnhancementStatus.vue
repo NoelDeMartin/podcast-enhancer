@@ -1,8 +1,9 @@
 <script setup lang="ts">
-import Loader2 from '~icons/lucide/loader-2';
 import { showModal } from '@noeldemartin/vue-modals';
-import { getBatchStatus } from '@/lib/entries';
+import Loader2 from '~icons/lucide/loader-2';
+
 import EntryFailureModal from '@/components/EntryFailureModal.vue';
+import { getBatchStatus } from '@/lib/entries';
 
 defineProps<{
     entry: any;
@@ -15,7 +16,7 @@ const viewFailure = (entry: any) => showModal(EntryFailureModal, { entry });
     <div class="inline-flex items-center">
         <div
             v-if="getBatchStatus(entry) === 'pending'"
-            class="flex items-center gap-1 text-sm text-muted-foreground"
+            class="text-muted-foreground flex items-center gap-1 text-sm"
         >
             <Loader2 class="h-3 w-3 animate-spin" />
             Pending
@@ -36,6 +37,6 @@ const viewFailure = (entry: any) => showModal(EntryFailureModal, { entry });
             Available
         </span>
 
-        <span v-else class="text-sm text-muted-foreground"> Missing </span>
+        <span v-else class="text-muted-foreground text-sm"> Missing </span>
     </div>
 </template>

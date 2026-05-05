@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import Clock from '~icons/lucide/clock';
+
 import { Badge } from '@/components/ui/badge';
 import { Modal } from '@/components/ui/modal';
 import { Separator } from '@/components/ui/separator';
@@ -13,7 +14,7 @@ defineProps<{
 <template>
     <Modal title="Entry Details" :description="entry?.name" class="max-w-2xl">
         <div class="max-h-[60vh] space-y-4 overflow-y-auto">
-            <div v-if="entry?.absolute_audio_url" class="rounded-none border-3 border-neo-dark p-4">
+            <div v-if="entry?.absolute_audio_url" class="border-neo-dark rounded-none border-3 p-4">
                 <audio controls class="w-full">
                     <source :src="entry.absolute_audio_url" type="audio/mpeg" />
                     Your browser does not support the audio element.
@@ -23,7 +24,7 @@ defineProps<{
             <div v-if="entry?.summary">
                 <h4 class="mb-2 text-sm font-semibold">AI Summary</h4>
                 <div
-                    class="text-sm leading-relaxed text-muted-foreground [&_a]:text-blue-600 dark:[&_a]:text-blue-400 [&_a:hover]:underline [&_ol]:list-decimal [&_ol]:pl-5 [&_p]:mb-4 [&_ul]:list-disc [&_ul]:pl-5"
+                    class="text-muted-foreground text-sm leading-relaxed [&_a]:text-blue-600 dark:[&_a]:text-blue-400 [&_a:hover]:underline [&_ol]:list-decimal [&_ol]:pl-5 [&_p]:mb-4 [&_ul]:list-disc [&_ul]:pl-5"
                     v-html="formatSummary(entry.summary)"
                 ></div>
             </div>
@@ -33,7 +34,7 @@ defineProps<{
             <div v-if="entry?.original_summary">
                 <h4 class="mb-2 text-sm font-semibold">Original Description</h4>
                 <div
-                    class="text-sm leading-relaxed text-muted-foreground [&_a]:text-blue-600 dark:[&_a]:text-blue-400 [&_a:hover]:underline [&_ol]:list-decimal [&_ol]:pl-5 [&_p]:mb-4 [&_ul]:list-disc [&_ul]:pl-5"
+                    class="text-muted-foreground text-sm leading-relaxed [&_a]:text-blue-600 dark:[&_a]:text-blue-400 [&_a:hover]:underline [&_ol]:list-decimal [&_ol]:pl-5 [&_p]:mb-4 [&_ul]:list-disc [&_ul]:pl-5"
                     v-html="formatSummary(entry.original_summary)"
                 ></div>
             </div>
@@ -68,13 +69,13 @@ defineProps<{
 
             <div v-if="parsedTranscription(entry)">
                 <h4 class="mb-2 text-sm font-semibold">Transcription</h4>
-                <div class="rounded-none border-3 border-neo-dark p-4">
+                <div class="border-neo-dark rounded-none border-3 p-4">
                     <div
                         v-for="(segment, index) in parsedTranscription(entry)"
                         :key="index"
                         class="mb-2 last:mb-0"
                     >
-                        <span class="mr-2 text-xs font-medium text-muted-foreground">
+                        <span class="text-muted-foreground mr-2 text-xs font-medium">
                             [{{ formatTimestamp(segment.start_seconds) }}] {{ segment.speaker }}:
                         </span>
                         <span class="text-sm leading-relaxed">{{ segment.text }}</span>

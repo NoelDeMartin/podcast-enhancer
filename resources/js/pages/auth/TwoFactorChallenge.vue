@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { Form, Head } from '@inertiajs/vue3';
 import { computed, ref } from 'vue';
+
 import InputError from '@/components/InputError.vue';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -38,20 +39,24 @@ const code = ref<string>('');
 </script>
 
 <template>
-    <AuthLayout :title="authConfigContent.title" :description="authConfigContent.description">
+    <AuthLayout
+        :title="authConfigContent.title"
+        :description="authConfigContent.description"
+        :logo-url="null"
+    >
         <Head title="Two-factor authentication" />
 
-        <div class="space-y-6">
+        <div class="grid gap-8">
             <template v-if="!showRecoveryInput">
                 <Form
                     v-bind="store.form()"
-                    class="space-y-4"
+                    class="flex flex-col gap-8"
                     reset-on-error
                     @error="code = ''"
                     #default="{ errors, processing, clearErrors }"
                 >
                     <input type="hidden" name="code" :value="code" />
-                    <div class="flex flex-col items-center justify-center space-y-3 text-center">
+                    <div class="flex flex-col items-center justify-center gap-3 text-center">
                         <div class="flex w-full items-center justify-center">
                             <InputOTP
                                 id="otp"
@@ -71,8 +76,14 @@ const code = ref<string>('');
                         </div>
                         <InputError :message="errors.code" />
                     </div>
-                    <Button type="submit" class="w-full" :disabled="processing">Continue</Button>
-                    <div class="text-center text-sm text-muted-foreground">
+                    <Button
+                        type="submit"
+                        class="border-neo-dark bg-neo-pink w-full border-3 font-black tracking-wider text-white uppercase"
+                        :disabled="processing"
+                    >
+                        Continue
+                    </Button>
+                    <div class="text-muted-foreground text-center text-sm">
                         <span>or you can </span>
                         <button
                             type="button"
@@ -88,21 +99,29 @@ const code = ref<string>('');
             <template v-else>
                 <Form
                     v-bind="store.form()"
-                    class="space-y-4"
+                    class="flex flex-col gap-8"
                     reset-on-error
                     #default="{ errors, processing, clearErrors }"
                 >
-                    <Input
-                        name="recovery_code"
-                        type="text"
-                        placeholder="Enter recovery code"
-                        :autofocus="showRecoveryInput"
-                        required
-                    />
-                    <InputError :message="errors.recovery_code" />
-                    <Button type="submit" class="w-full" :disabled="processing">Continue</Button>
+                    <div class="grid gap-3">
+                        <Input
+                            name="recovery_code"
+                            type="text"
+                            placeholder="Enter recovery code"
+                            :autofocus="showRecoveryInput"
+                            required
+                        />
+                        <InputError :message="errors.recovery_code" />
+                    </div>
+                    <Button
+                        type="submit"
+                        class="border-neo-dark bg-neo-pink w-full border-3 font-black tracking-wider text-white uppercase"
+                        :disabled="processing"
+                    >
+                        Continue
+                    </Button>
 
-                    <div class="text-center text-sm text-muted-foreground">
+                    <div class="text-muted-foreground text-center text-sm">
                         <span>or you can </span>
                         <button
                             type="button"

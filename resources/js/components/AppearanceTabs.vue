@@ -2,6 +2,7 @@
 import Monitor from '~icons/lucide/monitor';
 import Moon from '~icons/lucide/moon';
 import Sun from '~icons/lucide/sun';
+
 import { useAppearance } from '@/composables/useAppearance';
 
 const { appearance, updateAppearance } = useAppearance();
@@ -22,7 +23,7 @@ const tabs = [
             :class="[
                 'flex items-center rounded-none px-3.5 py-1.5 transition-colors',
                 appearance === value
-                    ? 'bg-white shadow-neo-hard dark:bg-neutral-700 dark:text-neutral-100'
+                    ? 'shadow-neo-hard bg-white dark:bg-neutral-700 dark:text-neutral-100'
                     : 'text-neutral-500 hover:bg-neutral-200/60 hover:text-black dark:text-neutral-400 dark:hover:bg-neutral-700/60',
             ]"
         >

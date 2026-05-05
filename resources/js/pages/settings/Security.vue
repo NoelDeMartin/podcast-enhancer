@@ -1,8 +1,9 @@
 <script setup lang="ts">
 import { Form, Head } from '@inertiajs/vue3';
 import { showModal } from '@noeldemartin/vue-modals';
-import ShieldCheck from '~icons/lucide/shield-check';
 import { onUnmounted } from 'vue';
+import ShieldCheck from '~icons/lucide/shield-check';
+
 import SecurityController from '@/actions/App/Http/Controllers/Settings/SecurityController';
 import Heading from '@/components/Heading.vue';
 import InputError from '@/components/InputError.vue';
@@ -13,10 +14,11 @@ import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { useTwoFactorAuth } from '@/composables/useTwoFactorAuth';
 import AppLayout from '@/layouts/AppLayout.vue';
-import SettingsLayout from '@/layouts/settings/Layout.vue';
 import { edit } from '@/routes/security';
 import { disable, enable } from '@/routes/two-factor';
 import type { BreadcrumbItem } from '@/types';
+
+import SettingsLayout from './Partials/SettingsLayout.vue';
 
 type Props = {
     canManageTwoFactor?: boolean;
@@ -138,7 +140,7 @@ const openSetupModal = () =>
                     v-if="!twoFactorEnabled"
                     class="flex flex-col items-start justify-start space-y-4"
                 >
-                    <p class="text-sm text-muted-foreground">
+                    <p class="text-muted-foreground text-sm">
                         When you enable two-factor authentication, you will be prompted for a secure
                         pin during login. This pin can be retrieved from a TOTP-supported
                         application on your phone.
@@ -160,7 +162,7 @@ const openSetupModal = () =>
                 </div>
 
                 <div v-else class="flex flex-col items-start justify-start space-y-4">
-                    <p class="text-sm text-muted-foreground">
+                    <p class="text-muted-foreground text-sm">
                         You will be prompted for a secure, random pin during login, which you can
                         retrieve from the TOTP-supported application on your phone.
                     </p>

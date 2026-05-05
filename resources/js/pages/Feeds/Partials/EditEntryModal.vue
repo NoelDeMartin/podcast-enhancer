@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { useForm } from '@inertiajs/vue3';
 import { ref } from 'vue';
+
 import { update as updateEntryAction } from '@/actions/App/Http/Controllers/EntryController';
 import { Button } from '@/components/ui/button';
 import { DialogFooter } from '@/components/ui/dialog';

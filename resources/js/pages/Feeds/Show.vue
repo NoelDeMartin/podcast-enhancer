@@ -3,12 +3,13 @@ import { Head, Link, usePoll, router } from '@inertiajs/vue3';
 import { useForm } from '@inertiajs/vue3';
 import { showModal } from '@noeldemartin/vue-modals';
 import { watchDebounced } from '@vueuse/core';
+import { computed, ref, watch } from 'vue';
 import Loader2 from '~icons/lucide/loader-2';
 import MoreHorizontal from '~icons/lucide/more-horizontal';
 import Plus from '~icons/lucide/plus';
 import RefreshCw from '~icons/lucide/refresh-cw';
 import Rss from '~icons/lucide/rss';
-import { computed, ref, watch } from 'vue';
+
 import {
     destroy as destroyEntry,
     show as showEntryAction,
@@ -37,6 +38,7 @@ import {
 } from '@/components/ui/table';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { formatDate, getBatchStatus } from '@/lib/entries';
+
 import CreateEntryModal from './Partials/CreateEntryModal.vue';
 import EditEntryModal from './Partials/EditEntryModal.vue';
 import EntryDetailsModal from './Partials/EntryDetailsModal.vue';
@@ -197,7 +199,7 @@ const syncFeed = () => {
                 <SearchInput v-model="search" placeholder="Search entries..." />
             </div>
 
-            <div class="border-3 bg-background shadow-neo-hard-hard">
+            <div class="bg-background border-3">
                 <Table>
                     <TableHeader>
                         <TableRow>
@@ -236,7 +238,7 @@ const syncFeed = () => {
                                         {{ entry.name }}
                                     </Link>
                                 </TableCell>
-                                <TableCell class="align-top text-sm text-muted-foreground">
+                                <TableCell class="text-muted-foreground align-top text-sm">
                                     {{ formatDate(entry.published_at) }}
                                 </TableCell>
                                 <TableCell class="align-top">
