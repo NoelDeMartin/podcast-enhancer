@@ -10,7 +10,7 @@ class DashboardController extends Controller
 {
     public function index(): Response
     {
-        return Inertia::render('Dashboard', [
+        return Inertia::render('Dashboard/Index', [
             'feeds' => Feed::withCount('entries')
                 ->filter(request()->only('search'))
                 ->latest()

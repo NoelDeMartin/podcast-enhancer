@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import { Form, Head } from '@inertiajs/vue3';
+import { showModal } from '@noeldemartin/vue-modals';
 import ShieldCheck from '~icons/lucide/shield-check';
-import { onUnmounted, ref } from 'vue';
+import { onUnmounted } from 'vue';
 import SecurityController from '@/actions/App/Http/Controllers/Settings/SecurityController';
 import Heading from '@/components/Heading.vue';
 import InputError from '@/components/InputError.vue';
@@ -23,7 +24,7 @@ type Props = {
     twoFactorEnabled?: boolean;
 };
 
-withDefaults(defineProps<Props>(), {
+const props = withDefaults(defineProps<Props>(), {
     canManageTwoFactor: false,
     requiresConfirmation: false,
     twoFactorEnabled: false,
@@ -37,9 +38,14 @@ const breadcrumbs: BreadcrumbItem[] = [
 ];
 
 const { hasSetupData, clearTwoFactorAuthData } = useTwoFactorAuth();
-const showSetupModal = ref<boolean>(false);
 
 onUnmounted(() => clearTwoFactorAuthData());
+
+const openSetupModal = () =>
+    showModal(TwoFactorSetupModal, {
+        requiresConfirmation: props.requiresConfirmation,
+        twoFactorEnabled: props.twoFactorEnabled,
+    });
 </script>
 
 <template>
@@ -139,13 +145,13 @@ onUnmounted(() => clearTwoFactorAuthData());
                     </p>
 
                     <div>
-                        <Button v-if="hasSetupData" @click="showSetupModal = true">
+                        <Button v-if="hasSetupData" @click="openSetupModal">
                             <ShieldCheck />Continue setup
                         </Button>
                         <Form
                             v-else
                             v-bind="enable.form()"
-                            @success="showSetupModal = true"
+                            @success="openSetupModal"
                             #default="{ processing }"
                         >
                             <Button type="submit" :disabled="processing"> Enable 2FA </Button>
@@ -169,12 +175,6 @@ onUnmounted(() => clearTwoFactorAuthData());
 
                     <TwoFactorRecoveryCodes />
                 </div>
-
-                <TwoFactorSetupModal
-                    v-model:isOpen="showSetupModal"
-                    :requiresConfirmation="requiresConfirmation"
-                    :twoFactorEnabled="twoFactorEnabled"
-                />
             </div>
         </SettingsLayout>
     </AppLayout>

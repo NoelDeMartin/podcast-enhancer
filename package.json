@@ -16,6 +16,7 @@
     },
     "dependencies": {
         "@inertiajs/vue3": "^2.3.7",
+        "@noeldemartin/vue-modals": "next",
         "@tanstack/vue-table": "^8.21.3",
         "@vueuse/core": "^12.8.2",
         "class-variance-authority": "^0.7.1",

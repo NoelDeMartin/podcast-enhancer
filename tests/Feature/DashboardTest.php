@@ -25,7 +25,7 @@ it('paginates feeds on the dashboard', function () {
 
     $response->assertOk();
     $response->assertInertia(fn ($page) => $page
-        ->component('Dashboard')
+        ->component('Dashboard/Index')
         ->has('feeds.data', 10)
         ->has('feeds.links')
     );
@@ -42,7 +42,7 @@ it('can filter feeds by title', function () {
 
     $response->assertOk();
     $response->assertInertia(fn ($page) => $page
-        ->component('Dashboard')
+        ->component('Dashboard/Index')
         ->has('feeds.data', 1)
         ->where('filters.search', 'Laravel')
     );
@@ -52,7 +52,7 @@ it('can filter feeds by title', function () {
 
     $response->assertOk();
     $response->assertInertia(fn ($page) => $page
-        ->component('Dashboard')
+        ->component('Dashboard/Index')
         ->has('feeds.data', 1)
         ->where('filters.search', 'Weekly')
     );

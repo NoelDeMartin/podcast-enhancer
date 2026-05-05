@@ -38,9 +38,3 @@ const auth = computed(() => page.props.auth);
         <WelcomeAbout />
     </AppLayout>
 </template>
-
-<style scoped>
-html {
-    scroll-behavior: smooth;
-}
-</style>

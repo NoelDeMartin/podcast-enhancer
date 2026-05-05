@@ -1,20 +1,14 @@
 <script setup lang="ts">
 import Loader2 from '~icons/lucide/loader-2';
-import { ref } from 'vue';
-import {
-    Dialog,
-    DialogContent,
-    DialogDescription,
-    DialogHeader,
-    DialogTitle,
-} from '@/components/ui/dialog';
+import { showModal } from '@noeldemartin/vue-modals';
 import { getBatchStatus } from '@/lib/entries';
+import EntryFailureModal from '@/components/EntryFailureModal.vue';
 
 defineProps<{
     entry: any;
 }>();
 
-const viewingFailure = ref(false);
+const viewFailure = (entry: any) => showModal(EntryFailureModal, { entry });
 </script>
 
 <template>
@@ -30,7 +24,7 @@ const viewingFailure = ref(false);
         <button
             v-else-if="getBatchStatus(entry) === 'failed'"
             class="text-sm text-red-500 hover:underline"
-            @click="viewingFailure = true"
+            @click="viewFailure(entry)"
         >
             Failed
         </button>
@@ -43,27 +37,5 @@ const viewingFailure = ref(false);
         </span>
 
         <span v-else class="text-sm text-muted-foreground"> Missing </span>
-
-        <Dialog :open="viewingFailure" @update:open="viewingFailure = false">
-            <DialogContent class="max-w-2xl">
-                <DialogHeader>
-                    <DialogTitle>Processing Failed</DialogTitle>
-                    <DialogDescription>
-                        {{ entry.name }}
-                    </DialogDescription>
-                </DialogHeader>
-                <div
-                    class="max-h-[60vh] overflow-y-auto rounded-none border-3 border-neo-dark bg-red-50 p-4 dark:bg-red-950/20"
-                >
-                    <pre
-                        class="text-xs leading-relaxed whitespace-pre-wrap text-red-800 dark:text-red-300"
-                        >{{
-                            entry.latest_job_batch?.job_batch?.failed_job_details?.[0]?.exception ??
-                            'No exception details available.'
-                        }}</pre
-                    >
-                </div>
-            </DialogContent>
-        </Dialog>
     </div>
 </template>

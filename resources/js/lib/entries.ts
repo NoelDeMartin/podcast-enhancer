@@ -56,3 +56,21 @@ export function parsedTranscription(entry: any): any[] | null {
         return null;
     }
 }
+
+export function formatDate(value: string | Date | null | undefined): string {
+    if (!value) {
+        return '-';
+    }
+
+    const date = typeof value === 'string' ? new Date(value) : value;
+
+    if (Number.isNaN(date.getTime())) {
+        return '-';
+    }
+
+    return new Intl.DateTimeFormat(undefined, {
+        year: 'numeric',
+        month: 'short',
+        day: '2-digit',
+    }).format(date);
+}

@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import AppHeaderLayout from '@/layouts/app/AppHeaderLayout.vue';
+import { ModalsPortal } from '@/components/ui/modal';
 
 type Props = {
     floatingHeader?: boolean;
@@ -18,5 +19,6 @@ defineProps<Props>();
             <slot name="header-right" />
         </template>
         <slot />
+        <ModalsPortal />
     </AppHeaderLayout>
 </template>
