@@ -10,15 +10,28 @@ class DashboardController extends Controller
 {
     public function index(): Response
     {
+        $user = auth()->user();
+        $filters = request()->only('search');
+
+        $feeds = Feed::withCount('entries')
+            ->with(['latestJobBatch'])
+            ->filter($filters)
+            ->latest()
+            ->paginate(10)
+            ->withQueryString();
+
+        $feeds->through(fn (Feed $feed) => $feed->setAttribute('can', [
+            'update' => $user->can('update', $feed),
+            'delete' => $user->can('delete', $feed),
+            'sync' => $user->can('sync', $feed),
+        ]));
+
         return Inertia::render('Dashboard/Index', [
-            'feeds' => Feed::withCount('entries')
-                ->filter(request()->only('search'))
-                ->latest()
-                ->paginate(10)
-                ->withQueryString(),
-            'filters' => request()->only(['search']),
+            'feeds' => $feeds,
+            'filters' => $filters,
             'can' => [
-                'uploadFiles' => request()->user()?->can('uploadFiles', Feed::class) ?? false,
+                'createManual' => $user->can('createManual', Feed::class),
+                'uploadFiles' => $user->can('uploadFiles', Feed::class),
             ],
         ]);
     }

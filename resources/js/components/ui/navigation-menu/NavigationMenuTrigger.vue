@@ -2,7 +2,7 @@
 import type { NavigationMenuTriggerProps } from "reka-ui"
 import type { HTMLAttributes } from "vue"
 import { reactiveOmit } from "@vueuse/core"
-import ChevronDown from "~icons/lucide/chevron-down"
+import ChevronDown from "~icons/carbon/chevron-down"
 import {
   NavigationMenuTrigger,
   useForwardProps,

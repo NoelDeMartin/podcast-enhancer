@@ -9,6 +9,7 @@ const props = defineProps<{
 
 <template>
   <div
+    v-bind="$attrs"
     data-slot="card"
     :class="
       cn(

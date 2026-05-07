@@ -6,16 +6,11 @@ use App\Jobs\PrepareTranscriptionJob;
 use App\Models\Entry;
 use App\Models\Feed;
 use App\Models\User;
-use Illuminate\Foundation\Http\Middleware\PreventRequestForgery;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Bus;
 use Illuminate\Support\Facades\Http;
 
 uses(RefreshDatabase::class);
-
-beforeEach(function () {
-    $this->withoutMiddleware(PreventRequestForgery::class);
-});
 
 it('can fetch episodes from an RSS feed', function () {
     $user = User::factory()->create();

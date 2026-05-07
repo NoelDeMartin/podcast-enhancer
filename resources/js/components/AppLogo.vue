@@ -1,5 +1,5 @@
 <template>
-    <span class="text-lg font-black tracking-tighter uppercase sm:text-4xl">
-        Podcast <span class="text-neo-pink">Enhancer</span>
+    <span class="text-lg leading-none font-black tracking-tighter uppercase sm:text-4xl">
+        Podcast <span class="text-primary">Enhancer</span>
     </span>
 </template>

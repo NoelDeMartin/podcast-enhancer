@@ -4,18 +4,18 @@ import { cva } from "class-variance-authority"
 export { default as Button } from "./Button.vue"
 
 export const buttonVariants = cva(
-  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-none text-sm font-mono font-bold disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none focus-visible:ring-neo-pink focus-visible:ring-2",
+  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-none text-sm font-mono font-bold disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none focus-visible:ring-primary focus-visible:ring-offset-1 focus-visible:ring-2",
   {
     variants: {
       variant: {
         default:
-          "bg-neo-pink text-white border-3 border-neo-dark  hover:bg-neo-pink/90 active:bg-neo-pink/80",
+          "bg-primary text-primary-foreground border-3 border-neo-dark  hover:bg-primary/80 active:bg-primary/60",
         destructive:
-          "bg-destructive text-white border-3 border-neo-dark hover:-translate-y-0.5 active: active:translate-x-[4px] active:translate-y-[4px]",
+          "bg-destructive text-destructive-foreground border-3 border-neo-dark hover:bg-destructive/70 active:bg-destructive/50 focus-visible:ring-destructive",
         outline:
-          "bg-background border-3 border-neo-dark hover:-translate-y-0.5 active: active:translate-x-[4px] active:translate-y-[4px]",
+          "bg-transparent border-3 border-neo-dark hover:bg-accent hover:text-accent-foreground",
         secondary:
-          "bg-transparent text-primary-foreground border-3 border-neo-dark  transition-none hover:bg-neo-pink hover:border-neo-pink hover:text-white focus-visible:border-neo-pink focus-visible:text-neo-pink focus-visible:hover:text-white focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:outline-none",
+          "bg-black text-white border-3 border-neo-dark hover:bg-primary focus-visible:ring-black",
         ghost:
           "hover:bg-accent hover:text-accent-foreground",
         link: "text-primary underline-offset-4 hover:underline",

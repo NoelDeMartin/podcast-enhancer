@@ -84,10 +84,9 @@ defineProps<{
 
                 <Button
                     type="submit"
-                    class="border-neo-dark bg-neo-pink mt-6 w-full border-3 font-black tracking-wider text-white uppercase"
+                    class="mt-6 w-full font-black tracking-wider uppercase"
                     :tabindex="4"
                     :disabled="processing"
-                    data-test="login-button"
                 >
                     <Spinner v-if="processing" />
                     Log In

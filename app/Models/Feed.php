@@ -27,7 +27,6 @@ class Feed extends Model
         'rss_url',
         'image_url',
         'last_synced_at',
-        'sync_frequency',
     ];
 
     protected $appends = [

@@ -2,7 +2,7 @@
 import type { DropdownMenuSubTriggerProps } from "reka-ui"
 import type { HTMLAttributes } from "vue"
 import { reactiveOmit } from "@vueuse/core"
-import ChevronRight from "~icons/lucide/chevron-right"
+import ChevronRight from "~icons/carbon/chevron-right"
 import {
   DropdownMenuSubTrigger,
   useForwardProps,

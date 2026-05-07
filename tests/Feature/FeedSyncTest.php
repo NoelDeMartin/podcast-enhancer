@@ -8,7 +8,6 @@ use App\Models\Feed;
 use App\Models\User;
 use Carbon\CarbonImmutable;
 use Illuminate\Bus\PendingBatch;
-use Illuminate\Foundation\Http\Middleware\PreventRequestForgery;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Bus;
 use Illuminate\Support\Facades\Http;
@@ -16,7 +15,6 @@ use Illuminate\Support\Facades\Http;
 uses(RefreshDatabase::class);
 
 beforeEach(function () {
-    $this->withoutMiddleware(PreventRequestForgery::class);
     Bus::fake();
     $this->user = User::factory()->create();
 });

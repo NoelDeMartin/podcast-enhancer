@@ -17,14 +17,14 @@ const currentYear = new Date().getFullYear();
                     href="https://github.com/noeldemartin/podcasts-enhancer"
                     target="_blank"
                     rel="noreferrer"
-                    class="group hover:text-neo-pink flex items-center gap-2 text-sm font-black tracking-widest uppercase transition-colors"
+                    class="group hover:text-primary flex items-center gap-2 text-sm font-black tracking-widest uppercase transition-colors"
                 >
                     <LogoGithub class="size-5" />
                     GitHub
                 </a>
                 <a
                     href="mailto:hey@noeldemartin.com?subject=Podcast+Enhancer"
-                    class="group hover:text-neo-pink flex items-center gap-2 text-sm font-black tracking-widest uppercase transition-colors"
+                    class="group hover:text-primary flex items-center gap-2 text-sm font-black tracking-widest uppercase transition-colors"
                 >
                     <Email class="size-5" />
                     Contact

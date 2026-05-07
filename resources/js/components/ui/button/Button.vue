@@ -19,6 +19,7 @@ const props = withDefaults(defineProps<Props>(), {
 
 <template>
   <Primitive
+    v-bind="$attrs"
     data-slot="button"
     :data-variant="variant"
     :data-size="size"

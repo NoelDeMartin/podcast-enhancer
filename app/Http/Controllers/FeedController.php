@@ -20,7 +20,7 @@ class FeedController extends Controller
 
     public function store(StoreFeedRequest $request): RedirectResponse
     {
-        Gate::authorize('create', Feed::class);
+        Gate::authorize('createManual', Feed::class);
 
         $validated = $request->validated();
 
@@ -36,10 +36,10 @@ class FeedController extends Controller
         return redirect()->back()->with('success', 'Feed created successfully.');
     }
 
-    public function show(string $feed): Response
+    public function show(string $slug): Response
     {
         $feed = Feed::withoutGlobalScope(UserScope::class)
-            ->where('slug', $feed)
+            ->where('slug', $slug)
             ->firstOrFail();
 
         Gate::authorize('view', $feed);
@@ -49,30 +49,29 @@ class FeedController extends Controller
         $this->loadModelFailedJobDetails($feed);
 
         $user = auth()->user();
+        $filters = request()->only('search');
 
         $entries = $feed->entries()
             ->with(['latestJobBatch'])
-            ->filter(request()->only('search'))
+            ->filter($filters)
             ->latest('published_at')
             ->paginate(10)
             ->withQueryString();
 
-        $entries->getCollection()->each(function ($entry) use ($user) {
-            $entry->can = [
-                'produce' => $user?->can('produce', $entry) ?? false,
-                'regenerate' => $user?->can('regenerate', $entry) ?? false,
-            ];
-        });
+        $entries->through(fn ($entry) => $entry->setAttribute('can', [
+            'produce' => $user?->can('produce', $entry),
+            'regenerate' => $user?->can('regenerate', $entry),
+        ]));
 
         return Inertia::render('Feeds/Show', [
             'feed' => $feed,
             'entries' => $entries,
-            'filters' => request()->only(['search']),
+            'filters' => $filters,
             'can' => [
-                'update' => $user?->can('update', $feed) ?? false,
-                'delete' => $user?->can('delete', $feed) ?? false,
-                'sync' => $user?->can('sync', $feed) ?? false,
-                'uploadFiles' => $user?->can('uploadFiles', Feed::class) ?? false,
+                'update' => $user?->can('update', $feed),
+                'delete' => $user?->can('delete', $feed),
+                'sync' => $user?->can('sync', $feed),
+                'uploadFiles' => $user?->can('uploadFiles', Feed::class),
             ],
         ]);
     }
@@ -98,10 +97,6 @@ class FeedController extends Controller
                 $validated['image_file'] ?? $validated['image_url'] ?? null,
                 ! empty($validated['delete_image_file'])
             );
-        }
-
-        if (array_key_exists('sync_frequency', $validated)) {
-            $validated['sync_frequency'] = $validated['sync_frequency'] ?: null;
         }
 
         $feed->update(Arr::except($validated, ['image_file', 'delete_image_file']));

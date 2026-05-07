@@ -3,12 +3,13 @@ import { Form, Head, Link, usePage } from '@inertiajs/vue3';
 import { computed } from 'vue';
 
 import ProfileController from '@/actions/App/Http/Controllers/Settings/ProfileController';
-import DeleteUser from '@/components/DeleteUser.vue';
 import Heading from '@/components/Heading.vue';
 import InputError from '@/components/InputError.vue';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { useInitials } from '@/composables/useInitials';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { edit } from '@/routes/profile';
 import { send } from '@/routes/verification';
@@ -32,6 +33,8 @@ const breadcrumbItems: BreadcrumbItem[] = [
 
 const page = usePage();
 const user = computed(() => page.props.auth.user);
+
+const { getInitials } = useInitials();
 </script>
 
 <template>
@@ -53,6 +56,32 @@ const user = computed(() => page.props.auth.user);
                     class="space-y-6"
                     v-slot="{ errors, processing, recentlySuccessful }"
                 >
+                    <div class="grid gap-2">
+                        <Label>Avatar</Label>
+                        <div class="flex items-center gap-4">
+                            <Avatar class="size-16 overflow-hidden">
+                                <AvatarImage :src="user.avatar!" :alt="user.name" />
+                                <AvatarFallback
+                                    class="bg-neo-bg text-xl font-semibold text-black dark:text-white"
+                                >
+                                    {{ getInitials(user.name) }}
+                                </AvatarFallback>
+                            </Avatar>
+                            <p class="text-muted-foreground text-sm">
+                                Your avatar is linked to your email address. To change it, please
+                                visit
+                                <a
+                                    href="https://gravatar.com"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    class="text-foreground underline decoration-neutral-300 underline-offset-4 transition-colors duration-300 ease-out hover:decoration-current! dark:decoration-neutral-500"
+                                >
+                                    Gravatar </a
+                                >.
+                            </p>
+                        </div>
+                    </div>
+
                     <div class="grid gap-2">
                         <Label for="name">Name</Label>
                         <Input
@@ -101,11 +130,8 @@ const user = computed(() => page.props.auth.user);
                             A new verification link has been sent to your email address.
                         </div>
                     </div>
-
                     <div class="flex items-center gap-4">
-                        <Button :disabled="processing" data-test="update-profile-button"
-                            >Save</Button
-                        >
+                        <Button :disabled="processing"> Save Changes </Button>
 
                         <Transition
                             enter-active-class="transition ease-in-out"
@@ -120,8 +146,6 @@ const user = computed(() => page.props.auth.user);
                     </div>
                 </Form>
             </div>
-
-            <DeleteUser />
         </SettingsLayout>
     </AppLayout>
 </template>

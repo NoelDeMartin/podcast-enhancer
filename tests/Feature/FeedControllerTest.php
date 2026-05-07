@@ -3,12 +3,10 @@
 use App\Models\Entry;
 use App\Models\Feed;
 use App\Models\User;
-use Illuminate\Foundation\Http\Middleware\PreventRequestForgery;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 
 beforeEach(function () {
-    $this->withoutMiddleware(PreventRequestForgery::class);
     $this->user = User::factory()->create();
 });
 
@@ -54,6 +52,39 @@ it('can filter entries by name', function () {
     );
 });
 
+it('allows pro users to create manual feeds', function () {
+    $user = User::factory()->create(['plan' => 'pro']);
+
+    $response = $this->actingAs($user)
+        ->post(route('feeds.store'), [
+            'title' => 'Manual Podcast',
+            'description' => 'A manual podcast creation',
+        ]);
+
+    $response->assertRedirect();
+    $this->assertDatabaseHas('feeds', [
+        'user_id' => $user->id,
+        'title' => 'Manual Podcast',
+        'rss_url' => null,
+    ]);
+});
+
+it('prevents basic users from creating manual feeds', function () {
+    $user = User::factory()->create(['plan' => 'basic']);
+
+    $response = $this->actingAs($user)
+        ->post(route('feeds.store'), [
+            'title' => 'Manual Podcast',
+            'description' => 'A manual podcast creation',
+        ]);
+
+    $response->assertStatus(403);
+    $this->assertDatabaseMissing('feeds', [
+        'user_id' => $user->id,
+        'title' => 'Manual Podcast',
+    ]);
+});
+
 it('can update custom feed', function () {
     $feed = Feed::factory()->for($this->user)->create([
         'title' => 'Old Title',
@@ -90,7 +121,6 @@ it('cannot update restricted fields for external feed', function () {
             'title' => 'Attempted New Title',
             'description' => 'Attempted New Description',
             'image_url' => 'https://example.com/new.png',
-            'sync_frequency' => 3600,
         ]);
 
     $response->assertRedirect();
@@ -99,7 +129,6 @@ it('cannot update restricted fields for external feed', function () {
         'title' => 'Original Title',
         'description' => 'Original Description',
         'image_url' => 'https://example.com/original.png',
-        'sync_frequency' => 3600,
     ]);
 });
 

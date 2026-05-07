@@ -8,6 +8,9 @@ const meta: Meta = {
     parameters: {
         layout: 'fullscreen',
     },
+    args: {
+        canResetPassword: true,
+    },
 };
 
 export default meta;

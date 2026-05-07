@@ -1,14 +1,15 @@
 <script setup lang="ts">
-import { Head, Link, usePoll, router } from '@inertiajs/vue3';
+import { Head, Link, router, usePoll } from '@inertiajs/vue3';
 import { useForm } from '@inertiajs/vue3';
 import { showModal } from '@noeldemartin/vue-modals';
 import { watchDebounced } from '@vueuse/core';
 import { computed, ref, watch } from 'vue';
-import Loader2 from '~icons/lucide/loader-2';
-import MoreHorizontal from '~icons/lucide/more-horizontal';
-import Plus from '~icons/lucide/plus';
-import RefreshCw from '~icons/lucide/refresh-cw';
-import Rss from '~icons/lucide/rss';
+import Add from '~icons/carbon/add';
+import Edit from '~icons/carbon/edit';
+import OverflowMenuHorizontal from '~icons/carbon/overflow-menu-horizontal';
+import Renew from '~icons/carbon/renew';
+import Rss from '~icons/carbon/rss';
+import TrashCan from '~icons/carbon/trash-can';
 
 import {
     destroy as destroyEntry,
@@ -87,7 +88,7 @@ const viewSyncFailure = () => showModal(SyncFailureModal, { feed: props.feed });
 const deleteEntry = (slug: string) => {
     const entry = props.entries.data.find((e: any) => e.slug === slug);
 
-    if (confirm('Are you sure you want to delete this entry?')) {
+    if (confirm('Are you sure you want to delete this episode?')) {
         useForm({}).delete(destroyEntry([props.feed, entry.slug]).url);
     }
 };
@@ -142,7 +143,7 @@ const syncFeed = () => {
 
     <AppLayout>
         <div
-            class="mx-auto flex h-full w-full max-w-5xl flex-1 flex-col gap-6 overflow-x-auto rounded-none p-4"
+            class="mx-auto flex size-full max-w-5xl flex-1 flex-col gap-6 overflow-x-auto rounded-none p-4"
         >
             <div class="flex items-center justify-between">
                 <div class="flex items-center gap-3">
@@ -153,9 +154,9 @@ const syncFeed = () => {
                         :href="FeedRssController.url(feed.slug)"
                         target="_blank"
                         class="text-orange-500 hover:text-orange-600"
-                        title="RSS Feed"
+                        title="RSS Podcast Feed"
                     >
-                        <Rss class="h-5 w-5" />
+                        <Rss class="size-5" />
                     </a>
                 </div>
 
@@ -174,21 +175,21 @@ const syncFeed = () => {
                         @click="syncFeed"
                         :disabled="isSyncing || getFeedSyncStatus() === 'pending'"
                     >
-                        <Loader2
+                        <Renew
                             v-if="isSyncing || getFeedSyncStatus() === 'pending'"
-                            class="mr-2 h-4 w-4 animate-spin"
+                            class="mr-2 size-4 animate-spin"
                         />
-                        <RefreshCw v-else class="mr-2 h-4 w-4" />
+                        <Renew v-else class="mr-2 size-4" />
                         {{ getFeedSyncStatus() === 'pending' ? 'Synchronizing...' : 'Synchronize' }}
                     </Button>
                     <template v-else-if="!feed.rss_url && can.update">
                         <Button @click="addEntry">
-                            <Plus class="mr-2 h-4 w-4" />
-                            Add Entry
+                            <Add class="mr-2 size-4" />
+                            Add Episode
                         </Button>
 
                         <Button variant="outline" @click="importEpisodes">
-                            <Rss class="mr-2 h-4 w-4" />
+                            <Rss class="mr-2 size-4" />
                             Add from RSS
                         </Button>
                     </template>
@@ -196,7 +197,7 @@ const syncFeed = () => {
             </div>
 
             <div class="flex items-center gap-4">
-                <SearchInput v-model="search" placeholder="Search entries..." />
+                <SearchInput v-model="search" placeholder="Search episodes..." />
             </div>
 
             <div class="bg-background border-3">
@@ -221,13 +222,13 @@ const syncFeed = () => {
                                         v-if="entry.absolute_image_url || feed.absolute_image_url"
                                         :src="entry.absolute_image_url || feed.absolute_image_url"
                                         alt=""
-                                        class="h-10 w-10 rounded-none object-cover"
+                                        class="size-10 rounded-none object-cover"
                                     />
                                     <div
                                         v-else
-                                        class="flex h-10 w-10 items-center justify-center rounded-none bg-gray-100 dark:bg-zinc-800"
+                                        class="flex size-10 items-center justify-center rounded-none bg-gray-100 dark:bg-zinc-800"
                                     >
-                                        <Rss class="h-5 w-5 text-gray-400" />
+                                        <Rss class="size-5 text-gray-400" />
                                     </div>
                                 </TableCell>
                                 <TableCell class="align-top font-medium">
@@ -248,7 +249,6 @@ const syncFeed = () => {
                                     <button
                                         type="button"
                                         class="text-blue-600 hover:underline dark:text-blue-400"
-                                        data-test="view-details"
                                         @click="viewEntry(entry)"
                                     >
                                         View
@@ -260,14 +260,20 @@ const syncFeed = () => {
                                 >
                                     <DropdownMenu>
                                         <DropdownMenuTrigger as-child>
-                                            <Button variant="ghost" class="h-8 w-8 p-0">
-                                                <span class="sr-only">Open menu</span>
-                                                <MoreHorizontal class="h-4 w-4" />
+                                            <Button variant="ghost" class="size-8 p-0">
+                                                <span class="sr-only"
+                                                    >Open menu for {{ entry.name }}</span
+                                                >
+                                                <OverflowMenuHorizontal class="size-4" />
                                             </Button>
                                         </DropdownMenuTrigger>
                                         <DropdownMenuContent align="end">
                                             <template v-if="!feed.rss_url && can.update">
-                                                <DropdownMenuItem @click="editEntry(entry)">
+                                                <DropdownMenuItem
+                                                    class="gap-1.5"
+                                                    @click="editEntry(entry)"
+                                                >
+                                                    <Edit class="size-4" />
                                                     Edit
                                                 </DropdownMenuItem>
                                             </template>
@@ -281,9 +287,10 @@ const syncFeed = () => {
 
                                             <template v-if="!feed.rss_url && can.delete">
                                                 <DropdownMenuItem
-                                                    class="text-red-600"
+                                                    class="gap-1.5 text-red-600"
                                                     @click="deleteEntry(entry.slug)"
                                                 >
+                                                    <TrashCan class="size-4" />
                                                     Delete
                                                 </DropdownMenuItem>
                                             </template>
@@ -297,9 +304,9 @@ const syncFeed = () => {
                                 :colspan="can.update || can.delete ? 6 : 5"
                                 class="h-24 text-center"
                             >
-                                No entries yet.
+                                No episodes yet.
                                 <template v-if="can.update">
-                                    Click "Add Entry" to create one.
+                                    Click "Add Episode" to create one.
                                 </template>
                             </TableCell>
                         </TableRow>

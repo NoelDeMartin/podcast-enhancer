@@ -11,7 +11,7 @@ use function Pest\Laravel\assertDatabaseMissing;
 uses(RefreshDatabase::class);
 
 it('can manage entries for a feed', function () {
-    $user = User::factory()->create();
+    $user = User::factory()->pro()->create();
     $feed = Feed::factory()->for($user)->create(['title' => 'Tech News']);
     $entry = Entry::factory()->create([
         'feed_id' => $feed->id,
@@ -24,28 +24,30 @@ it('can manage entries for a feed', function () {
         ->assertSee('Initial Entry');
 
     // Create Entry
-    $page->click('Add Entry')
-        ->waitForText('New Entry')
+    $page->click('Add Episode')
+        ->waitForText('New Episode')
         ->fill('name', 'Pest 4 Released')
-        ->click('Save Entry')
+        ->click('Save Episode')
         ->waitForText('Pest 4 Released');
 
     assertDatabaseHas('entries', ['name' => 'Pest 4 Released']);
 
     // Edit Entry
-    $page->click('table tbody tr:first-child button.h-8.w-8') // Open dropdown for the first row
+    $page->press('Open menu for Initial Entry')
+        ->wait(0.5)
         ->waitForText('Edit')
         ->click('Edit')
-        ->waitForText('Edit Entry')
+        ->waitForText('Edit Episode')
         ->fill('edit-name', 'Pest 4.0 Released')
-        ->click('Update Entry')
+        ->click('Update Episode')
         ->waitForText('Pest 4.0 Released');
 
     assertDatabaseHas('entries', ['name' => 'Pest 4.0 Released']);
 
     // Delete Entry
     $page->script('window.confirm = function () { return true; }');
-    $page->click('table tbody tr:first-child button.h-8.w-8')
+    $page->press('Open menu for Pest 4.0 Released')
+        ->wait(0.5)
         ->waitForText('Delete')
         ->click('Delete');
 
@@ -103,7 +105,7 @@ it('can view entry details in a dialog on the feed page', function () {
 
     visit('/feeds/'.$feed->slug)
         ->waitForText('Detailed Entry')
-        ->click('[data-test="view-details"]')
+        ->click('View')
         ->waitForText('Summary')
         ->waitForText('Original Description')
         ->assertSee('This is the original description.');

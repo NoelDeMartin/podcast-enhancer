@@ -39,7 +39,7 @@ const resolvedIconWrapperClass = computed(() => {
 
             <div
                 :class="[
-                    'border-neo-dark shadow-neo-hard relative grid h-10 w-10 shrink-0 rotate-6 place-items-center border-3 transition-transform duration-300 group-hover:rotate-0 sm:h-14 sm:w-14',
+                    'border-neo-dark shadow-neo-hard relative grid size-10 shrink-0 rotate-6 place-items-center border-3 transition-transform duration-300 group-hover:rotate-0 sm:size-14',
                     resolvedIconWrapperClass,
                 ]"
             >

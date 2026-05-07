@@ -2,7 +2,7 @@
 import { useForm } from '@inertiajs/vue3';
 import { ref } from 'vue';
 import { computed } from 'vue';
-import Loader2 from '~icons/lucide/loader-2';
+import Renew from '~icons/carbon/renew';
 
 import {
     fetch as fetchRssAction,
@@ -38,12 +38,12 @@ const isFetchingRss = ref(false);
 const rssError = ref('');
 
 const title = computed(() =>
-    episodes.value.length === 0 ? 'Import from RSS Feed' : 'Select Episodes to Import',
+    episodes.value.length === 0 ? 'Import from RSS Podcast' : 'Select Episodes to Import',
 );
 const description = computed(() =>
     episodes.value.length === 0
-        ? 'Enter the RSS feed URL to fetch episodes.'
-        : 'Select the episodes you want to add to this feed.',
+        ? 'Enter the RSS podcast URL to fetch episodes.'
+        : 'Select the episodes you want to add to this podcast.',
 );
 
 const fetchRss = async () => {
@@ -65,7 +65,7 @@ const fetchRss = async () => {
 
         if (!response.ok) {
             const data = await response.json();
-            throw new Error(data.message || 'Failed to fetch RSS feed.');
+            throw new Error(data.message || 'Failed to fetch RSS podcast.');
         }
 
         const data = await response.json();
@@ -105,7 +105,7 @@ const toggleEpisode = (index: number) => {
                     <Input
                         id="rss-url"
                         v-model="rssUrl"
-                        placeholder="https://example.com/feed.xml"
+                        placeholder="https://example.com/podcast.xml"
                         :disabled="isFetchingRss"
                     />
                     <p v-if="rssError" class="text-sm text-red-500">
@@ -115,7 +115,7 @@ const toggleEpisode = (index: number) => {
             </div>
             <DialogFooter>
                 <Button :disabled="isFetchingRss || !rssUrl" @click="fetchRss">
-                    <Loader2 v-if="isFetchingRss" class="mr-2 h-4 w-4 animate-spin" />
+                    <Renew v-if="isFetchingRss" class="mr-2 size-4 animate-spin" />
                     Fetch Episodes
                 </Button>
             </DialogFooter>

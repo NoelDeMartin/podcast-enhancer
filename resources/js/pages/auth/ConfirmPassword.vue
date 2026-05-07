@@ -35,11 +35,7 @@ import { store } from '@/routes/password/confirm';
                 </div>
 
                 <div class="flex items-center">
-                    <Button
-                        class="w-full"
-                        :disabled="processing"
-                        data-test="confirm-password-button"
-                    >
+                    <Button class="w-full" :disabled="processing">
                         <Spinner v-if="processing" />
                         Confirm password
                     </Button>

@@ -57,3 +57,25 @@ it('can filter feeds by title', function () {
         ->where('filters.search', 'Weekly')
     );
 });
+
+it('includes latestJobBatch and can permissions for feeds on the dashboard', function () {
+    $user = User::factory()->create();
+    Feed::factory()->for($user)->create();
+
+    $response = $this->actingAs($user)
+        ->get(route('dashboard'));
+
+    $response->assertOk();
+    $response->assertInertia(fn ($page) => $page
+        ->component('Dashboard/Index')
+        ->has('feeds.data.0', fn ($page) => $page
+            ->has('latest_job_batch')
+            ->has('can', fn ($page) => $page
+                ->has('update')
+                ->has('delete')
+                ->has('sync')
+            )
+            ->etc()
+        )
+    );
+});

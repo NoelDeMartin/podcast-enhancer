@@ -11,30 +11,31 @@ use function Pest\Laravel\assertDatabaseMissing;
 uses(RefreshDatabase::class);
 
 it('can manage feeds on the dashboard', function () {
-    $user = User::factory()->create();
+    $user = User::factory()->state(['plan' => 'pro'])->create();
     $feed = Feed::factory()->for($user)->create(['title' => 'Initial Feed']);
 
-    $this->actingAs($user);
-
-    $page = visit('/dashboard')
-        ->assertSee('Initial Feed');
+    $page = $this->actingAs($user)
+        ->visit('/dashboard')
+        ->waitForText('Initial Feed');
 
     // Create Feed
-    $page->click('New Feed')
-        ->waitForText('Create New Feed')
+    $page->click('New Podcast')
+        ->waitForText('Add New Podcast')
+        ->click('Manual Creation')
         ->fill('title', 'My Awesome Feed')
-        ->click('Create Feed')
-        ->waitForText('My Awesome Feed');
+        ->click('Create Podcast')
+        ->waitForText('My Awesome Feed')
+        ->wait(1.0);
 
     assertDatabaseHas('feeds', ['title' => 'My Awesome Feed']);
 
     // Edit Feed
-    $page->click('table tbody tr:first-child button.h-8.w-8') // The dropdown trigger for the first row
-        ->waitForText('Edit')
+    $page->press('Open menu for My Awesome Feed')
+        ->wait(0.5)
         ->click('Edit')
-        ->waitForText('Edit Feed')
+        ->waitForText('Edit Podcast')
         ->fill('edit-title', 'Updated Awesome Feed')
-        ->click('Update Feed')
+        ->click('Update Podcast')
         ->waitForText('Updated Awesome Feed');
 
     assertDatabaseHas('feeds', ['title' => 'Updated Awesome Feed']);

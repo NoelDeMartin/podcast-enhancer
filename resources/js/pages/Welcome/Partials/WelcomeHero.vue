@@ -48,7 +48,7 @@ const auth = computed(() => page.props.auth);
                                 as-child
                                 size="lg"
                                 class="mt-6 h-16 px-10 text-xl sm:mt-8"
-                                variant="secondary"
+                                variant="outline"
                             >
                                 <Link :href="dashboard()">
                                     Open dashboard
@@ -60,7 +60,7 @@ const auth = computed(() => page.props.auth);
                             v-else
                             as-child
                             size="lg"
-                            variant="secondary"
+                            variant="outline"
                             class="h-16 px-10 text-xl"
                         >
                             <a :href="`${home().url}#get-started`" v-scroll-on-click>

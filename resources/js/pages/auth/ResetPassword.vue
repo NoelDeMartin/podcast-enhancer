@@ -73,9 +73,8 @@ const inputEmail = ref(props.email);
 
                 <Button
                     type="submit"
-                    class="border-neo-dark bg-neo-pink mt-6 w-full border-3 font-black tracking-wider text-white uppercase"
+                    class="mt-6 w-full font-black tracking-wider uppercase"
                     :disabled="processing"
-                    data-test="reset-password-button"
                 >
                     <Spinner v-if="processing" />
                     Reset Password

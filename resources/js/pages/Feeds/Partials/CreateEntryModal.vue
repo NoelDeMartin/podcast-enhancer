@@ -55,12 +55,12 @@ const submit = () => {
 </script>
 
 <template>
-    <Modal title="New Entry" description="Add a new entry to this feed.">
+    <Modal title="New Episode" description="Add a new episode to this podcast.">
         <form @submit.prevent="submit">
             <div class="grid gap-4 py-4">
                 <div class="grid gap-2">
                     <Label for="name">Name</Label>
-                    <Input id="name" v-model="form.name" placeholder="Entry Name" required />
+                    <Input id="name" v-model="form.name" placeholder="Episode Name" required />
                     <div v-if="form.errors.name" class="text-sm text-red-500">
                         {{ form.errors.name }}
                     </div>
@@ -149,7 +149,7 @@ const submit = () => {
                 </div>
             </div>
             <DialogFooter>
-                <Button type="submit" :disabled="form.processing"> Save Entry </Button>
+                <Button type="submit" :disabled="form.processing"> Save Episode </Button>
             </DialogFooter>
         </form>
     </Modal>

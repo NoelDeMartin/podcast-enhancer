@@ -32,7 +32,7 @@ const auth = computed(() => page.props.auth);
             </nav>
         </template>
         <template #header-right>
-            <Button as-child size="sm" variant="secondary">
+            <Button as-child size="sm" variant="outline">
                 <Link v-if="auth.user" :href="dashboard()">Dashboard</Link>
                 <Link v-else :href="login()">Log In</Link>
             </Button>

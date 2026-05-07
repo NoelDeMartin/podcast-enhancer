@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { showModal } from '@noeldemartin/vue-modals';
-import Loader2 from '~icons/lucide/loader-2';
+import Renew from '~icons/carbon/renew';
 
 import EntryFailureModal from '@/components/EntryFailureModal.vue';
 import { getBatchStatus } from '@/lib/entries';
@@ -18,7 +18,7 @@ const viewFailure = (entry: any) => showModal(EntryFailureModal, { entry });
             v-if="getBatchStatus(entry) === 'pending'"
             class="text-muted-foreground flex items-center gap-1 text-sm"
         >
-            <Loader2 class="h-3 w-3 animate-spin" />
+            <Renew class="size-3 animate-spin" />
             Pending
         </div>
 

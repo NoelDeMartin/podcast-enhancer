@@ -62,7 +62,7 @@ const submit = () => {
 </script>
 
 <template>
-    <Modal title="Edit Entry" description="Update the details of this entry.">
+    <Modal title="Edit Episode" description="Update the details of this episode.">
         <form @submit.prevent="submit">
             <div class="grid gap-4 py-4">
                 <div class="grid gap-2">
@@ -220,7 +220,7 @@ const submit = () => {
                 </div>
             </div>
             <DialogFooter>
-                <Button type="submit" :disabled="form.processing"> Update Entry </Button>
+                <Button type="submit" :disabled="form.processing"> Update Episode </Button>
             </DialogFooter>
         </form>
     </Modal>

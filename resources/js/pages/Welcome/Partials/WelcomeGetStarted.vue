@@ -24,7 +24,7 @@ import { Button } from '@/components/ui/button';
                             </span>
 
                             <div
-                                class="border-neo-dark bg-neo-dark text-neo-yellow shadow-neo-hard flex h-10 w-10 rotate-6 items-center justify-center border-3 transition-transform duration-300 group-hover:translate-x-1 group-hover:translate-y-1 group-hover:rotate-0 sm:h-14 sm:w-14"
+                                class="border-neo-dark bg-neo-dark text-neo-yellow shadow-neo-hard flex size-10 rotate-6 items-center justify-center border-3 transition-transform duration-300 group-hover:translate-x-1 group-hover:translate-y-1 group-hover:rotate-0 sm:size-14"
                             >
                                 <i-carbon-cloud class="size-6 sm:size-8" />
                             </div>
@@ -60,7 +60,8 @@ import { Button } from '@/components/ui/button';
                         <div class="mt-auto pt-10">
                             <Button
                                 as-child
-                                class="bg-neo-dark h-14 w-full px-4 text-lg text-white sm:px-8"
+                                class="h-14 w-full px-4 text-lg sm:px-8"
+                                variant="secondary"
                             >
                                 <a href="mailto:hey@noeldemartin.com?subject=Podcast+Enhancer">
                                     <i-carbon-email class="mr-2 size-6" />
@@ -82,7 +83,7 @@ import { Button } from '@/components/ui/button';
                         </span>
 
                         <div
-                            class="border-neo-dark bg-neo-blue shadow-neo-hard flex h-10 w-10 rotate-6 items-center justify-center border-3 text-white transition-transform duration-300 group-hover:translate-x-1 group-hover:translate-y-1 group-hover:rotate-0 sm:h-14 sm:w-14"
+                            class="border-neo-dark bg-neo-blue shadow-neo-hard flex size-10 rotate-6 items-center justify-center border-3 text-white transition-transform duration-300 group-hover:translate-x-1 group-hover:translate-y-1 group-hover:rotate-0 sm:size-14"
                         >
                             <i-carbon-bare-metal-server class="size-6 sm:size-8" />
                         </div>
@@ -102,7 +103,7 @@ import { Button } from '@/components/ui/button';
                             Use your own API keys via Mistral, Gemini, Anthropic, or any other
                             provider supported by
                             <a
-                                class="hover:decoration-neo-pink underline decoration-2 underline-offset-4"
+                                class="hover:decoration-primary hover:text-primary underline decoration-2 underline-offset-4"
                                 href="https://laravel.com/docs/ai-sdk"
                                 target="_blank"
                                 rel="noreferrer"
@@ -120,7 +121,7 @@ import { Button } from '@/components/ui/button';
 
                     <div class="mt-auto pt-10">
                         <Button
-                            variant="secondary"
+                            variant="outline"
                             as-child
                             class="h-14 w-full border-3 px-4 text-lg sm:px-8"
                         >

@@ -30,10 +30,7 @@ defineProps<{
         </div>
 
         <Form v-bind="send.form()" class="grid gap-8 text-center" v-slot="{ processing }">
-            <Button
-                :disabled="processing"
-                class="border-neo-dark bg-neo-pink border-3 font-black tracking-wider text-white uppercase"
-            >
+            <Button :disabled="processing" class="font-black tracking-wider uppercase">
                 <Spinner v-if="processing" />
                 Resend Verification Email
             </Button>

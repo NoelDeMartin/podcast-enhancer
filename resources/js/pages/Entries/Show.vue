@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { Head, Link, usePage } from '@inertiajs/vue3';
 import { computed } from 'vue';
-import Clock from '~icons/lucide/clock';
-import ExternalLink from '~icons/lucide/external-link';
+import Launch from '~icons/carbon/launch';
+import Time from '~icons/carbon/time';
 
 import { show as showFeedAction } from '@/actions/App/Http/Controllers/FeedController';
 import EntryEnhancementActions from '@/components/EntryEnhancementActions.vue';
@@ -38,7 +38,7 @@ useEntryPolling(isProcessing);
                             v-if="entry.absolute_image_url || entry.feed.absolute_image_url"
                             :src="entry.absolute_image_url || entry.feed.absolute_image_url"
                             alt=""
-                            class="border-neo-dark h-16 w-16 border-3 object-cover"
+                            class="border-neo-dark size-16 border-3 object-cover"
                         />
                         <div>
                             <div class="mb-1">
@@ -85,7 +85,7 @@ useEntryPolling(isProcessing);
                     target="_blank"
                     class="ml-4 flex shrink-0 items-center text-sm text-blue-600 hover:underline dark:text-blue-400"
                 >
-                    <ExternalLink class="mr-1 h-4 w-4" />
+                    <Launch class="mr-1 size-4" />
                     Open File
                 </a>
             </div>
@@ -115,8 +115,8 @@ useEntryPolling(isProcessing);
                             :key="index"
                             class="flex items-center gap-3"
                         >
-                            <Badge variant="secondary" class="shrink-0 text-xs">
-                                <Clock class="mr-1 h-3 w-3" />
+                            <Badge variant="outline" class="shrink-0 text-xs">
+                                <Time class="mr-1 size-3" />
                                 {{ formatTimestamp(chapter.startTime) }}
                             </Badge>
                             <span class="text-sm">{{ chapter.title }}</span>

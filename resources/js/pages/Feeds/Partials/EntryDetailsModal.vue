@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import Clock from '~icons/lucide/clock';
+import Time from '~icons/carbon/time';
 
 import { Badge } from '@/components/ui/badge';
 import { Modal } from '@/components/ui/modal';
@@ -12,7 +12,7 @@ defineProps<{
 </script>
 
 <template>
-    <Modal title="Entry Details" :description="entry?.name" class="max-w-2xl">
+    <Modal title="Episode Details" :description="entry?.name" class="max-w-2xl">
         <div class="max-h-[60vh] space-y-4 overflow-y-auto">
             <div v-if="entry?.absolute_audio_url" class="border-neo-dark rounded-none border-3 p-4">
                 <audio controls class="w-full">
@@ -51,9 +51,8 @@ defineProps<{
                         :key="index"
                         class="flex items-center gap-3"
                     >
-                        <Badge variant="secondary" class="shrink-0 text-xs">
-                            <Clock class="mr-1 h-3 w-3" />
-                            {{ formatTimestamp(chapter.startTime) }}
+                        <Badge variant="outline" class="shrink-0 text-xs">
+                            <Time class="mr-1 size-3" /> {{ formatTimestamp(chapter.startTime) }}
                         </Badge>
                         <span class="text-sm">{{ chapter.title }}</span>
                     </li>

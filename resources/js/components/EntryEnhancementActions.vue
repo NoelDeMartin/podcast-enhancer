@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { useForm } from '@inertiajs/vue3';
-import Sparkles from '~icons/lucide/sparkles';
+import AiGenerate from '~icons/carbon/ai-generate';
 
 import { produce as produceEntry } from '@/actions/App/Http/Controllers/EntryController';
 import { Button } from '@/components/ui/button';
@@ -43,15 +43,19 @@ const hasTranscription = () => !!props.entry.transcription_path;
                 !isPending() &&
                 (!hasTranscription() ? entry.can?.produce : entry.can?.regenerate)
             "
+            class="gap-1.5"
             @click="regenerateTranscription"
         >
+            <AiGenerate class="size-4" />
             {{ hasTranscription() ? 'Regenerate enhancements' : 'Generate enhancements' }}
         </DropdownMenuItem>
 
         <DropdownMenuItem
             v-if="hasTranscription() && !isPending() && entry.can?.regenerate"
+            class="gap-1.5"
             @click="regenerateMetadata"
         >
+            <AiGenerate class="size-4" />
             Regenerate (only chapters & summary)
         </DropdownMenuItem>
     </template>
@@ -60,21 +64,25 @@ const hasTranscription = () => !!props.entry.transcription_path;
         <DropdownMenu v-if="!hasTranscription() ? entry.can?.produce : entry.can?.regenerate">
             <DropdownMenuTrigger as-child>
                 <Button variant="outline">
-                    <Sparkles class="mr-2 h-4 w-4" />
+                    <AiGenerate class="mr-2 size-4" />
                     Enhance
                 </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
                 <DropdownMenuItem
                     v-if="!hasTranscription() ? entry.can?.produce : entry.can?.regenerate"
+                    class="gap-1.5"
                     @click="regenerateTranscription"
                 >
+                    <AiGenerate class="size-4" />
                     {{ hasTranscription() ? 'Regenerate everything' : 'Generate enhancements' }}
                 </DropdownMenuItem>
                 <DropdownMenuItem
                     v-if="hasTranscription() && entry.can?.regenerate"
+                    class="gap-1.5"
                     @click="regenerateMetadata"
                 >
+                    <AiGenerate class="size-4" />
                     Regenerate (only chapters & summary)
                 </DropdownMenuItem>
             </DropdownMenuContent>

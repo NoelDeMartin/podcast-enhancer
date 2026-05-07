@@ -87,12 +87,14 @@ onBeforeUnmount(() => {
                 <slot />
             </div>
 
-            <slot name="right">
-                <UserMenu v-if="auth.user" />
-                <Button v-else as-child size="sm" variant="secondary">
-                    <Link :href="login()">Log In</Link>
-                </Button>
-            </slot>
+            <div class="flex items-center">
+                <slot name="right">
+                    <UserMenu v-if="auth.user" />
+                    <Button v-else as-child size="sm" variant="secondary">
+                        <Link :href="login()">Log In</Link>
+                    </Button>
+                </slot>
+            </div>
         </div>
     </header>
 </template>

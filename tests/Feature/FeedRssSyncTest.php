@@ -8,12 +8,11 @@ use Illuminate\Support\Facades\Http;
 
 uses(RefreshDatabase::class);
 
-it('syncs feed when rss is requested and sync_frequency has passed', function () {
+it('syncs feed when rss is requested and a day has passed', function () {
     $feed = Feed::factory()->create([
         'title' => 'Test Feed',
         'rss_url' => 'https://example.com/feed.xml',
-        'sync_frequency' => 3600, // 1 hour
-        'last_synced_at' => now()->subHours(2),
+        'last_synced_at' => now()->subDays(2),
     ]);
 
     $rssContent = '<?xml version="1.0" encoding="UTF-8"?>
@@ -45,26 +44,10 @@ it('syncs feed when rss is requested and sync_frequency has passed', function ()
     expect($feed->last_synced_at->isAfter(now()->subMinute()))->toBeTrue();
 });
 
-it('does not sync if sync_frequency has not passed', function () {
+it('does not sync if a day has not passed', function () {
     $feed = Feed::factory()->create([
         'rss_url' => 'https://example.com/feed.xml',
-        'sync_frequency' => 3600, // 1 hour
-        'last_synced_at' => now()->subMinutes(30),
-    ]);
-
-    Http::fake();
-
-    $response = $this->get(route('feeds.rss', $feed));
-
-    $response->assertStatus(200);
-    Http::assertNothingSent();
-});
-
-it('does not sync if sync_frequency is null', function () {
-    $feed = Feed::factory()->create([
-        'rss_url' => 'https://example.com/feed.xml',
-        'sync_frequency' => null,
-        'last_synced_at' => now()->subHours(2),
+        'last_synced_at' => now()->subHours(12),
     ]);
 
     Http::fake();

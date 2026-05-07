@@ -19,7 +19,6 @@ class UpdateFeedRequest extends FormRequest
             'image_url' => ['nullable', 'string'],
             'image_file' => ['nullable', 'image', 'mimes:jpeg,png,jpg,gif,webp,svg'],
             'delete_image_file' => ['nullable', 'boolean'],
-            'sync_frequency' => ['nullable', 'integer', 'min:0'],
         ];
     }
 }

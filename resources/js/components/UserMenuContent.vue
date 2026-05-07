@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { Link, router } from '@inertiajs/vue3';
-import LogOut from '~icons/lucide/log-out';
-import Settings from '~icons/lucide/settings';
+import Logout from '~icons/carbon/logout';
+import Settings from '~icons/carbon/settings';
 
 import {
     DropdownMenuGroup,
@@ -35,7 +35,7 @@ defineProps<Props>();
     <DropdownMenuGroup>
         <DropdownMenuItem :as-child="true">
             <Link class="block w-full cursor-pointer" :href="edit()" prefetch>
-                <Settings class="mr-2 h-4 w-4" />
+                <Settings class="mr-2 size-4" />
                 Settings
             </Link>
         </DropdownMenuItem>
@@ -47,9 +47,8 @@ defineProps<Props>();
             :href="logout()"
             @click="handleLogout"
             as="button"
-            data-test="logout-button"
         >
-            <LogOut class="mr-2 h-4 w-4" />
+            <Logout class="mr-2 size-4" />
             Log out
         </Link>
     </DropdownMenuItem>

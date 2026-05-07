@@ -22,7 +22,7 @@ defineProps<{
     >
         <div class="relative flex flex-col items-center">
             <div
-                class="border-neo-dark bg-neo-yellow shadow-neo-hard relative z-10 flex h-14 w-14 items-center justify-center border-3 font-mono text-2xl font-black"
+                class="border-neo-dark bg-neo-yellow shadow-neo-hard relative z-10 flex size-14 items-center justify-center border-3 font-mono text-2xl font-black"
             >
                 {{ number }}
             </div>
@@ -36,7 +36,7 @@ defineProps<{
         >
             <div
                 :class="[
-                    'border-neo-dark shadow-neo-hard absolute top-4 right-4 flex h-10 w-10 rotate-6 items-center justify-center border-3 text-white transition-transform duration-300 group-hover:translate-x-1 group-hover:translate-y-1 group-hover:rotate-0 sm:top-8 sm:right-8 sm:h-16 sm:w-16',
+                    'border-neo-dark shadow-neo-hard absolute top-4 right-4 flex size-10 rotate-6 items-center justify-center border-3 text-white transition-transform duration-300 group-hover:translate-x-1 group-hover:translate-y-1 group-hover:rotate-0 sm:top-8 sm:right-8 sm:size-16',
                     iconWrapperClass ?? 'bg-neo-blue',
                 ]"
             >

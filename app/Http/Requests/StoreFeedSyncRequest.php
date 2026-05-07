@@ -15,7 +15,6 @@ class StoreFeedSyncRequest extends FormRequest
     {
         return [
             'rss_url' => ['required', 'url'],
-            'sync_frequency' => ['nullable', 'integer', 'min:0'],
         ];
     }
 }

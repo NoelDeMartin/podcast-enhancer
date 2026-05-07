@@ -23,7 +23,7 @@ defineProps<{
                     v-else
                     class="border-neo-dark hover:bg-neo-yellow focus:bg-neo-yellow border-3 px-4 py-3 text-sm leading-4 transition-all focus:outline-none"
                     :class="{
-                        'bg-neo-pink hover:bg-neo-pink focus:bg-neo-pink text-white': link.active,
+                        'bg-primary hover:bg-primary focus:bg-primary text-white': link.active,
                         'bg-white': !link.active,
                     }"
                     :href="link.url"

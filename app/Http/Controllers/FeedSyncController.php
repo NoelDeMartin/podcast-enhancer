@@ -35,7 +35,6 @@ class FeedSyncController extends Controller
                 'rss_url' => $request->rss_url,
                 'image_url' => $data['image_url'] ?? null,
                 'last_synced_at' => now(),
-                'sync_frequency' => $request->sync_frequency ?: null,
             ]);
 
             $episodes = collect($data['episodes'])

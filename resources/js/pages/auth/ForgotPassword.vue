@@ -44,9 +44,8 @@ defineProps<{
 
                 <div class="flex items-center justify-start">
                     <Button
-                        class="border-neo-dark bg-neo-pink w-full border-3 font-black tracking-wider text-white uppercase"
+                        class="w-full font-black tracking-wider uppercase"
                         :disabled="processing"
-                        data-test="email-password-reset-link-button"
                     >
                         <Spinner v-if="processing" />
                         Email Password Reset Link

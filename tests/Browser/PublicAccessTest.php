@@ -44,5 +44,5 @@ it('does not show management actions to guests on the feed page', function () {
         ->assertDontSee('Add Entry')
         ->assertDontSee('Synchronize')
         // The dropdown trigger button should not be present if can.update and can.delete are false
-        ->assertNotPresent('table tbody tr:first-child button.h-8.w-8');
+        ->assertNotPresent('Open menu for Public Feed');
 });

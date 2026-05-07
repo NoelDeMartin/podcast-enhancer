@@ -22,6 +22,11 @@ class FeedPolicy
         return true;
     }
 
+    public function createManual(User $user): bool
+    {
+        return $user->isPro();
+    }
+
     public function update(User $user, Feed $feed): bool
     {
         return $user->id === $feed->user_id;

@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { useForm } from '@inertiajs/vue3';
 import { ref, watch } from 'vue';
-import Rss from '~icons/lucide/rss';
 
 import { update } from '@/actions/App/Http/Controllers/FeedController';
 import { Button } from '@/components/ui/button';
@@ -33,7 +32,6 @@ const form = useForm({
     image_url: '',
     image_file: null as File | null,
     delete_image_file: false,
-    sync_frequency: '0',
 });
 
 const imageSource = ref<'url' | 'file'>('url');
@@ -54,7 +52,6 @@ watch(
 
         form.title = feed.title;
         form.description = feed.description ?? '';
-        form.sync_frequency = (feed.sync_frequency ?? 0).toString();
 
         const external = isExternal(feed.image_url);
         imageSource.value = external ? 'url' : 'file';
@@ -75,42 +72,12 @@ const submit = () => {
 </script>
 
 <template>
-    <Modal title="Edit Feed" description="Update the details of this feed.">
+    <Modal title="Edit Podcast" description="Update the details of this podcast.">
         <form @submit.prevent="submit">
             <div class="grid gap-4 py-4">
-                <div
-                    v-if="feed?.rss_url"
-                    class="space-y-4 rounded-none border-3 bg-yellow-50 p-4 text-sm text-yellow-700 dark:border-yellow-200/10 dark:bg-yellow-700/10 dark:text-yellow-100"
-                >
-                    <div class="flex items-center gap-2">
-                        <Rss class="h-4 w-4" />
-                        <span class="font-medium">External Feed</span>
-                    </div>
-                    <p>
-                        Title, description, and image are automatically managed from the RSS feed.
-                        Sync frequency can still be adjusted.
-                    </p>
-                </div>
-                <div v-if="feed?.rss_url" class="grid gap-2">
-                    <Label for="edit-rss-url">RSS URL</Label>
-                    <div
-                        id="edit-rss-url"
-                        class="border-neo-dark bg-muted text-muted-foreground rounded-none border-3 px-3 py-2 text-sm break-all select-all"
-                    >
-                        {{ feed.rss_url }}
-                    </div>
-                </div>
                 <div class="grid gap-2">
                     <Label for="edit-title">Title</Label>
-                    <Input
-                        id="edit-title"
-                        v-model="form.title"
-                        :readonly="!!feed?.rss_url"
-                        :class="{
-                            'bg-muted text-muted-foreground': !!feed?.rss_url,
-                        }"
-                        required
-                    />
+                    <Input id="edit-title" v-model="form.title" required />
                     <div v-if="form.errors.title" class="text-sm text-red-500">
                         {{ form.errors.title }}
                     </div>
@@ -120,134 +87,89 @@ const submit = () => {
                     <Textarea
                         id="edit-description"
                         v-model="form.description"
-                        placeholder="Optional description for this podcast feed..."
+                        placeholder="Optional description for this podcast..."
                         rows="3"
-                        :readonly="!!feed?.rss_url"
-                        :class="{
-                            'bg-muted text-muted-foreground': !!feed?.rss_url,
-                        }"
                     />
                     <div v-if="form.errors.description" class="text-sm text-red-500">
                         {{ form.errors.description }}
                     </div>
                 </div>
-                <div v-if="feed?.rss_url" class="grid gap-2">
-                    <Label for="edit-sync_frequency">Sync Frequency</Label>
-                    <Select v-model="form.sync_frequency">
-                        <SelectTrigger id="edit-sync_frequency">
-                            <SelectValue placeholder="Select frequency" />
+                <div class="grid gap-2">
+                    <Label for="editFeedImageSource">Image Source</Label>
+                    <Select v-model="imageSource">
+                        <SelectTrigger>
+                            <SelectValue placeholder="Select source" />
                         </SelectTrigger>
                         <SelectContent>
-                            <SelectItem value="0">Manual only</SelectItem>
-                            <SelectItem value="3600">Every hour</SelectItem>
-                            <SelectItem value="21600">Every 6 hours</SelectItem>
-                            <SelectItem value="43200">Every 12 hours</SelectItem>
-                            <SelectItem value="86400">Daily</SelectItem>
-                            <SelectItem value="604800">Weekly</SelectItem>
+                            <SelectItem value="url">Remote URL</SelectItem>
+                            <SelectItem v-if="canUploadFiles" value="file">Upload File</SelectItem>
                         </SelectContent>
                     </Select>
-                    <div v-if="form.errors.sync_frequency" class="text-sm text-red-500">
-                        {{ form.errors.sync_frequency }}
+                </div>
+                <div v-if="imageSource === 'url'" class="grid gap-2">
+                    <Label for="edit-image_url">Image URL</Label>
+                    <Input
+                        id="edit-image_url"
+                        v-model="form.image_url"
+                        placeholder="https://example.com/image.jpg"
+                    />
+                    <div v-if="form.errors.image_url" class="text-sm text-red-500">
+                        {{ form.errors.image_url }}
                     </div>
                 </div>
-                <template v-if="!feed?.rss_url">
-                    <div class="grid gap-2">
-                        <Label for="editFeedImageSource">Image Source</Label>
-                        <Select v-model="imageSource">
-                            <SelectTrigger>
-                                <SelectValue placeholder="Select source" />
-                            </SelectTrigger>
-                            <SelectContent>
-                                <SelectItem value="url">Remote URL</SelectItem>
-                                <SelectItem v-if="canUploadFiles" value="file"
-                                    >Upload File</SelectItem
-                                >
-                            </SelectContent>
-                        </Select>
+                <div v-if="imageSource === 'file'" class="grid gap-2">
+                    <Label for="edit-image_file">Image File</Label>
+                    <div
+                        v-if="
+                            !isExternal(feed?.image_url) &&
+                            feed?.image_url &&
+                            !form.delete_image_file &&
+                            !form.image_file
+                        "
+                        class="flex items-center gap-4"
+                    >
+                        <span class="text-sm text-gray-500">Current image attached</span>
+                        <Button
+                            type="button"
+                            variant="destructive"
+                            size="sm"
+                            @click="form.delete_image_file = true"
+                        >
+                            Delete
+                        </Button>
                     </div>
-                    <div v-if="imageSource === 'url'" class="grid gap-2">
-                        <Label for="edit-image_url">Image URL</Label>
+                    <div v-else>
                         <Input
-                            id="edit-image_url"
-                            v-model="form.image_url"
-                            placeholder="https://example.com/image.jpg"
+                            id="edit-image_file"
+                            type="file"
+                            @input="form.image_file = $event.target.files[0]"
+                            accept="image/*"
                         />
-                        <div v-if="form.errors.image_url" class="text-sm text-red-500">
-                            {{ form.errors.image_url }}
+                        <div v-if="form.errors.image_file" class="text-sm text-red-500">
+                            {{ form.errors.image_file }}
                         </div>
-                    </div>
-                    <div v-if="imageSource === 'file'" class="grid gap-2">
-                        <Label for="edit-image_file">Image File</Label>
-                        <div
+                        <Button
                             v-if="
+                                form.delete_image_file &&
                                 !isExternal(feed?.image_url) &&
-                                feed?.image_url &&
-                                !form.delete_image_file &&
-                                !form.image_file
+                                feed?.image_url
                             "
-                            class="flex items-center gap-4"
+                            type="button"
+                            variant="link"
+                            size="sm"
+                            class="mt-1 px-0 text-gray-500"
+                            @click="
+                                form.delete_image_file = false;
+                                form.image_file = null;
+                            "
                         >
-                            <span class="text-sm text-gray-500">Current image attached</span>
-                            <Button
-                                type="button"
-                                variant="destructive"
-                                size="sm"
-                                @click="form.delete_image_file = true"
-                            >
-                                Delete
-                            </Button>
-                        </div>
-                        <div v-else>
-                            <Input
-                                id="edit-image_file"
-                                type="file"
-                                @input="form.image_file = $event.target.files[0]"
-                                accept="image/*"
-                            />
-                            <div v-if="form.errors.image_file" class="text-sm text-red-500">
-                                {{ form.errors.image_file }}
-                            </div>
-                            <Button
-                                v-if="
-                                    form.delete_image_file &&
-                                    !isExternal(feed?.image_url) &&
-                                    feed?.image_url
-                                "
-                                type="button"
-                                variant="link"
-                                size="sm"
-                                class="mt-1 px-0 text-gray-500"
-                                @click="
-                                    form.delete_image_file = false;
-                                    form.image_file = null;
-                                "
-                            >
-                                Cancel deletion
-                            </Button>
-                        </div>
-                    </div>
-                </template>
-                <div v-else class="grid gap-2">
-                    <Label>Feed Image</Label>
-                    <div class="flex items-center gap-4">
-                        <img
-                            v-if="feed.absolute_image_url"
-                            :src="feed.absolute_image_url"
-                            alt=""
-                            class="border-neo-dark h-16 w-16 rounded-none border-3 object-cover"
-                        />
-                        <div
-                            v-else
-                            class="border-neo-dark bg-muted flex h-16 w-16 items-center justify-center rounded-none border-3"
-                        >
-                            <Rss class="text-muted h-8 w-8" />
-                        </div>
-                        <div class="text-muted-foreground text-xs">Managed by RSS feed</div>
+                            Cancel deletion
+                        </Button>
                     </div>
                 </div>
             </div>
             <DialogFooter>
-                <Button type="submit" :disabled="form.processing"> Update Feed </Button>
+                <Button type="submit" :disabled="form.processing"> Update Podcast </Button>
             </DialogFooter>
         </form>
     </Modal>

@@ -14,8 +14,7 @@ class FeedRssController extends Controller
         $feed = Feed::withoutGlobalScope(UserScope::class)->where('slug', $feed)->firstOrFail();
 
         $shouldSync = $feed->rss_url &&
-            $feed->sync_frequency &&
-            (! $feed->last_synced_at || $feed->last_synced_at->addSeconds($feed->sync_frequency)->isPast());
+            (! $feed->last_synced_at || $feed->last_synced_at->addDay()->isPast());
 
         if ($shouldSync) {
             (new SyncFeedJob($feed->id))->handle();

@@ -22,16 +22,23 @@ const auth = computed(() => page.props.auth);
             <Button
                 variant="ghost"
                 size="icon"
-                class="border-neo-dark focus-within:ring-primary relative h-10 w-10 rounded-none border-3 p-0 focus-within:ring-2"
+                class="group relative size-10 rounded-none p-0 hover:bg-transparent"
             >
-                <Avatar class="h-full w-full rounded-none">
+                <Avatar
+                    class="bg-neo-dark group-hover:bg-primary group-active:bg-primary size-full"
+                >
                     <AvatarImage v-if="auth.user.avatar" :src="auth.user.avatar" alt="" />
-                    <AvatarFallback
-                        class="bg-neo-bg rounded-none font-semibold text-black dark:text-white"
-                    >
+
+                    <AvatarFallback class="bg-neo-bg font-semibold text-black dark:text-white">
                         {{ getInitials(auth.user?.name) }}
                     </AvatarFallback>
                 </Avatar>
+                <div
+                    v-if="auth.user.plan === 'pro'"
+                    class="bg-primary border-neo-dark absolute -bottom-2 left-1/2 z-10 -translate-x-1/2 border-2 px-1 text-[10px] font-black tracking-tighter text-white uppercase"
+                >
+                    Pro
+                </div>
             </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" class="w-56">

@@ -28,8 +28,8 @@
     --color-popover: var(--color-neo-bg);
     --color-popover-foreground: var(--color-neo-dark);
 
-    --color-primary: var(--color-neo-yellow);
-    --color-primary-foreground: var(--color-neo-dark);
+    --color-primary: var(--color-neo-pink);
+    --color-primary-foreground: white;
 
     --color-secondary: var(--color-neo-blue);
     --color-secondary-foreground: white;
@@ -67,15 +67,6 @@
     --radius-md: 0px;
     --radius-sm: 0px;
     --radius: 0px;
-
-    --color-sidebar: var(--color-neo-bg);
-    --color-sidebar-foreground: var(--color-neo-dark);
-    --color-sidebar-primary: var(--color-neo-yellow);
-    --color-sidebar-primary-foreground: var(--color-neo-dark);
-    --color-sidebar-accent: var(--color-neo-pink);
-    --color-sidebar-accent-foreground: white;
-    --color-sidebar-border: var(--color-neo-dark);
-    --color-sidebar-ring: var(--color-neo-blue);
 }
 
 /*
