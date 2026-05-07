@@ -25,7 +25,7 @@ const auth = computed(() => page.props.auth);
                 class="group relative size-10 rounded-none p-0 hover:bg-transparent"
             >
                 <Avatar
-                    class="bg-neo-dark group-hover:bg-primary group-active:bg-primary size-full"
+                    class="bg-neo-dark group-hover:shadow-neo-hard size-full transition-all duration-300 group-active:translate-x-[2px] group-active:translate-y-[2px] group-active:shadow-none"
                 >
                     <AvatarImage v-if="auth.user.avatar" :src="auth.user.avatar" alt="" />
 

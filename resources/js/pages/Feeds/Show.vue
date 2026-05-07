@@ -1,50 +1,31 @@
 <script setup lang="ts">
-import { Head, Link, router, usePoll } from '@inertiajs/vue3';
+import { Head, router, usePoll } from '@inertiajs/vue3';
 import { useForm } from '@inertiajs/vue3';
 import { showModal } from '@noeldemartin/vue-modals';
 import { watchDebounced } from '@vueuse/core';
 import { computed, ref, watch } from 'vue';
 import Add from '~icons/carbon/add';
-import Edit from '~icons/carbon/edit';
-import OverflowMenuHorizontal from '~icons/carbon/overflow-menu-horizontal';
 import Renew from '~icons/carbon/renew';
 import Rss from '~icons/carbon/rss';
-import TrashCan from '~icons/carbon/trash-can';
+import WarningAlt from '~icons/carbon/warning-alt';
 
-import {
-    destroy as destroyEntry,
-    show as showEntryAction,
-} from '@/actions/App/Http/Controllers/EntryController';
+import { destroy as destroyEntry } from '@/actions/App/Http/Controllers/EntryController';
 import { show as showFeed } from '@/actions/App/Http/Controllers/FeedController';
 import FeedRssController from '@/actions/App/Http/Controllers/FeedRssController';
 import { sync as syncFeedAction } from '@/actions/App/Http/Controllers/FeedSyncController';
-import EntryEnhancementActions from '@/components/EntryEnhancementActions.vue';
-import EntryEnhancementStatus from '@/components/EntryEnhancementStatus.vue';
+import FailureModal from '@/components/modals/FailureModal/FailureModal.vue';
 import Pagination from '@/components/Pagination.vue';
 import SearchInput from '@/components/SearchInput.vue';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
-import {
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuItem,
-    DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import {
-    Table,
-    TableBody,
-    TableCell,
-    TableHead,
-    TableHeader,
-    TableRow,
-} from '@/components/ui/table';
+import { Card } from '@/components/ui/card';
 import AppLayout from '@/layouts/AppLayout.vue';
-import { formatDate, getBatchStatus } from '@/lib/entries';
+import { getBatchStatus } from '@/lib/entries';
 
 import CreateEntryModal from './Partials/CreateEntryModal.vue';
 import EditEntryModal from './Partials/EditEntryModal.vue';
-import EntryDetailsModal from './Partials/EntryDetailsModal.vue';
+import FeedEntryItem from './Partials/FeedEntryItem.vue';
 import ImportEpisodesModal from './Partials/ImportEpisodesModal.vue';
-import SyncFailureModal from './Partials/SyncFailureModal.vue';
 
 const props = defineProps<{
     feed: any;
@@ -82,8 +63,14 @@ const addEntry = () =>
 const importEpisodes = () => showModal(ImportEpisodesModal, { feed: props.feed });
 const editEntry = (entry: any) =>
     showModal(EditEntryModal, { feed: props.feed, entry, canUploadFiles: props.can.uploadFiles });
-const viewEntry = (entry: any) => showModal(EntryDetailsModal, { entry });
-const viewSyncFailure = () => showModal(SyncFailureModal, { feed: props.feed });
+const viewSyncFailure = () =>
+    showModal(FailureModal, {
+        title: 'Synchronization failed',
+        description: props.feed.title,
+        exception:
+            props.feed.latest_job_batch?.job_batch?.failed_job_details?.[0]?.exception ??
+            'No exception details available.',
+    });
 
 const deleteEntry = (slug: string) => {
     const entry = props.entries.data.find((e: any) => e.slug === slug);
@@ -93,28 +80,10 @@ const deleteEntry = (slug: string) => {
     }
 };
 
-function getFeedSyncStatus(): 'pending' | 'failed' | 'completed' | null {
-    const batch = props.feed.latest_job_batch?.job_batch;
-
-    if (!batch) {
-        return null;
-    }
-
-    if (batch.cancelled_at !== null) {
-        return 'failed';
-    }
-
-    if (batch.finished_at !== null) {
-        return 'completed';
-    }
-
-    return 'pending';
-}
-
 const hasActiveJobs = computed(
     () =>
         props.entries.data.some((e: any) => getBatchStatus(e) === 'pending') ||
-        getFeedSyncStatus() === 'pending',
+        getBatchStatus(props.feed) === 'pending',
 );
 
 const { start: startPolling, stop: stopPolling } = usePoll(
@@ -143,11 +112,11 @@ const syncFeed = () => {
 
     <AppLayout>
         <div
-            class="mx-auto flex size-full max-w-5xl flex-1 flex-col gap-6 overflow-x-auto rounded-none p-4"
+            class="mx-auto flex size-full max-w-5xl flex-1 flex-col gap-4 overflow-x-hidden rounded-none p-3 sm:gap-6 sm:p-4"
         >
-            <div class="flex items-center justify-between">
-                <div class="flex items-center gap-3">
-                    <h2 class="text-2xl font-bold tracking-tight">
+            <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                <div class="flex min-w-0 items-center gap-3">
+                    <h2 class="min-w-0 truncate text-xl font-bold tracking-tight sm:text-2xl">
                         {{ feed.title }}
                     </h2>
                     <a
@@ -160,35 +129,32 @@ const syncFeed = () => {
                     </a>
                 </div>
 
-                <div v-if="can.update || can.sync" class="flex items-center gap-2">
-                    <div v-if="getFeedSyncStatus() === 'failed'" class="flex items-center gap-1">
-                        <button
-                            class="text-xs text-red-500 hover:underline"
-                            @click="viewSyncFailure"
-                        >
-                            Sync Failed
-                        </button>
-                    </div>
-
+                <div
+                    v-if="can.update || can.sync"
+                    class="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:items-center sm:justify-end"
+                >
                     <Button
                         v-if="feed.rss_url && can.sync"
                         @click="syncFeed"
-                        :disabled="isSyncing || getFeedSyncStatus() === 'pending'"
+                        :disabled="isSyncing || getBatchStatus(feed) === 'pending'"
+                        class="w-full sm:w-auto"
                     >
                         <Renew
-                            v-if="isSyncing || getFeedSyncStatus() === 'pending'"
+                            v-if="isSyncing || getBatchStatus(feed) === 'pending'"
                             class="mr-2 size-4 animate-spin"
                         />
                         <Renew v-else class="mr-2 size-4" />
-                        {{ getFeedSyncStatus() === 'pending' ? 'Synchronizing...' : 'Synchronize' }}
+                        {{
+                            getBatchStatus(feed) === 'pending' ? 'Synchronizing...' : 'Synchronize'
+                        }}
                     </Button>
                     <template v-else-if="!feed.rss_url && can.update">
-                        <Button @click="addEntry">
+                        <Button @click="addEntry" class="w-full sm:w-auto">
                             <Add class="mr-2 size-4" />
                             Add Episode
                         </Button>
 
-                        <Button variant="outline" @click="importEpisodes">
+                        <Button variant="outline" @click="importEpisodes" class="w-full sm:w-auto">
                             <Rss class="mr-2 size-4" />
                             Add from RSS
                         </Button>
@@ -196,122 +162,42 @@ const syncFeed = () => {
                 </div>
             </div>
 
-            <div class="flex items-center gap-4">
+            <Alert v-if="getBatchStatus(feed) === 'failed'" variant="destructive">
+                <WarningAlt />
+                <AlertTitle>Synchronization Failed</AlertTitle>
+                <AlertDescription>
+                    <p>The most recent sync failed. View the error details to investigate.</p>
+                    <Button
+                        size="sm"
+                        variant="secondary"
+                        class="mt-3 w-full sm:mt-1 sm:w-auto"
+                        @click="viewSyncFailure"
+                    >
+                        View Details
+                    </Button>
+                </AlertDescription>
+            </Alert>
+
+            <div class="flex w-full items-center gap-4">
                 <SearchInput v-model="search" placeholder="Search episodes..." />
             </div>
 
-            <div class="bg-background border-3">
-                <Table>
-                    <TableHeader>
-                        <TableRow>
-                            <TableHead class="w-[10%]">Image</TableHead>
-                            <TableHead class="w-[33%]">Name</TableHead>
-                            <TableHead class="w-[12%]">Published</TableHead>
-                            <TableHead class="w-[20%]">Enhancements</TableHead>
-                            <TableHead class="w-[10%]">Details</TableHead>
-                            <TableHead v-if="can.update || can.delete" class="text-right"
-                                >Actions</TableHead
-                            >
-                        </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                        <template v-for="entry in entries.data" :key="entry.id">
-                            <TableRow>
-                                <TableCell>
-                                    <img
-                                        v-if="entry.absolute_image_url || feed.absolute_image_url"
-                                        :src="entry.absolute_image_url || feed.absolute_image_url"
-                                        alt=""
-                                        class="size-10 rounded-none object-cover"
-                                    />
-                                    <div
-                                        v-else
-                                        class="flex size-10 items-center justify-center rounded-none bg-gray-100 dark:bg-zinc-800"
-                                    >
-                                        <Rss class="size-5 text-gray-400" />
-                                    </div>
-                                </TableCell>
-                                <TableCell class="align-top font-medium">
-                                    <Link
-                                        :href="showEntryAction.url([props.feed.slug, entry.slug])"
-                                        class="hover:underline"
-                                    >
-                                        {{ entry.name }}
-                                    </Link>
-                                </TableCell>
-                                <TableCell class="text-muted-foreground align-top text-sm">
-                                    {{ formatDate(entry.published_at) }}
-                                </TableCell>
-                                <TableCell class="align-top">
-                                    <EntryEnhancementStatus :entry="entry" />
-                                </TableCell>
-                                <TableCell class="align-top">
-                                    <button
-                                        type="button"
-                                        class="text-blue-600 hover:underline dark:text-blue-400"
-                                        @click="viewEntry(entry)"
-                                    >
-                                        View
-                                    </button>
-                                </TableCell>
-                                <TableCell
-                                    v-if="can.update || can.delete"
-                                    class="text-right align-top"
-                                >
-                                    <DropdownMenu>
-                                        <DropdownMenuTrigger as-child>
-                                            <Button variant="ghost" class="size-8 p-0">
-                                                <span class="sr-only"
-                                                    >Open menu for {{ entry.name }}</span
-                                                >
-                                                <OverflowMenuHorizontal class="size-4" />
-                                            </Button>
-                                        </DropdownMenuTrigger>
-                                        <DropdownMenuContent align="end">
-                                            <template v-if="!feed.rss_url && can.update">
-                                                <DropdownMenuItem
-                                                    class="gap-1.5"
-                                                    @click="editEntry(entry)"
-                                                >
-                                                    <Edit class="size-4" />
-                                                    Edit
-                                                </DropdownMenuItem>
-                                            </template>
+            <div class="bg-background">
+                <ul v-if="entries.data.length > 0" class="flex flex-col gap-8">
+                    <FeedEntryItem
+                        v-for="entry in entries.data"
+                        :key="entry.id"
+                        :feed="feed"
+                        :entry="entry"
+                        :can="{ update: can.update, delete: can.delete }"
+                        @edit="editEntry"
+                        @delete="deleteEntry"
+                    />
+                </ul>
 
-                                            <EntryEnhancementActions
-                                                v-if="entry.can?.produce || entry.can?.regenerate"
-                                                :feed="feed"
-                                                :entry="entry"
-                                                type="dropdown-items"
-                                            />
-
-                                            <template v-if="!feed.rss_url && can.delete">
-                                                <DropdownMenuItem
-                                                    class="gap-1.5 text-red-600"
-                                                    @click="deleteEntry(entry.slug)"
-                                                >
-                                                    <TrashCan class="size-4" />
-                                                    Delete
-                                                </DropdownMenuItem>
-                                            </template>
-                                        </DropdownMenuContent>
-                                    </DropdownMenu>
-                                </TableCell>
-                            </TableRow>
-                        </template>
-                        <TableRow v-if="entries.data.length === 0">
-                            <TableCell
-                                :colspan="can.update || can.delete ? 6 : 5"
-                                class="h-24 text-center"
-                            >
-                                No episodes yet.
-                                <template v-if="can.update">
-                                    Click "Add Episode" to create one.
-                                </template>
-                            </TableCell>
-                        </TableRow>
-                    </TableBody>
-                </Table>
+                <Card v-else class="flex h-48 items-center justify-center border-dashed">
+                    <p class="text-muted-foreground">No episodes yet.</p>
+                </Card>
             </div>
 
             <Pagination :links="entries.links" />

@@ -24,6 +24,7 @@ class Entry extends Model
         'name',
         'slug',
         'audio_url',
+        'duration',
         'image_url',
         'transcription_path',
         'summary',

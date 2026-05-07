@@ -3,19 +3,18 @@
 namespace App\Http\Controllers;
 
 use App\Concerns\DispatchesBatches;
-use App\Concerns\FetchesRssFeeds;
+use App\Concerns\ImportsRssFeeds;
 use App\Http\Requests\FetchRssRequest;
 use App\Http\Requests\StoreRssImportRequest;
-use App\Models\Entry;
 use App\Models\Feed;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Validation\ValidationException;
 
 class RssImportController extends Controller
 {
-    use DispatchesBatches;
-    use FetchesRssFeeds;
+    use DispatchesBatches, ImportsRssFeeds;
 
     public function fetch(FetchRssRequest $request, Feed $feed): JsonResponse
     {
@@ -26,11 +25,11 @@ class RssImportController extends Controller
 
             return response()->json(['episodes' => $data['episodes']]);
         } catch (\Exception $e) {
-            $message = $e->getMessage() === 'Failed to fetch RSS feed.'
-                ? 'Failed to fetch RSS feed.'
-                : 'Invalid RSS feed format.';
-
-            return response()->json(['message' => $message], 422);
+            return response()->json([
+                'message' => $e->getMessage() === 'Failed to fetch RSS feed.'
+                    ? 'Failed to fetch RSS feed.'
+                    : 'Invalid RSS feed format.',
+            ], 422);
         }
     }
 
@@ -42,23 +41,26 @@ class RssImportController extends Controller
             abort(403, 'Manual RSS imports are not allowed for synchronized feeds.');
         }
 
-        foreach ($request->episodes as $episodeData) {
-            $publishedAt = filled($episodeData['published_at'] ?? null)
-                ? $episodeData['published_at']
-                : now();
-
-            $entry = $feed->entries()->create([
-                'name' => $episodeData['name'],
-                'slug' => Entry::generateUniqueSlug($episodeData['name']),
-                'audio_url' => $episodeData['audio_url'],
-                'image_url' => $episodeData['image_url'] ?? null,
-                'original_summary' => $episodeData['summary'] ?? null,
-                'published_at' => $publishedAt,
-            ]);
-
-            $this->dispatchTranscriptionBatch($entry);
+        try {
+            $rssData = $this->fetchAndParseRss($request->url);
+        } catch (\Exception) {
+            throw ValidationException::withMessages(['url' => 'Failed to fetch or parse the RSS feed.']);
         }
 
-        return redirect()->back()->with('success', count($request->episodes).' episodes imported successfully.');
+        $matchedEpisodes = collect($rssData['episodes'])
+            ->keyBy(fn ($episode) => $episode['guid'] ?: $episode['audio_url'])
+            ->only($request->episodes);
+
+        if ($matchedEpisodes->count() !== count($request->episodes)) {
+            $missing = array_diff($request->episodes, $matchedEpisodes->keys()->all());
+
+            throw ValidationException::withMessages([
+                'episodes' => 'The following episodes could not be found in the feed: '.implode(', ', $missing),
+            ]);
+        }
+
+        $count = $matchedEpisodes->filter(fn ($episode) => $this->importEpisode($feed, $episode))->count();
+
+        return redirect()->back()->with('success', $count.' episodes imported successfully.');
     }
 }

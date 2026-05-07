@@ -7,10 +7,7 @@ import { setInertiaPage } from '../../../../.storybook/mocks/inertia';
 import Index from './Index.vue';
 
 type DashboardArgs = {
-    feeds: {
-        data: any[];
-        links: any[];
-    };
+    feeds: any[];
     filters: {
         search?: string;
     };
@@ -79,14 +76,7 @@ type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {
     args: {
-        feeds: {
-            data: feeds,
-            links: [
-                { url: null, label: '&laquo; Previous', active: false },
-                { url: '/dashboard?page=1', label: '1', active: true },
-                { url: null, label: 'Next &raquo;', active: false },
-            ],
-        },
+        feeds,
         filters: {
             search: '',
         },
@@ -95,10 +85,7 @@ export const Default: Story = {
 
 export const Empty: Story = {
     args: {
-        feeds: {
-            data: [],
-            links: [],
-        },
+        feeds: [],
         filters: {
             search: '',
         },
@@ -107,10 +94,7 @@ export const Empty: Story = {
 
 export const Searching: Story = {
     args: {
-        feeds: {
-            data: [feeds[0]],
-            links: [],
-        },
+        feeds: [feeds[0]],
         filters: {
             search: 'Laravel',
         },
@@ -120,21 +104,18 @@ export const Searching: Story = {
 export const Syncing: Story = {
     args: {
         ...Default.args,
-        feeds: {
-            ...Default.args.feeds,
-            data: [
-                {
-                    ...feeds[0],
-                    latest_job_batch: {
-                        job_batch: {
-                            finished_at: null,
-                            cancelled_at: null,
-                        },
+        feeds: [
+            {
+                ...feeds[0],
+                latest_job_batch: {
+                    job_batch: {
+                        finished_at: null,
+                        cancelled_at: null,
                     },
                 },
-                ...feeds.slice(1),
-            ],
-        },
+            },
+            ...feeds.slice(1),
+        ],
     },
 };
 

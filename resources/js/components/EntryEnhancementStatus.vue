@@ -1,42 +1,50 @@
 <script setup lang="ts">
 import { showModal } from '@noeldemartin/vue-modals';
+import { computed } from 'vue';
+import AiGenerate from '~icons/carbon/ai-generate';
 import Renew from '~icons/carbon/renew';
 
-import EntryFailureModal from '@/components/EntryFailureModal.vue';
+import FailureModal from '@/components/modals/FailureModal/FailureModal.vue';
 import { getBatchStatus } from '@/lib/entries';
 
-defineProps<{
+const props = defineProps<{
     entry: any;
+    showBullet?: boolean;
 }>();
 
-const viewFailure = (entry: any) => showModal(EntryFailureModal, { entry });
+const viewFailure = (entry: any) =>
+    showModal(FailureModal, {
+        title: 'Processing failed',
+        description: entry.name,
+        exception:
+            entry.latest_job_batch?.job_batch?.failed_job_details?.[0]?.exception ??
+            'No exception details available.',
+    });
+
+const status = computed(() => getBatchStatus(props.entry));
+const shouldShow = computed(() => status.value !== null || !!props.entry.transcription_path);
 </script>
 
 <template>
-    <div class="inline-flex items-center">
-        <div
-            v-if="getBatchStatus(entry) === 'pending'"
-            class="text-muted-foreground flex items-center gap-1 text-sm"
-        >
-            <Renew class="size-3 animate-spin" />
+    <div v-if="shouldShow" class="inline-flex items-center gap-3 text-sm">
+        <span v-if="showBullet" class="text-neo-dark/30 hidden sm:inline">•</span>
+
+        <div v-if="status === 'pending'" class="text-muted-foreground flex items-center gap-1.5">
+            <Renew class="size-4 animate-spin" />
             Pending
         </div>
 
         <button
-            v-else-if="getBatchStatus(entry) === 'failed'"
-            class="text-sm text-red-500 hover:underline"
+            v-else-if="status === 'failed'"
+            class="text-red-500 hover:underline"
             @click="viewFailure(entry)"
         >
             Failed
         </button>
 
-        <span
-            v-else-if="entry.transcription_path"
-            class="text-sm text-green-600 dark:text-green-400"
-        >
-            Available
-        </span>
-
-        <span v-else class="text-muted-foreground text-sm"> Missing </span>
+        <div v-else-if="entry.transcription_path" class="flex items-center gap-1.5">
+            <AiGenerate class="size-4" />
+            Enhanced
+        </div>
     </div>
 </template>

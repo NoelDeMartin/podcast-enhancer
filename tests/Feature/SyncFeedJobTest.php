@@ -152,3 +152,51 @@ it('can handle long audio and image urls', function () {
     expect($entry->audio_url)->toBe($longUrl);
     expect($entry->image_url)->toBe($longImageUrl);
 });
+
+it('parses and saves episode duration from itunes:duration', function () {
+    $feed = Feed::factory()->create([
+        'rss_url' => 'https://example.com/feed.xml',
+    ]);
+
+    $rssContent = '<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:itunes="http://www.itunes.com/dtds/podcast-1.0.dtd">
+    <channel>
+        <title>Podcast Title</title>
+        <item>
+            <title>Episode 1</title>
+            <enclosure url="https://example.com/audio1.mp3" type="audio/mpeg"/>
+            <itunes:duration>01:02:03</itunes:duration>
+            <pubDate>Tue, 07 Apr 2026 12:34:56 +0000</pubDate>
+        </item>
+        <item>
+            <title>Episode 2</title>
+            <enclosure url="https://example.com/audio2.mp3" type="audio/mpeg"/>
+            <itunes:duration>45:30</itunes:duration>
+            <pubDate>Wed, 08 Apr 2026 12:34:56 +0000</pubDate>
+        </item>
+        <item>
+            <title>Episode 3</title>
+            <enclosure url="https://example.com/audio3.mp3" type="audio/mpeg"/>
+            <itunes:duration>125</itunes:duration>
+            <pubDate>Thu, 09 Apr 2026 12:34:56 +0000</pubDate>
+        </item>
+    </channel>
+</rss>';
+
+    Http::fake([
+        'https://example.com/feed.xml' => Http::response($rssContent, 200),
+    ]);
+
+    $job = new SyncFeedJob($feed->id);
+    $job->handle();
+
+    $entries = $feed->entries()->get();
+
+    $e1 = $entries->firstWhere('name', 'Episode 1');
+    $e2 = $entries->firstWhere('name', 'Episode 2');
+    $e3 = $entries->firstWhere('name', 'Episode 3');
+
+    expect($e1->duration)->toBe(3723); // 1:02:03 = 3600 + 120 + 3
+    expect($e2->duration)->toBe(2730); // 45:30 = 2700 + 30
+    expect($e3->duration)->toBe(125);   // 125 = 125
+});

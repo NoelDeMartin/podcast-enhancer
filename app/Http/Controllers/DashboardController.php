@@ -17,10 +17,9 @@ class DashboardController extends Controller
             ->with(['latestJobBatch'])
             ->filter($filters)
             ->latest()
-            ->paginate(10)
-            ->withQueryString();
+            ->get();
 
-        $feeds->through(fn (Feed $feed) => $feed->setAttribute('can', [
+        $feeds->each(fn (Feed $feed) => $feed->setAttribute('can', [
             'update' => $user->can('update', $feed),
             'delete' => $user->can('delete', $feed),
             'sync' => $user->can('sync', $feed),

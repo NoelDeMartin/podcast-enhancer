@@ -14,12 +14,9 @@ class StoreRssImportRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'episodes' => ['required', 'array'],
-            'episodes.*.name' => ['required', 'string'],
-            'episodes.*.audio_url' => ['required', 'url'],
-            'episodes.*.image_url' => ['nullable', 'url'],
-            'episodes.*.summary' => ['nullable', 'string'],
-            'episodes.*.published_at' => ['nullable', 'date'],
+            'url' => ['required', 'url'],
+            'episodes' => ['required', 'array', 'max:50'],
+            'episodes.*' => ['required', 'string'],
         ];
     }
 }

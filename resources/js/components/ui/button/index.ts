@@ -4,18 +4,18 @@ import { cva } from "class-variance-authority"
 export { default as Button } from "./Button.vue"
 
 export const buttonVariants = cva(
-  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-none text-sm font-mono font-bold disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none focus-visible:ring-primary focus-visible:ring-offset-1 focus-visible:ring-2",
+  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-none text-sm font-mono font-bold disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none focus-visible:ring-primary focus-visible:ring-offset-1 focus-visible:ring-2 transition-all duration-200 shadow-none",
   {
     variants: {
       variant: {
         default:
-          "bg-primary text-primary-foreground border-3 border-neo-dark  hover:bg-primary/80 active:bg-primary/60",
+          "bg-primary text-primary-foreground border-3 border-neo-dark hover:shadow-neo-hard active:shadow-none active:translate-x-[2px] active:translate-y-[2px]",
         destructive:
-          "bg-destructive text-destructive-foreground border-3 border-neo-dark hover:bg-destructive/70 active:bg-destructive/50 focus-visible:ring-destructive",
+          "bg-destructive text-destructive-foreground border-3 border-neo-dark hover:shadow-neo-hard active:shadow-none active:translate-x-[2px] active:translate-y-[2px] focus-visible:ring-destructive",
         outline:
           "bg-transparent border-3 border-neo-dark hover:bg-accent hover:text-accent-foreground",
         secondary:
-          "bg-black text-white border-3 border-neo-dark hover:bg-primary focus-visible:ring-black",
+          "bg-black text-white border-3 border-neo-dark hover:shadow-neo-hard active:shadow-none active:translate-x-[2px] active:translate-y-[2px] focus-visible:ring-black",
         ghost:
           "hover:bg-accent hover:text-accent-foreground",
         link: "text-primary underline-offset-4 hover:underline",

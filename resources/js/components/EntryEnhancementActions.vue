@@ -43,7 +43,7 @@ const hasTranscription = () => !!props.entry.transcription_path;
                 !isPending() &&
                 (!hasTranscription() ? entry.can?.produce : entry.can?.regenerate)
             "
-            class="gap-1.5"
+            class="gap-1.5 font-bold uppercase"
             @click="regenerateTranscription"
         >
             <AiGenerate class="size-4" />
@@ -52,7 +52,7 @@ const hasTranscription = () => !!props.entry.transcription_path;
 
         <DropdownMenuItem
             v-if="hasTranscription() && !isPending() && entry.can?.regenerate"
-            class="gap-1.5"
+            class="gap-1.5 font-bold uppercase"
             @click="regenerateMetadata"
         >
             <AiGenerate class="size-4" />

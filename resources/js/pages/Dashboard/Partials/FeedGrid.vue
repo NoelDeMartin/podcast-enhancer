@@ -18,6 +18,7 @@ import {
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { getBatchStatus } from '@/lib/entries';
 
 const props = defineProps<{
     feeds: any[];
@@ -28,25 +29,7 @@ const emit = defineEmits<{
     delete: [feed: any];
 }>();
 
-function getFeedSyncStatus(feed: any): 'pending' | 'failed' | 'completed' | null {
-    const batch = feed.latest_job_batch?.job_batch;
-
-    if (!batch) {
-        return null;
-    }
-
-    if (batch.cancelled_at !== null) {
-        return 'failed';
-    }
-
-    if (batch.finished_at !== null) {
-        return 'completed';
-    }
-
-    return 'pending';
-}
-
-const hasActiveJobs = computed(() => props.feeds.some((f) => getFeedSyncStatus(f) === 'pending'));
+const hasActiveJobs = computed(() => props.feeds.some((f) => getBatchStatus(f) === 'pending'));
 
 const { start: startPolling, stop: stopPolling } = usePoll(
     3000,
@@ -60,8 +43,7 @@ watch(hasActiveJobs, (active) => (active ? startPolling() : stopPolling()), {
 
 const isSyncing = ref<Record<number, boolean>>({});
 
-const isFeedSyncing = (feed: any) =>
-    isSyncing.value[feed.id] || getFeedSyncStatus(feed) === 'pending';
+const isFeedSyncing = (feed: any) => isSyncing.value[feed.id] || getBatchStatus(feed) === 'pending';
 
 const syncFeed = (feed: any) => {
     isSyncing.value[feed.id] = true;
@@ -120,9 +102,13 @@ const formatLastSynced = (date: string) => {
 
 <template>
     <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
-        <Card v-for="feed in feeds" :key="feed.id" class="flex flex-col gap-0 overflow-hidden py-0">
+        <Card
+            v-for="feed in feeds"
+            :key="feed.id"
+            class="hover:shadow-neo-hard flex flex-col gap-0 overflow-hidden py-0 transition-all duration-300"
+        >
             <div class="group border-neo-dark relative aspect-square overflow-hidden border-b-3">
-                <Link :href="show.url(feed.slug)" class="block size-full">
+                <Link :href="show.url(feed.slug)" class="block size-full" tabindex="-1">
                     <img
                         v-if="feed.absolute_image_url"
                         :src="feed.absolute_image_url"

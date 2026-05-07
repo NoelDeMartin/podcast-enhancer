@@ -16,7 +16,7 @@ it('allows authenticated users to visit the dashboard', function () {
     $response->assertOk();
 });
 
-it('paginates feeds on the dashboard', function () {
+it('returns all feeds on the dashboard', function () {
     $user = User::factory()->create();
     Feed::factory()->count(15)->for($user)->create();
 
@@ -26,8 +26,8 @@ it('paginates feeds on the dashboard', function () {
     $response->assertOk();
     $response->assertInertia(fn ($page) => $page
         ->component('Dashboard/Index')
-        ->has('feeds.data', 10)
-        ->has('feeds.links')
+        ->has('feeds', 15)
+        ->missing('feeds.links')
     );
 });
 
@@ -43,7 +43,7 @@ it('can filter feeds by title', function () {
     $response->assertOk();
     $response->assertInertia(fn ($page) => $page
         ->component('Dashboard/Index')
-        ->has('feeds.data', 1)
+        ->has('feeds', 1)
         ->where('filters.search', 'Laravel')
     );
 
@@ -53,7 +53,7 @@ it('can filter feeds by title', function () {
     $response->assertOk();
     $response->assertInertia(fn ($page) => $page
         ->component('Dashboard/Index')
-        ->has('feeds.data', 1)
+        ->has('feeds', 1)
         ->where('filters.search', 'Weekly')
     );
 });
@@ -68,7 +68,7 @@ it('includes latestJobBatch and can permissions for feeds on the dashboard', fun
     $response->assertOk();
     $response->assertInertia(fn ($page) => $page
         ->component('Dashboard/Index')
-        ->has('feeds.data.0', fn ($page) => $page
+        ->has('feeds.0', fn ($page) => $page
             ->has('latest_job_batch')
             ->has('can', fn ($page) => $page
                 ->has('update')

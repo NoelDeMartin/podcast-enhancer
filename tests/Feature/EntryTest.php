@@ -6,6 +6,7 @@ use App\Models\Feed;
 use App\Models\User;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Bus;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Storage;
 
 beforeEach(function () {
@@ -386,21 +387,31 @@ it('trims original descriptions before importing in the database', function () {
     Bus::fake();
     $feed = Feed::factory()->for($this->user)->create(['rss_url' => null]);
 
+    $rssContent = '<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0">
+    <channel>
+        <item>
+            <title>Episode 1 Unique</title>
+            <guid>guid1</guid>
+            <description>   This is a description with spaces.   </description>
+            <enclosure url="https://example.com/audio1.mp3" type="audio/mpeg"/>
+        </item>
+        <item>
+            <title>Episode 2 Unique</title>
+            <guid>guid2</guid>
+            <description>   </description>
+            <enclosure url="https://example.com/audio2.mp3" type="audio/mpeg"/>
+        </item>
+    </channel>
+</rss>';
+
+    Http::fake([
+        'https://example.com/feed.xml' => Http::response($rssContent, 200),
+    ]);
+
     $this->post(route('feeds.import-rss.store', $feed), [
-        'episodes' => [
-            [
-                'name' => 'Episode 1 Unique',
-                'summary' => '   This is a description with spaces.   ',
-                'audio_url' => 'https://example.com/audio1.mp3',
-                'published_at' => '2026-04-21 10:00:00',
-            ],
-            [
-                'name' => 'Episode 2 Unique',
-                'summary' => '   ',
-                'audio_url' => 'https://example.com/audio2.mp3',
-                'published_at' => '2026-04-21 11:00:00',
-            ],
-        ],
+        'url' => 'https://example.com/feed.xml',
+        'episodes' => ['guid1', 'guid2'],
     ])
         ->assertSessionHas('success', '2 episodes imported successfully.');
 

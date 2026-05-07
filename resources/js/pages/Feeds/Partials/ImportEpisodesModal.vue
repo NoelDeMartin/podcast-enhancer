@@ -79,8 +79,14 @@ const fetchRss = async () => {
 };
 
 const importRss = () => {
-    const selected = episodes.value.filter((_, i) => selectedEpisodes.value.includes(i));
-    useForm({ episodes: selected }).post(storeRssAction(props.feed).url, {
+    const selected = episodes.value
+        .filter((_, i) => selectedEpisodes.value.includes(i))
+        .map((episode) => episode.guid || episode.audio_url);
+
+    useForm({
+        url: rssUrl.value,
+        episodes: selected,
+    }).post(storeRssAction(props.feed).url, {
         onSuccess: () => {
             emit('close');
         },

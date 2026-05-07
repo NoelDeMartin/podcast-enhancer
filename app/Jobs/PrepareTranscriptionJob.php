@@ -82,6 +82,8 @@ class PrepareTranscriptionJob implements ShouldQueue
         $creditsRequired = (int) ceil($durationInSeconds / 60);
         $user = User::findOrFail($this->userId);
 
+        $entry->update(['duration' => $durationInSeconds]);
+
         if ($user->credits < $creditsRequired) {
             Log::info(static::class.' failed (insufficient credits)', [
                 'entry_id' => $entry->id,

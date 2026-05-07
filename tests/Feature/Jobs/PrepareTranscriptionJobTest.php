@@ -37,6 +37,7 @@ it('consumes credits successfully when enough funds are available', function () 
     $job->withBatchId($batch->id);
     $job->handle();
 
+    expect($entry->fresh()->duration)->toBe(125);
     expect($user->fresh()->credits)->toBe(7);
     expect(CreditUsage::count())->toBe(1);
     expect(CreditUsage::first())->toMatchArray([

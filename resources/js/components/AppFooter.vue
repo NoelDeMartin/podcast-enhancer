@@ -2,6 +2,8 @@
 import Email from '~icons/carbon/email';
 import LogoGithub from '~icons/carbon/logo-github';
 
+import TextLink from '@/components/TextLink.vue';
+
 const currentYear = new Date().getFullYear();
 </script>
 
@@ -10,7 +12,15 @@ const currentYear = new Date().getFullYear();
         <div
             class="mx-auto flex max-w-7xl flex-col items-center justify-between gap-6 px-4 sm:px-6 md:flex-row"
         >
-            <p class="text-sm font-bold opacity-70">&copy; {{ currentYear }} Noel De Martin</p>
+            <p class="text-sm font-bold opacity-70">
+                &copy; {{ currentYear }}
+                <a
+                    href="https://noeldemartin.com"
+                    target="_blank"
+                    class="hover:text-primary hover:underline"
+                    >Noel De Martin</a
+                >
+            </p>
 
             <div class="flex items-center gap-8">
                 <a

@@ -5,7 +5,6 @@ import { watchDebounced } from '@vueuse/core';
 import { ref } from 'vue';
 import Add from '~icons/carbon/add';
 
-import Pagination from '@/components/Pagination.vue';
 import SearchInput from '@/components/SearchInput.vue';
 import { Button } from '@/components/ui/button';
 import AppLayout from '@/layouts/AppLayout.vue';
@@ -17,10 +16,7 @@ import FeedGrid from './Partials/FeedGrid.vue';
 import NewFeedModal from './Partials/NewFeedModal.vue';
 
 const props = defineProps<{
-    feeds: {
-        data: any[];
-        links: any[];
-    };
+    feeds: any[];
     filters: {
         search?: string;
     };
@@ -75,9 +71,7 @@ const deleteFeed = (feed: any) => showModal(DeleteFeedModal, { feed });
                 </div>
             </div>
 
-            <FeedGrid :feeds="feeds.data" @edit="editFeed" @delete="deleteFeed" />
-
-            <Pagination :links="feeds.links" />
+            <FeedGrid :feeds="feeds" @edit="editFeed" @delete="deleteFeed" />
         </div>
     </AppLayout>
 </template>

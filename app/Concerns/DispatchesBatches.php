@@ -23,8 +23,12 @@ trait DispatchesBatches
             throw new \Exception('Entry ID is missing before dispatching batch');
         }
 
+        $userId = $entry->relationLoaded('feed')
+            ? $entry->feed->user_id
+            : $entry->feed()->withoutGlobalScopes()->first()->user_id;
+
         $batch = Bus::batch([
-            new PrepareTranscriptionJob($entry->id, $entry->feed->user_id),
+            new PrepareTranscriptionJob($entry->id, $userId),
         ])
             ->then(function (Batch $batch) use ($entryId) {
                 /** @var Entry|null $entry */

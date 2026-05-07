@@ -2,10 +2,12 @@
 
 namespace App\Concerns;
 
+use App\Models\Entry;
+use App\Models\Feed;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\Http;
 
-trait FetchesRssFeeds
+trait ImportsRssFeeds
 {
     protected function fetchAndParseRss(string $url): array
     {
@@ -30,10 +32,7 @@ trait FetchesRssFeeds
         $episodes = [];
 
         foreach ($xml->channel->item as $item) {
-            $audioUrl = (string) ($item->enclosure['url'] ?? '');
-            if (empty($audioUrl)) {
-                $audioUrl = null;
-            }
+            $audioUrl = (string) ($item->enclosure['url'] ?? '') ?: null;
 
             $episodeImageUrl = null;
             if ($item->children('itunes', true)->image) {
@@ -45,12 +44,19 @@ trait FetchesRssFeeds
             $pubDate = trim((string) ($item->pubDate ?? ''));
             $publishedAt = $pubDate !== '' ? CarbonImmutable::parse($pubDate) : null;
 
+            $duration = null;
+            if ($item->children('itunes', true)->duration) {
+                $duration = $this->parseDuration((string) $item->children('itunes', true)->duration);
+            }
+
             $episodes[] = [
+                'guid' => (string) ($item->guid ?? ''),
                 'name' => (string) $item->title,
                 'summary' => trim((string) $item->description),
                 'audio_url' => $audioUrl,
                 'image_url' => $episodeImageUrl,
                 'published_at' => $publishedAt,
+                'duration' => $duration,
             ];
         }
 
@@ -60,5 +66,45 @@ trait FetchesRssFeeds
             'image_url' => $imageUrl,
             'episodes' => $episodes,
         ];
+    }
+
+    protected function importEpisode(Feed $feed, array $episodeData): ?Entry
+    {
+        $audioUrl = $episodeData['audio_url'];
+        $name = $episodeData['name'];
+
+        if (! $audioUrl) {
+            return null;
+        }
+
+        if ($feed->entries()->where('audio_url', $audioUrl)->exists() || $feed->entries()->where('name', $name)->exists()) {
+            return null;
+        }
+
+        return $feed->entries()->create([
+            'name' => $name,
+            'slug' => Entry::generateUniqueSlug($name),
+            'audio_url' => $audioUrl,
+            'duration' => $episodeData['duration'] ?? null,
+            'image_url' => $episodeData['image_url'] ?? null,
+            'original_summary' => $episodeData['summary'] ?? null,
+            'published_at' => $episodeData['published_at'] ?? now(),
+        ]);
+    }
+
+    protected function parseDuration(string $duration): int
+    {
+        if (is_numeric($duration)) {
+            return (int) $duration;
+        }
+
+        $parts = explode(':', $duration);
+        $seconds = 0;
+
+        foreach ($parts as $part) {
+            $seconds = $seconds * 60 + (int) $part;
+        }
+
+        return $seconds;
     }
 }

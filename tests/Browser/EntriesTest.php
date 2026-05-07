@@ -91,7 +91,7 @@ it('can view an entry page', function () {
         ->assertSee('Tech News');
 });
 
-it('can view entry details in a dialog on the feed page', function () {
+it('can navigate to entry details from the feed page', function () {
     $user = User::factory()->create();
     $feed = Feed::factory()->for($user)->create(['title' => 'Tech News']);
     $entry = Entry::factory()->create([
@@ -105,8 +105,9 @@ it('can view entry details in a dialog on the feed page', function () {
 
     visit('/feeds/'.$feed->slug)
         ->waitForText('Detailed Entry')
-        ->click('View')
-        ->waitForText('Summary')
+        ->click('Detailed Entry')
+        ->waitForText('AI Summary')
+        ->assertSee('AI generated summary.')
         ->waitForText('Original Description')
         ->assertSee('This is the original description.');
 });

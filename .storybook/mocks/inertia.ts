@@ -26,12 +26,17 @@ export const usePage = () => page;
 
 export const setInertiaPage = (data: any) => {
     if (data.props) {
-        if (data.props.auth && data.props.auth.user) {
+        if (data.props.auth && 'user' in data.props.auth) {
             page.props.auth = page.props.auth || { user: null };
-            page.props.auth.user = {
-                ...((page.props.auth.user ?? {}) as Record<string, unknown>),
-                ...(data.props.auth.user as Record<string, unknown>),
-            };
+
+            if (data.props.auth.user === null) {
+                page.props.auth.user = null;
+            } else {
+                page.props.auth.user = {
+                    ...((page.props.auth.user ?? {}) as Record<string, unknown>),
+                    ...(data.props.auth.user as Record<string, unknown>),
+                };
+            }
         }
 
         Object.assign(page.props, {

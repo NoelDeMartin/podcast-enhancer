@@ -3,16 +3,15 @@
 namespace App\Http\Controllers;
 
 use App\Concerns\DispatchesBatches;
-use App\Concerns\FetchesRssFeeds;
+use App\Concerns\ImportsRssFeeds;
 use App\Http\Requests\StoreFeedSyncRequest;
-use App\Models\Entry;
 use App\Models\Feed;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Gate;
 
 class FeedSyncController extends Controller
 {
-    use DispatchesBatches, FetchesRssFeeds;
+    use DispatchesBatches, ImportsRssFeeds;
 
     public function store(StoreFeedSyncRequest $request): RedirectResponse
     {
@@ -41,14 +40,7 @@ class FeedSyncController extends Controller
                 ->filter(fn ($episode) => ! empty($episode['audio_url']));
 
             foreach ($episodes as $episode) {
-                $feed->entries()->create([
-                    'name' => $episode['name'],
-                    'slug' => Entry::generateUniqueSlug($episode['name']),
-                    'audio_url' => $episode['audio_url'],
-                    'image_url' => $episode['image_url'] ?? null,
-                    'original_summary' => $episode['summary'] ?? null,
-                    'published_at' => $episode['published_at'],
-                ]);
+                $this->importEpisode($feed, $episode);
             }
 
             return redirect()->back()->with('success', "Feed created and {$episodes->count()} episodes imported successfully.");
