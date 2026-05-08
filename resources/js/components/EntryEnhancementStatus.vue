@@ -15,10 +15,10 @@ const props = defineProps<{
 const viewFailure = (entry: any) =>
     showModal(FailureModal, {
         title: 'Processing failed',
-        description: entry.name,
-        exception:
+        description: `For "${entry.name}" episode.`,
+        details:
             entry.latest_job_batch?.job_batch?.failed_job_details?.[0]?.exception ??
-            'No exception details available.',
+            'No error details available.',
     });
 
 const status = computed(() => getBatchStatus(props.entry));
@@ -31,7 +31,7 @@ const shouldShow = computed(() => status.value !== null || !!props.entry.transcr
 
         <div v-if="status === 'pending'" class="text-muted-foreground flex items-center gap-1.5">
             <Renew class="size-4 animate-spin" />
-            Pending
+            Enhancing
         </div>
 
         <button
@@ -39,7 +39,7 @@ const shouldShow = computed(() => status.value !== null || !!props.entry.transcr
             class="text-red-500 hover:underline"
             @click="viewFailure(entry)"
         >
-            Failed
+            Processing failed
         </button>
 
         <div v-else-if="entry.transcription_path" class="flex items-center gap-1.5">

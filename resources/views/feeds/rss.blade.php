@@ -25,6 +25,9 @@
                 <pubDate>{{ $entry->published_at->toRfc2822String() }}</pubDate>
                 <itunes:summary>{{ strip_tags($entry->original_summary ?? $entry->summary ?? '') }}</itunes:summary>
                 <itunes:episodeType>full</itunes:episodeType>
+                @if($entry->duration)
+                    <itunes:duration>{{ $entry->duration }}</itunes:duration>
+                @endif
                 @php
                     $effectiveImageUrl = $entry->absolute_image_url ?: $feed->absolute_image_url;
                 @endphp

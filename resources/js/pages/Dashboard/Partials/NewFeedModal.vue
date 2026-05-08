@@ -77,6 +77,7 @@ const visibleTabs = tabs.filter((tab) => !('hidden' in tab && tab.hidden));
 <template>
     <Modal
         title="Add New Podcast"
+        :show-close-button="false"
         :description="
             mode === 'rss'
                 ? 'Import a podcast from an existing feed.'
@@ -125,6 +126,14 @@ const visibleTabs = tabs.filter((tab) => !('hidden' in tab && tab.hidden));
                 </div>
             </div>
             <DialogFooter>
+                <Button
+                    type="button"
+                    variant="outline"
+                    :disabled="rssForm.processing"
+                    @click="emit('close')"
+                >
+                    Cancel
+                </Button>
                 <Button type="submit" :disabled="rssForm.processing">
                     <Renew v-if="rssForm.processing" class="mr-2 size-4 animate-spin" />
                     Import Podcast
@@ -191,6 +200,14 @@ const visibleTabs = tabs.filter((tab) => !('hidden' in tab && tab.hidden));
                 </div>
             </div>
             <DialogFooter>
+                <Button
+                    type="button"
+                    variant="outline"
+                    :disabled="manualForm.processing"
+                    @click="emit('close')"
+                >
+                    Cancel
+                </Button>
                 <Button type="submit" :disabled="manualForm.processing"> Create Podcast </Button>
             </DialogFooter>
         </form>

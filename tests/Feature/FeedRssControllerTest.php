@@ -15,6 +15,7 @@ it('generates an rss feed for a feed', function () {
         'name' => 'Episode 1',
         'summary' => 'This is the first episode summary.',
         'audio_url' => 'audios/audio.mp3',
+        'duration' => 3723,
     ]);
 
     Storage::disk('public')->put('audios/audio.mp3', 'dummy content');
@@ -28,6 +29,7 @@ it('generates an rss feed for a feed', function () {
         ->assertSee('Read episode transcription</a>', false)
         ->assertSee('Enhanced by <a href="'.url('/').'">Podcasts Enhancer</a>', false)
         ->assertSee('<pubDate>'.$entry->published_at->toRfc2822String().'</pubDate>', false)
+        ->assertSee('<itunes:duration>3723</itunes:duration>', false)
         ->assertSee(asset(Storage::disk('public')->url($entry->audio_url)), false)
         ->assertSee('length="13"', false); // "dummy content" is 13 bytes
 });

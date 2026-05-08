@@ -67,9 +67,9 @@ const viewSyncFailure = () =>
     showModal(FailureModal, {
         title: 'Synchronization failed',
         description: props.feed.title,
-        exception:
+        details:
             props.feed.latest_job_batch?.job_batch?.failed_job_details?.[0]?.exception ??
-            'No exception details available.',
+            'No error details available.',
     });
 
 const deleteEntry = (slug: string) => {
@@ -200,7 +200,7 @@ const syncFeed = () => {
                 </Card>
             </div>
 
-            <Pagination :links="entries.links" />
+            <Pagination :links="entries.links" label="Episode Pages" />
         </div>
     </AppLayout>
 </template>

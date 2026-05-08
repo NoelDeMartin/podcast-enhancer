@@ -103,16 +103,6 @@ const hasManualFeedMenuItems = computed(
 const showEntryOverflowMenu = computed(
     () => hasManualFeedMenuItems.value || hasEnhancementDropdownItems.value,
 );
-
-/**
- * Explicit grid areas avoid fragile row-span / col-span with implicit rows so metadata
- * and description stay in the text column beside the art from sm and up.
- */
-const entryItemGridClass = computed(() =>
-    description.value
-        ? "[grid-template-areas:'img_title'_'meta_meta'_'desc_desc'] sm:[grid-template-areas:'img_title'_'img_meta'_'img_desc']"
-        : "[grid-template-areas:'img_title'_'meta_meta'] sm:[grid-template-areas:'img_title'_'img_meta']",
-);
 </script>
 
 <template>
@@ -120,8 +110,7 @@ const entryItemGridClass = computed(() =>
         class="group border-neo-dark bg-neo-bg hover:shadow-neo-hard relative border-3 p-4 transition-all duration-300 sm:p-6"
     >
         <div
-            class="grid grid-cols-[auto_1fr] gap-x-4 gap-y-3 sm:items-start sm:gap-x-6 sm:gap-y-3"
-            :class="entryItemGridClass"
+            class="xs:grid-cols-[auto_1fr_auto] xs:grid-rows-[auto_auto_auto] xs:[grid-template-areas:'img_title_actions'_'meta_meta_meta'_'desc_desc_desc'] grid grid-cols-[1fr_auto] grid-rows-[auto_auto_auto_auto] gap-x-4 gap-y-3 [grid-template-areas:'img_actions'_'title_title'_'meta_meta'_'desc_desc'] sm:grid-cols-[auto_1fr_auto] sm:grid-rows-[auto_1fr_auto] sm:items-start sm:gap-x-6 sm:gap-y-3 sm:[grid-template-areas:'img_title_actions'_'img_meta_meta'_'desc_desc_desc']"
         >
             <Link
                 :href="showEntryAction.url([props.feed.slug, props.entry.slug])"
@@ -156,52 +145,46 @@ const entryItemGridClass = computed(() =>
                     >
                         {{ entry.name }}
                     </Link>
-
-                    <div
-                        v-if="showEntryOverflowMenu"
-                        class="flex shrink-0 items-center pt-0.5 sm:pt-0"
-                    >
-                        <DropdownMenu>
-                            <DropdownMenuTrigger as-child>
-                                <Button
-                                    variant="ghost"
-                                    class="size-9 shrink-0 p-0 sm:-ml-3 sm:size-8"
-                                >
-                                    <span class="sr-only">Open menu for {{ entry.name }}</span>
-                                    <OverflowMenuHorizontal class="size-6" />
-                                </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end">
-                                <template v-if="!feed.rss_url && can.update">
-                                    <DropdownMenuItem
-                                        class="gap-1.5 font-bold uppercase"
-                                        @click="emit('edit', entry)"
-                                    >
-                                        <Edit class="size-4" />
-                                        Edit
-                                    </DropdownMenuItem>
-                                </template>
-
-                                <EntryEnhancementActions
-                                    v-if="hasEnhancementDropdownItems"
-                                    :feed="feed"
-                                    :entry="entry"
-                                    type="dropdown-items"
-                                />
-
-                                <template v-if="!feed.rss_url && can.delete">
-                                    <DropdownMenuItem
-                                        class="gap-1.5 font-bold text-red-600 uppercase"
-                                        @click="emit('delete', entry.slug)"
-                                    >
-                                        <TrashCan class="size-4" />
-                                        Delete
-                                    </DropdownMenuItem>
-                                </template>
-                            </DropdownMenuContent>
-                        </DropdownMenu>
-                    </div>
                 </div>
+            </div>
+
+            <div class="size-9 [grid-area:actions]">
+                <DropdownMenu v-if="showEntryOverflowMenu">
+                    <DropdownMenuTrigger as-child>
+                        <Button variant="ghost" class="size-9">
+                            <span class="sr-only">Open menu for {{ entry.name }}</span>
+                            <OverflowMenuHorizontal class="size-6" />
+                        </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                        <template v-if="!feed.rss_url && can.update">
+                            <DropdownMenuItem
+                                class="gap-1.5 font-bold uppercase"
+                                @click="emit('edit', entry)"
+                            >
+                                <Edit class="size-4" />
+                                Edit
+                            </DropdownMenuItem>
+                        </template>
+
+                        <EntryEnhancementActions
+                            v-if="hasEnhancementDropdownItems"
+                            :feed="feed"
+                            :entry="entry"
+                            type="dropdown-items"
+                        />
+
+                        <template v-if="!feed.rss_url && can.delete">
+                            <DropdownMenuItem
+                                class="gap-1.5 font-bold text-red-600 uppercase"
+                                @click="emit('delete', entry.slug)"
+                            >
+                                <TrashCan class="size-4" />
+                                Delete
+                            </DropdownMenuItem>
+                        </template>
+                    </DropdownMenuContent>
+                </DropdownMenu>
             </div>
 
             <div

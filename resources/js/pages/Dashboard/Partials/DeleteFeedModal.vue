@@ -30,7 +30,7 @@ const submit = () => {
 </script>
 
 <template>
-    <Modal>
+    <Modal :show-close-button="false">
         <form @submit.prevent="submit" class="space-y-6">
             <DialogHeader>
                 <div class="flex flex-col items-center gap-4 text-left">

@@ -44,19 +44,19 @@ class FeedController extends Controller
 
         Gate::authorize('view', $feed);
 
-        $feed->load(['latestJobBatch']);
-
-        $this->loadModelFailedJobDetails($feed);
-
         $user = auth()->user();
         $filters = request()->only('search');
-
         $entries = $feed->entries()
             ->with(['latestJobBatch'])
             ->filter($filters)
             ->latest('published_at')
             ->paginate(10)
             ->withQueryString();
+
+        $feed->load(['latestJobBatch']);
+
+        $this->loadModelFailedJobDetails($feed);
+        $this->loadModelFailedJobDetails($entries->getCollection());
 
         $entries->through(fn ($entry) => $entry->setAttribute('can', [
             'produce' => $user?->can('produce', $entry),

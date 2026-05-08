@@ -11,7 +11,7 @@ import FailureModal from './FailureModal.vue';
 type FailureModalStoryArgs = {
     title: string;
     description?: string | null;
-    exception?: string | null;
+    details?: string | null;
 };
 
 const meta: Meta<FailureModalStoryArgs> = {
@@ -36,7 +36,7 @@ export const ProcessingFailed: Story = {
     args: {
         title: 'Processing failed',
         description: entries[0].name,
-        exception: 'Something went wrong during transcription.',
+        details: 'Something went wrong during transcription.',
     },
 };
 
@@ -44,7 +44,7 @@ export const SynchronizationFailed: Story = {
     args: {
         title: 'Synchronization failed',
         description: feeds[0].title,
-        exception: `ErrorException: Trying to access array offset on value of type null in /var/www/html/app/Jobs/SyncFeedJob.php:87
+        details: `ErrorException: Trying to access array offset on value of type null in /var/www/html/app/Jobs/SyncFeedJob.php:87
 Stack trace:
 #0 /var/www/html/vendor/laravel/framework/src/Illuminate/Foundation/Bootstrap/HandleExceptions.php(269): Illuminate\\Foundation\\Bootstrap\\HandleExceptions->handleError(2, 'Trying to access...', '/var/www/html/a...', 87)
 #1 /var/www/html/app/Jobs/SyncFeedJob.php(87): Illuminate\\Foundation\\Bootstrap\\HandleExceptions->{closure:Illuminate\\Foundation\\Bootstrap\\HandleExceptions::forwardsTo():268}()

@@ -26,7 +26,7 @@ type ShowArgs = {
 };
 
 const meta = {
-    title: 'Pages/Feeds/Show',
+    title: 'Pages/Feed',
     component: Show,
     parameters: {
         layout: 'fullscreen',

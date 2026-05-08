@@ -6,11 +6,11 @@ withDefaults(
     defineProps<{
         title: string;
         description?: string | null;
-        exception?: string | null;
+        details?: string | null;
     }>(),
     {
         description: null,
-        exception: null,
+        details: null,
     },
 );
 </script>
@@ -37,19 +37,14 @@ withDefaults(
                 </div>
             </DialogHeader>
 
-            <div class="space-y-2">
-                <div class="text-muted-foreground text-xs font-medium tracking-wide">
-                    Exception details
-                </div>
-                <div
-                    class="border-neo-dark bg-muted/30 max-w-full overflow-hidden rounded-none border-3"
-                >
-                    <div class="max-h-[50vh] min-w-0 overflow-auto">
-                        <pre
-                            class="text-neo-dark/90 w-fit min-w-full p-4 font-mono text-xs leading-relaxed whitespace-pre dark:text-white/90"
-                            >{{ exception ?? 'No exception details available.' }}</pre
-                        >
-                    </div>
+            <div
+                class="border-neo-dark bg-muted/30 max-w-full overflow-hidden rounded-none border-3"
+            >
+                <div class="max-h-[50vh] min-w-0 overflow-auto">
+                    <pre
+                        class="text-neo-dark/90 w-fit min-w-full p-4 font-mono text-xs leading-relaxed whitespace-pre dark:text-white/90"
+                        >{{ details ?? 'No error details available.' }}</pre
+                    >
                 </div>
             </div>
         </div>
