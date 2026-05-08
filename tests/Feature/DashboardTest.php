@@ -16,6 +16,14 @@ it('allows authenticated users to visit the dashboard', function () {
     $response->assertOk();
 });
 
+it('redirects unverified users to the verification notice page', function () {
+    $user = User::factory()->unverified()->create();
+    $this->actingAs($user);
+
+    $response = $this->get(route('dashboard'));
+    $response->assertRedirect(route('verification.notice'));
+});
+
 it('returns all feeds on the dashboard', function () {
     $user = User::factory()->create();
     Feed::factory()->count(15)->for($user)->create();

@@ -1,17 +1,24 @@
 <script setup lang="ts">
+import { computed } from 'vue';
+
+import { cn } from '@/lib/utils';
+
 type Props = {
     title: string;
     description?: string;
     variant?: 'default' | 'small';
+    class?: string;
 };
 
-withDefaults(defineProps<Props>(), {
+const props = withDefaults(defineProps<Props>(), {
     variant: 'default',
 });
+
+const className = computed(() => props.class);
 </script>
 
 <template>
-    <header :class="variant === 'small' ? '' : 'mb-8 space-y-0.5'">
+    <header :class="cn(variant === 'small' ? '' : 'mb-8 space-y-0.5', className)">
         <h2
             :class="
                 variant === 'small'

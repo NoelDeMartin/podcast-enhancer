@@ -1,6 +1,8 @@
 <?php
 
 use App\Models\User;
+use Illuminate\Auth\Notifications\VerifyEmail;
+use Illuminate\Support\Facades\Notification;
 
 it('displays the profile page', function () {
     $user = User::factory()->create();
@@ -13,6 +15,7 @@ it('displays the profile page', function () {
 });
 
 it('can update the profile information', function () {
+    Notification::fake();
     $user = User::factory()->create();
 
     $response = $this
@@ -31,6 +34,8 @@ it('can update the profile information', function () {
     expect($user->name)->toBe('Test User');
     expect($user->email)->toBe('test@example.com');
     expect($user->email_verified_at)->toBeNull();
+
+    Notification::assertSentTo($user, VerifyEmail::class);
 });
 
 it('leaves the email verification status unchanged when the email address is unchanged', function () {

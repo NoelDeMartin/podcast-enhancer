@@ -44,7 +44,9 @@ const { getInitials } = useInitials();
         <h1 class="sr-only">Profile settings</h1>
 
         <SettingsLayout>
-            <div class="flex flex-col space-y-6">
+            <div
+                class="hover:shadow-neo-hard flex flex-col space-y-6 border-2 bg-white p-4 transition-all duration-300"
+            >
                 <Heading
                     variant="small"
                     title="Profile information"

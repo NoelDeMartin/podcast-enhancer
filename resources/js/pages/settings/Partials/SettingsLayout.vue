@@ -3,7 +3,6 @@ import { Link } from '@inertiajs/vue3';
 
 import Heading from '@/components/Heading.vue';
 import { Button } from '@/components/ui/button';
-import { Separator } from '@/components/ui/separator';
 import { useCurrentUrl } from '@/composables/useCurrentUrl';
 import { toUrl } from '@/lib/utils';
 import { edit as editProfile } from '@/routes/profile';
@@ -25,11 +24,17 @@ const { isCurrentOrParentUrl } = useCurrentUrl();
 </script>
 
 <template>
-    <div class="mx-auto w-full max-w-7xl px-4 py-6 sm:px-6">
-        <Heading title="Settings" description="Manage your profile and account settings" />
+    <div class="mx-auto w-full max-w-7xl px-4 py-6 md:px-6">
+        <Heading
+            title="Settings"
+            description="Manage your profile and account settings"
+            class="mb-4 md:mb-8"
+        />
 
-        <div class="flex flex-col lg:flex-row lg:space-x-12">
-            <aside class="w-full max-w-xl lg:w-48">
+        <div class="flex flex-col md:flex-row md:space-x-12">
+            <aside
+                class="mb-4 w-full bg-gray-200 p-2 md:mr-4 md:w-48 md:max-w-xl md:bg-transparent md:p-0"
+            >
                 <nav class="flex flex-col space-y-1 space-x-0" aria-label="Settings">
                     <Button
                         v-for="item in sidebarNavItems"
@@ -37,7 +42,7 @@ const { isCurrentOrParentUrl } = useCurrentUrl();
                         variant="ghost"
                         :class="[
                             'w-full justify-start',
-                            { 'bg-muted': isCurrentOrParentUrl(item.href) },
+                            { 'border-2': isCurrentOrParentUrl(item.href) },
                         ]"
                         as-child
                     >
@@ -49,13 +54,9 @@ const { isCurrentOrParentUrl } = useCurrentUrl();
                 </nav>
             </aside>
 
-            <Separator class="my-6 lg:hidden" />
-
-            <div class="flex-1 md:max-w-2xl">
-                <section class="max-w-xl space-y-12">
-                    <slot />
-                </section>
-            </div>
+            <section class="space-y-12 md:max-w-xl">
+                <slot />
+            </section>
         </div>
     </div>
 </template>

@@ -10,7 +10,9 @@ defineProps<{
 
 <template>
     <section v-if="entry.original_summary" aria-labelledby="entry-show-notes">
-        <details class="bg-background group border-3 p-6">
+        <details
+            class="bg-background group hover:shadow-neo-hard border-3 p-6 transition-all duration-300"
+        >
             <summary
                 class="flex cursor-pointer list-none items-center justify-between gap-3 [&::-webkit-details-marker]:hidden"
             >

@@ -31,7 +31,9 @@ const breadcrumbs: BreadcrumbItem[] = [
         <h1 class="sr-only">Security settings</h1>
 
         <SettingsLayout>
-            <div class="space-y-6">
+            <div
+                class="hover:shadow-neo-hard flex flex-col space-y-6 border-2 bg-white p-4 transition-all duration-300"
+            >
                 <Heading
                     variant="small"
                     title="Update password"
