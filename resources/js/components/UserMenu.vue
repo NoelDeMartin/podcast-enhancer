@@ -29,7 +29,7 @@ const auth = computed(() => page.props.auth);
                 >
                     <AvatarImage v-if="auth.user.avatar" :src="auth.user.avatar" alt="" />
 
-                    <AvatarFallback class="bg-neo-bg font-semibold text-black dark:text-white">
+                    <AvatarFallback class="bg-neo-bg font-semibold text-black">
                         {{ getInitials(auth.user?.name) }}
                     </AvatarFallback>
                 </Avatar>

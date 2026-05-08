@@ -21,7 +21,7 @@ defineProps<{
                 <h3 id="entry-show-notes" class="flex-1 text-lg font-semibold">Show Notes</h3>
             </summary>
             <div
-                class="text-muted-foreground mt-4 text-sm leading-relaxed [&_a]:text-blue-600 dark:[&_a]:text-blue-400 [&_a:hover]:underline [&_ol]:list-decimal [&_ol]:pl-5 [&_p]:mb-4 [&_ul]:list-disc [&_ul]:pl-5"
+                class="text-muted-foreground mt-4 text-sm leading-relaxed [&_a]:text-blue-600 [&_a:hover]:underline [&_ol]:list-decimal [&_ol]:pl-5 [&_p]:mb-4 [&_ul]:list-disc [&_ul]:pl-5"
                 v-html="formatSummary(entry.original_summary)"
             ></div>
         </details>

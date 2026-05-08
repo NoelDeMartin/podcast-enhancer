@@ -84,10 +84,7 @@ const visibleTabs = tabs.filter((tab) => !('hidden' in tab && tab.hidden));
                 : 'Manually add a new podcast to start tracking episodes.'
         "
     >
-        <div
-            v-if="visibleTabs.length > 1"
-            class="flex w-full gap-1 border-b-3 border-black p-0.5 dark:border-white"
-        >
+        <div v-if="visibleTabs.length > 1" class="flex w-full gap-1 border-b-3 border-black p-0.5">
             <button
                 v-for="{ value, Icon, label } in visibleTabs"
                 :key="value"
@@ -96,8 +93,8 @@ const visibleTabs = tabs.filter((tab) => !('hidden' in tab && tab.hidden));
                 :class="[
                     'flex flex-1 items-center justify-center rounded-none py-2.5 transition-all duration-200',
                     mode === value
-                        ? 'bg-black text-white dark:bg-white dark:text-black'
-                        : 'text-neutral-500 hover:bg-neutral-100 hover:text-black dark:hover:bg-neutral-800 dark:hover:text-white',
+                        ? 'bg-black text-white'
+                        : 'text-neutral-500 hover:bg-neutral-100 hover:text-black',
                 ]"
             >
                 <component

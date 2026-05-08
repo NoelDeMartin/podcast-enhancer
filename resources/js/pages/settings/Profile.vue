@@ -61,9 +61,7 @@ const { getInitials } = useInitials();
                         <div class="flex items-center gap-4">
                             <Avatar class="size-16 overflow-hidden">
                                 <AvatarImage :src="user.avatar!" :alt="user.name" />
-                                <AvatarFallback
-                                    class="bg-neo-bg text-xl font-semibold text-black dark:text-white"
-                                >
+                                <AvatarFallback class="bg-neo-bg text-xl font-semibold text-black">
                                     {{ getInitials(user.name) }}
                                 </AvatarFallback>
                             </Avatar>
@@ -74,7 +72,7 @@ const { getInitials } = useInitials();
                                     href="https://gravatar.com"
                                     target="_blank"
                                     rel="noopener noreferrer"
-                                    class="text-foreground underline decoration-neutral-300 underline-offset-4 transition-colors duration-300 ease-out hover:decoration-current! dark:decoration-neutral-500"
+                                    class="text-foreground underline decoration-neutral-300 underline-offset-4 transition-colors duration-300 ease-out hover:decoration-current!"
                                 >
                                     Gravatar </a
                                 >.
@@ -117,7 +115,7 @@ const { getInitials } = useInitials();
                             <Link
                                 :href="send()"
                                 as="button"
-                                class="text-foreground underline decoration-neutral-300 underline-offset-4 transition-colors duration-300 ease-out hover:decoration-current! dark:decoration-neutral-500"
+                                class="text-foreground underline decoration-neutral-300 underline-offset-4 transition-colors duration-300 ease-out hover:decoration-current!"
                             >
                                 Click here to resend the verification email.
                             </Link>

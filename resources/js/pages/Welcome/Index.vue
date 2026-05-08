@@ -3,7 +3,6 @@ import { Head, Link, usePage } from '@inertiajs/vue3';
 import { computed } from 'vue';
 
 import { Button } from '@/components/ui/button';
-import WelcomeNavLink from '@/components/WelcomeNavLink.vue';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { dashboard, home, login } from '@/routes';
 
@@ -11,6 +10,7 @@ import WelcomeAbout from './Partials/WelcomeAbout.vue';
 import WelcomeGetStarted from './Partials/WelcomeGetStarted.vue';
 import WelcomeHero from './Partials/WelcomeHero.vue';
 import WelcomeManual from './Partials/WelcomeManual.vue';
+import WelcomeNavLink from './Partials/WelcomeNavLink.vue';
 
 const page = usePage();
 const auth = computed(() => page.props.auth);

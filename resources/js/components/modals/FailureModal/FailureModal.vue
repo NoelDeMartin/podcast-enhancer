@@ -42,7 +42,7 @@ withDefaults(
             >
                 <div class="max-h-[50vh] min-w-0 overflow-auto">
                     <pre
-                        class="text-neo-dark/90 w-fit min-w-full p-4 font-mono text-xs leading-relaxed whitespace-pre dark:text-white/90"
+                        class="text-neo-dark/90 w-fit min-w-full p-4 font-mono text-xs leading-relaxed whitespace-pre"
                         >{{ details ?? 'No error details available.' }}</pre
                     >
                 </div>

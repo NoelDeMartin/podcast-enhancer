@@ -115,10 +115,7 @@ const formatLastSynced = (date: string) => {
                         alt=""
                         class="size-full object-cover transition-transform duration-300 group-hover:scale-105"
                     />
-                    <div
-                        v-else
-                        class="flex size-full items-center justify-center bg-gray-100 dark:bg-zinc-800"
-                    >
+                    <div v-else class="flex size-full items-center justify-center bg-gray-100">
                         <Rss class="size-12 text-gray-400" />
                     </div>
                     <div

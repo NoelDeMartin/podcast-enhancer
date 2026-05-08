@@ -210,7 +210,7 @@ defineExpose({
                         <VolumeUp v-else class="size-5" />
                     </button>
 
-                    <div class="relative h-2 w-full bg-white/15">
+                    <div class="relative h-2 w-20 bg-white/15">
                         <div
                             class="bg-primary absolute inset-y-0 left-0"
                             :style="{ width: `${muted ? 0 : volumePercent}%` }"
