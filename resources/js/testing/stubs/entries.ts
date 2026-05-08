@@ -21,7 +21,7 @@ export const entries = [
         slug: 'pest-3-deep-dive',
         published_at: '2024-04-15T14:30:00Z',
         duration: 1200,
-        absolute_audio_url: null,
+        absolute_audio_url: 'https://example.com/audio2.mp3',
         absolute_image_url: null,
         original_summary:
             '<p>Join us as we explore the powerful new features in <strong>Pest 3.0</strong>, including architecture testing, browser testing, and more. We dive into real-world examples and discuss how these features can transform your testing workflow.</p>',

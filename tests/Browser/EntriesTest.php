@@ -84,9 +84,11 @@ it('can view an entry page', function () {
 
     visit('/feeds/'.$feed->slug.'/entries/'.$entry->slug)
         ->waitForText('My Awesome Entry')
-        ->assertSee('AI Summary')
+        ->assertSee('Summary')
+        ->click('Summary')
         ->assertSee('This is a great summary.')
-        ->waitForText('Original Description')
+        ->waitForText('Show Notes')
+        ->click('Show Notes')
         ->assertSee('This is the original description.')
         ->assertSee('Tech News');
 });
@@ -106,8 +108,10 @@ it('can navigate to entry details from the feed page', function () {
     visit('/feeds/'.$feed->slug)
         ->waitForText('Detailed Entry')
         ->click('Detailed Entry')
-        ->waitForText('AI Summary')
+        ->waitForText('Summary')
+        ->click('Summary')
         ->assertSee('AI generated summary.')
-        ->waitForText('Original Description')
+        ->waitForText('Show Notes')
+        ->click('Show Notes')
         ->assertSee('This is the original description.');
 });

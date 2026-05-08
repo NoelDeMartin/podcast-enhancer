@@ -27,6 +27,6 @@
 @endif
 
 @if(filled($originalSummary))
-<h2>Original Description</h2>
+<h2>Show Notes</h2>
 <p>{!! nl2br($originalSummary) !!}</p>
 @endif

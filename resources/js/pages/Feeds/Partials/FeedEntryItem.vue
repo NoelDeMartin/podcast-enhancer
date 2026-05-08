@@ -3,7 +3,7 @@ import { Link } from '@inertiajs/vue3';
 import { computed } from 'vue';
 import Calendar from '~icons/carbon/calendar';
 import Edit from '~icons/carbon/edit';
-import OverflowMenuHorizontal from '~icons/carbon/overflow-menu-horizontal';
+import OverflowMenuVertical from '~icons/carbon/overflow-menu-vertical';
 import Rss from '~icons/carbon/rss';
 import Time from '~icons/carbon/time';
 import TrashCan from '~icons/carbon/trash-can';
@@ -18,7 +18,8 @@ import {
     DropdownMenuItem,
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { formatDate, formatTimestamp, getBatchStatus } from '@/lib/entries';
+import { useEntryEnhancementActions } from '@/composables/useEntryEnhancementActions';
+import { formatDate, formatTimestamp } from '@/lib/entries';
 
 const props = defineProps<{
     feed: any;
@@ -71,37 +72,17 @@ const description = computed<string | null>(() => {
     return container.textContent?.replace(/\s+/g, ' ').trim() || null;
 });
 
-/**
- * Matches EntryEnhancementActions (type="dropdown-items"): menu rows only render when
- * audio exists, batch is not pending, and policy allows produce/regenerate as applicable.
- */
-const hasEnhancementDropdownItems = computed(() => {
-    const entry = props.entry;
+const enhancementActions = useEntryEnhancementActions(
+    () => props.feed,
+    () => props.entry,
+);
 
-    if (!(entry.can?.produce || entry.can?.regenerate)) {
-        return false;
-    }
-
-    const isPending = getBatchStatus(entry) === 'pending';
-    const hasTranscription = !!entry.transcription_path;
-
-    const primaryEnhancementItemVisible =
-        !!entry.audio_url &&
-        !isPending &&
-        (hasTranscription ? !!entry.can?.regenerate : !!entry.can?.produce);
-
-    const metadataOnlyItemVisible = hasTranscription && !isPending && !!entry.can?.regenerate;
-
-    return primaryEnhancementItemVisible || metadataOnlyItemVisible;
-});
-
-/** Same conditions as FeedGrid episode actions: manual feeds get edit/delete when allowed. */
 const hasManualFeedMenuItems = computed(
     () => !props.feed.rss_url && (props.can.update || props.can.delete),
 );
 
 const showEntryOverflowMenu = computed(
-    () => hasManualFeedMenuItems.value || hasEnhancementDropdownItems.value,
+    () => hasManualFeedMenuItems.value || enhancementActions.value.length > 0,
 );
 </script>
 
@@ -153,7 +134,7 @@ const showEntryOverflowMenu = computed(
                     <DropdownMenuTrigger as-child>
                         <Button variant="ghost" class="size-9">
                             <span class="sr-only">Open menu for {{ entry.name }}</span>
-                            <OverflowMenuHorizontal class="size-6" />
+                            <OverflowMenuVertical class="size-6" />
                         </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
@@ -168,10 +149,9 @@ const showEntryOverflowMenu = computed(
                         </template>
 
                         <EntryEnhancementActions
-                            v-if="hasEnhancementDropdownItems"
+                            v-if="enhancementActions.length > 0"
                             :feed="feed"
                             :entry="entry"
-                            type="dropdown-items"
                         />
 
                         <template v-if="!feed.rss_url && can.delete">

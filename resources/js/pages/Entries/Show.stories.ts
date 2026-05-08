@@ -8,25 +8,17 @@ import { setInertiaPage } from '../../../../.storybook/mocks/inertia';
 import Show from './Show.vue';
 
 type ShowArgs = {
-    feed: any;
-    entries: {
-        data: any[];
-        links: any[];
-    };
-    filters: {
-        search?: string;
-    };
+    entry: any;
     can: {
         update: boolean;
         delete: boolean;
-        sync: boolean;
         uploadFiles: boolean;
     };
     isGuest?: boolean;
 };
 
 const meta = {
-    title: 'Pages/Feed',
+    title: 'Pages/Entry',
     component: Show,
     parameters: {
         layout: 'fullscreen',
@@ -65,46 +57,33 @@ export default meta;
 
 type Story = StoryObj<typeof meta>;
 
-const commonLinks = [
-    { url: null, label: '&laquo; Previous', active: false },
-    { url: '/feeds/1?page=1', label: '1', active: true },
-    { url: null, label: 'Next &raquo;', active: false },
-];
-
-const entriesWithCan = entries.map((entry) => ({
-    ...entry,
-    audio_url: entry.absolute_audio_url,
+const baseEntry = {
+    ...entries[0],
+    feed: feeds[0],
+    audio_url: entries[0].absolute_audio_url,
     can: {
         produce: true,
         regenerate: true,
     },
-}));
+    chapters: [
+        { startTime: 0, title: 'Introduction' },
+        { startTime: 300, title: 'New Directory Structure' },
+        { startTime: 900, title: 'Conclusion' },
+    ],
+    transcription: JSON.stringify([
+        { start_seconds: 3, speaker: 'Host', text: 'Welcome back to the Laravel Podcast.' },
+        { start_seconds: 42, speaker: 'Guest', text: 'Today we’re talking about what’s new.' },
+    ]),
+    transcription_path: 'transcriptions/1.json',
+};
 
 export const Default: Story = {
     args: {
-        feed: feeds[0],
-        entries: {
-            data: entriesWithCan,
-            links: commonLinks,
-        },
-        filters: {
-            search: '',
-        },
+        entry: baseEntry,
         can: {
             update: true,
             delete: true,
-            sync: true,
             uploadFiles: true,
-        },
-    },
-};
-
-export const Empty: Story = {
-    args: {
-        ...Default.args,
-        entries: {
-            data: [],
-            links: [],
         },
     },
 };
@@ -113,20 +92,50 @@ export const Guest: Story = {
     args: {
         ...Default.args,
         isGuest: true,
+        entry: {
+            ...(Default.args as any).entry,
+            can: {
+                produce: false,
+                regenerate: false,
+            },
+        },
         can: {
             update: false,
             delete: false,
-            sync: false,
             uploadFiles: false,
         },
     },
 };
 
-export const Syncing: Story = {
+export const NoAudio: Story = {
     args: {
         ...Default.args,
-        feed: {
-            ...feeds[0],
+        entry: {
+            ...baseEntry,
+            absolute_audio_url: null,
+            audio_url: null,
+        },
+    },
+};
+
+export const NoEnhancements: Story = {
+    args: {
+        ...Default.args,
+        entry: {
+            ...baseEntry,
+            summary: null,
+            chapters: [],
+            transcription: null,
+            transcription_path: null,
+        },
+    },
+};
+
+export const Processing: Story = {
+    args: {
+        ...Default.args,
+        entry: {
+            ...baseEntry,
             latest_job_batch: {
                 job_batch: {
                     finished_at: null,
@@ -137,24 +146,23 @@ export const Syncing: Story = {
     },
 };
 
-export const SyncFailed: Story = {
+export const Failed: Story = {
     args: {
         ...Default.args,
-        feed: {
-            ...feeds[0],
+        entry: {
+            ...baseEntry,
             latest_job_batch: {
                 job_batch: {
                     finished_at: '2024-03-12T10:00:00Z',
                     cancelled_at: '2024-03-12T10:00:00Z',
+                    failed_job_details: [
+                        {
+                            exception:
+                                'RuntimeException: Something went wrong during transcription.',
+                        },
+                    ],
                 },
             },
         },
-    },
-};
-
-export const ManualFeed: Story = {
-    args: {
-        ...Default.args,
-        feed: feeds[2],
     },
 };

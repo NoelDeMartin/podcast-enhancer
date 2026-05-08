@@ -332,7 +332,7 @@ it('generates the correct rss description with AI summary and original descripti
         ->and($description)->toContain('<h2>Timestamps</h2>')
         ->and($description)->toContain('<li>00:00 - Intro</li>')
         ->and($description)->toContain('<li>00:30 - Main Topic</li>')
-        ->and($description)->toContain('<h2>Original Description</h2>')
+        ->and($description)->toContain('<h2>Show Notes</h2>')
         ->and($description)->toContain('<p>This is the original summary.</p>');
 });
 
@@ -347,7 +347,7 @@ it('generates the correct rss description when original summary is missing', fun
     $description = $entry->rss_description;
 
     expect($description)->toContain('<p>This is just an AI summary.</p>')
-        ->and($description)->not()->toContain('<h2>Original Description</h2>')
+        ->and($description)->not()->toContain('<h2>Show Notes</h2>')
         ->and($description)->not()->toContain('<h2>Timestamps</h2>');
 });
 
@@ -432,10 +432,10 @@ it('does not show original description section if it is empty or whitespace', fu
         'original_summary' => '   ',
     ]);
 
-    expect($entry->rss_description)->not->toContain('<h2>Original Description</h2>');
+    expect($entry->rss_description)->not->toContain('<h2>Show Notes</h2>');
 
     $entry->original_summary = '';
-    expect($entry->rss_description)->not->toContain('<h2>Original Description</h2>');
+    expect($entry->rss_description)->not->toContain('<h2>Show Notes</h2>');
 });
 
 it('generates a slug that does not exceed 255 characters even for very long names', function () {

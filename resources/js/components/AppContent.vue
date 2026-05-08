@@ -12,7 +12,7 @@ const className = computed(() => props.class);
 <template>
     <main
         :class="[
-            'mx-auto flex h-full w-full max-w-none flex-1 flex-col gap-0 rounded-none',
+            'mx-auto flex h-full w-full max-w-none flex-1 flex-col gap-0 rounded-none has-data-floating-player:pb-14',
             className,
         ]"
     >

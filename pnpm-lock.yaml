@@ -15,6 +15,9 @@ importers:
       '@inertiajs/vue3':
         specifier: ^2.3.7
         version: 2.3.21(vue@3.5.33(typescript@5.9.3))
+      '@noeldemartin/utils':
+        specifier: ^0.7.3
+        version: 0.7.3
       '@noeldemartin/vue-modals':
         specifier: next
         version: 0.1.1-next.db0e9bfc4e2573b82c47203d8e6bde5a182dfe83(vue@3.5.33(typescript@5.9.3))

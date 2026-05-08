@@ -28,7 +28,26 @@ export function formatTimestamp(seconds: number): string {
 
     return h > 0
         ? `${h}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`
-        : `${m}:${String(s).padStart(2, '0')}`;
+        : `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+}
+
+export function formatEntryTimestamp(seconds: number, totalDuration: number): string {
+    const totalSeconds = Math.max(0, Math.floor(seconds));
+    const useHours = totalDuration >= 3600;
+
+    if (useHours) {
+        const hours = Math.floor(totalSeconds / 3600);
+        const minutes = Math.floor((totalSeconds % 3600) / 60);
+        const secondsRemainder = totalSeconds % 60;
+
+        return [hours, minutes, secondsRemainder]
+            .map((unit) => String(unit).padStart(2, '0'))
+            .join(':');
+    }
+
+    return [Math.floor(totalSeconds / 60), totalSeconds % 60]
+        .map((unit) => String(unit).padStart(2, '0'))
+        .join(':');
 }
 
 export function formatSummary(summary: string | null | undefined): string {

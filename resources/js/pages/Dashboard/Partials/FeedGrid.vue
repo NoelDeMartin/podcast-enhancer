@@ -176,14 +176,21 @@ const formatLastSynced = (date: string) => {
             </CardHeader>
 
             <CardContent class="flex items-center justify-between px-4 pb-2">
+                <div
+                    class="text-muted-foreground text-right text-xs font-bold tracking-wider uppercase"
+                >
+                    <span class="text-foreground/70 font-bold">{{ feed.entries_count }}</span>
+                    episodes
+                </div>
+
                 <DropdownMenu>
                     <DropdownMenuTrigger as-child>
-                        <Button variant="ghost" class="-ml-3 size-8 shrink-0 p-0">
+                        <Button variant="ghost" class="-mr-3 size-8 shrink-0 p-0">
                             <span class="sr-only">Open menu for {{ feed.title }}</span>
                             <MoreVertical class="size-6" />
                         </Button>
                     </DropdownMenuTrigger>
-                    <DropdownMenuContent align="start">
+                    <DropdownMenuContent align="end">
                         <DropdownMenuItem
                             v-if="feed.rss_url && feed.can?.sync"
                             class="gap-1.5"
@@ -212,13 +219,6 @@ const formatLastSynced = (date: string) => {
                         </DropdownMenuItem>
                     </DropdownMenuContent>
                 </DropdownMenu>
-
-                <div
-                    class="text-muted-foreground text-right text-xs font-bold tracking-wider uppercase"
-                >
-                    <span class="text-foreground/70 font-bold">{{ feed.entries_count }}</span>
-                    episodes
-                </div>
             </CardContent>
         </Card>
 

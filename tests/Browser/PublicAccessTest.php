@@ -30,6 +30,7 @@ it('allows guests to view an entry page', function () {
 
     visit('/feeds/'.$feed->slug.'/entries/'.$entry->slug)
         ->waitForText('Public Entry')
+        ->click('Summary')
         ->assertSee('Public Summary')
         ->assertNoJavaScriptErrors();
 });
