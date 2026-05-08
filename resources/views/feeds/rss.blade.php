@@ -8,7 +8,7 @@
         <language>en-us</language>
         <pubDate>{{ $feed->created_at->toRfc2822String() }}</pubDate>
         <lastBuildDate>{{ now()->toRfc2822String() }}</lastBuildDate>
-        <itunes:author>Podcasts Enhancer</itunes:author>
+        <itunes:author>Podcast Enhancer</itunes:author>
         <itunes:summary>{{ $feed->description ?? 'A podcast feed for ' . $feed->title . '. Subscribe in your podcast player to get the latest episodes.' }}</itunes:summary>
         <itunes:type>episodic</itunes:type>
         @if($feed->image_url)

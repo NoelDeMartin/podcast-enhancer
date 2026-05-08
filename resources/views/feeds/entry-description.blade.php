@@ -11,10 +11,10 @@
 @endif
 
 @if($isEnhanced)
-<p>🧙 Enhanced by <a href="{{ $appUrl }}">Podcasts Enhancer</a></p>
+<p>🧙 Enhanced by <a href="{{ $appUrl }}">Podcast Enhancer</a></p>
 <p>👉 <a href="{{ $showNotesUrl }}">Read episode transcription</a></p>
 @else
-<p>👉 <a href="{{ $showNotesUrl }}">Enhance with Podcasts Enhancer</a></p>
+<p>👉 <a href="{{ $showNotesUrl }}">Enhance with Podcast Enhancer</a></p>
 @endif
 
 @if($entry->chapters)

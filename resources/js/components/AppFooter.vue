@@ -24,7 +24,7 @@ const currentYear = new Date().getFullYear();
 
             <div class="flex items-center gap-8">
                 <a
-                    href="https://github.com/noeldemartin/podcasts-enhancer"
+                    href="https://github.com/noeldemartin/podcast-enhancer"
                     target="_blank"
                     rel="noreferrer"
                     class="group hover:text-primary flex items-center gap-2 text-sm font-black tracking-widest uppercase transition-colors"

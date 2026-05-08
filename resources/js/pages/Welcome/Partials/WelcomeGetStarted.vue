@@ -126,7 +126,7 @@ import { Button } from '@/components/ui/button';
                             class="h-14 w-full border-3 px-4 text-lg sm:px-8"
                         >
                             <a
-                                href="https://github.com/noeldemartin/podcasts-enhancer"
+                                href="https://github.com/noeldemartin/podcast-enhancer"
                                 target="_blank"
                                 rel="noreferrer"
                             >

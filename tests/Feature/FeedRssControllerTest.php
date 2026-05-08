@@ -27,7 +27,7 @@ it('generates an rss feed for a feed', function () {
         ->assertSee('<title>Episode 1</title>', false)
         ->assertSee('<description><![CDATA[<p>This is the first episode summary.</p>', false)
         ->assertSee('Read episode transcription</a>', false)
-        ->assertSee('Enhanced by <a href="'.url('/').'">Podcasts Enhancer</a>', false)
+        ->assertSee('Enhanced by <a href="'.url('/').'">Podcast Enhancer</a>', false)
         ->assertSee('<pubDate>'.$entry->published_at->toRfc2822String().'</pubDate>', false)
         ->assertSee('<itunes:duration>3723</itunes:duration>', false)
         ->assertSee(asset(Storage::disk('public')->url($entry->audio_url)), false)

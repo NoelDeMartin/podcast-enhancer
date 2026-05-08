@@ -328,7 +328,7 @@ it('generates the correct rss description with AI summary and original descripti
 
     expect($description)->toContain('<p>This is the AI summary.</p>')
         ->and($description)->toContain("<a href=\"{$showNotesUrl}\">Read episode transcription</a>")
-        ->and($description)->toContain("Enhanced by <a href=\"{$appUrl}\">Podcasts Enhancer</a>")
+        ->and($description)->toContain("Enhanced by <a href=\"{$appUrl}\">Podcast Enhancer</a>")
         ->and($description)->toContain('<h2>Timestamps</h2>')
         ->and($description)->toContain('<li>00:00 - Intro</li>')
         ->and($description)->toContain('<li>00:30 - Main Topic</li>')
@@ -364,9 +364,9 @@ it('does not include enhancement links or enhanced by text when an entry is not 
     $appUrl = url('/');
     $showNotesUrl = route('entries.show', [$feed, $entry]);
 
-    expect($description)->not->toContain("Enhanced by <a href=\"{$appUrl}\">Podcasts Enhancer</a>")
+    expect($description)->not->toContain("Enhanced by <a href=\"{$appUrl}\">Podcast Enhancer</a>")
         ->and($description)->not->toContain("<a href=\"{$showNotesUrl}\">Read episode transcription</a>")
-        ->and($description)->toContain("<a href=\"{$showNotesUrl}\">Enhance with Podcasts Enhancer</a>");
+        ->and($description)->toContain("<a href=\"{$showNotesUrl}\">Enhance with Podcast Enhancer</a>");
 });
 
 it('preserves HTML in original summary and summary for rss_description', function () {
