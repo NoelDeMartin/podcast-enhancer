@@ -46,7 +46,7 @@ jobs:
         run: php artisan key:generate
 
       - name: Build Assets
-        run: vp build
+        run: vp run build:ssr
 
       - name: Tests
         run: ./vendor/bin/pest

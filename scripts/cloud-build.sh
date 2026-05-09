@@ -28,4 +28,4 @@ composer install --no-dev --no-interaction --prefer-dist --optimize-autoloader
 
 echo "Building assets..."
 php artisan wayfinder:generate --with-form
-./.vite-plus/bin/vp run build
+./.vite-plus/bin/vp run build:ssr
