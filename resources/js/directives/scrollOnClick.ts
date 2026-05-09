@@ -19,7 +19,12 @@ function prefersReducedMotion() {
     return window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches ?? false;
 }
 
-export const vScrollOnClick: Directive<HTMLElement, string | ScrollOnClickOptions | undefined> = {
+export const vScrollOnClick: Directive<HTMLElement, string | ScrollOnClickOptions | undefined> & {
+    getSSRProps?: () => any;
+} = {
+    getSSRProps() {
+        return {};
+    },
     mounted(el, binding) {
         const onClick = (e: MouseEvent) => {
             const target = getTargetFromEl(el, binding.value);

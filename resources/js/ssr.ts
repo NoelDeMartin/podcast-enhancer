@@ -5,6 +5,9 @@ import type { DefineComponent } from 'vue';
 import { createSSRApp, h } from 'vue';
 import { renderToString } from 'vue/server-renderer';
 
+import { ModalsPortal } from '@/components/ui/modal';
+import { vScrollOnClick } from '@/directives/scrollOnClick';
+
 const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
 
 createServer(
@@ -19,7 +22,9 @@ createServer(
                     import.meta.glob<DefineComponent>('./pages/**/*.vue'),
                 ),
             setup: ({ App, props, plugin }) =>
-                createSSRApp({ render: () => h(App, props) }).use(plugin),
+                createSSRApp({ render: () => h('div', [h(App, props), h(ModalsPortal)]) })
+                    .use(plugin)
+                    .directive('scroll-on-click', vScrollOnClick),
         }),
     { cluster: true },
 );
