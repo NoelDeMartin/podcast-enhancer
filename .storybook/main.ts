@@ -13,6 +13,7 @@ const config: StorybookConfig = {
     features: { sidebarOnboardingChecklist: false },
     viteFinal: async (config) =>
         mergeConfig(config, {
+            base: process.env.NODE_ENV === 'production' ? '/podcast-enhancer/' : '/',
             resolve: {
                 alias: {
                     '@inertiajs/vue3': fileURLToPath(
