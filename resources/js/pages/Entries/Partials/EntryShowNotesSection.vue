@@ -1,6 +1,4 @@
 <script setup lang="ts">
-import ChevronRight from '~icons/carbon/chevron-right';
-
 import { formatSummary } from '@/lib/entries';
 
 defineProps<{
@@ -16,7 +14,7 @@ defineProps<{
             <summary
                 class="flex cursor-pointer list-none items-center justify-between gap-3 [&::-webkit-details-marker]:hidden"
             >
-                <ChevronRight
+                <i-carbon-chevron-right
                     aria-hidden="true"
                     class="text-neo-dark/70 size-4 shrink-0 transition-transform group-open:rotate-90"
                 />

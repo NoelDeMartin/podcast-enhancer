@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import type { HTMLAttributes } from "vue"
-import Renew from "~icons/carbon/renew"
 import { cn } from "@/lib/utils"
 
 const props = defineProps<{
@@ -9,7 +8,7 @@ const props = defineProps<{
 </script>
 
 <template>
-  <Renew
+  <i-carbon-renew
     role="status"
     aria-label="Loading"
     :class="cn('size-4 animate-spin', props.class)"

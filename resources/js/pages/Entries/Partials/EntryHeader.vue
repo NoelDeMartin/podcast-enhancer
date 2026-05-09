@@ -1,9 +1,5 @@
 <script setup lang="ts">
 import { Link } from '@inertiajs/vue3';
-import AiGenerate from '~icons/carbon/ai-generate';
-import Calendar from '~icons/carbon/calendar';
-import OverflowMenuVertical from '~icons/carbon/overflow-menu-vertical';
-import Time from '~icons/carbon/time';
 
 import { show as showFeedAction } from '@/actions/App/Http/Controllers/FeedController';
 import EntryEnhancementActions from '@/components/EntryEnhancementActions.vue';
@@ -62,7 +58,7 @@ const enhancementActions = useEntryEnhancementActions(
                     class="font-bold uppercase"
                     @click="enhancementActions[0].run"
                 >
-                    <AiGenerate class="mr-2 size-4" />
+                    <i-carbon-ai-generate class="mr-2 size-4" />
                     {{ enhancementActions[0].label }}
                 </Button>
                 <DropdownMenu v-else-if="enhancementActions.length > 1">
@@ -71,7 +67,7 @@ const enhancementActions = useEntryEnhancementActions(
                             <span class="sr-only">
                                 Open enhancement menu for {{ entry.name }}
                             </span>
-                            <OverflowMenuVertical class="size-6" />
+                            <i-carbon-overflow-menu-vertical class="size-6" />
                         </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
@@ -84,13 +80,13 @@ const enhancementActions = useEntryEnhancementActions(
                 class="text-neo-dark/70 xs:flex-row xs:items-center xs:gap-x-4 xs:gap-y-1 flex flex-col flex-wrap items-start gap-x-0 gap-y-2 text-sm font-bold [grid-area:meta]"
             >
                 <span class="inline-flex shrink-0 items-center gap-1.5">
-                    <Calendar class="size-4 shrink-0" />
+                    <i-carbon-calendar class="size-4 shrink-0" />
                     {{ formatDate(entry.published_at) }}
                 </span>
                 <template v-if="entry.duration">
                     <span class="text-neo-dark/30 shrink-0 max-sm:hidden">•</span>
                     <span class="inline-flex shrink-0 items-center gap-1.5">
-                        <Time class="size-4 shrink-0" />
+                        <i-carbon-time class="size-4 shrink-0" />
                         {{ formatTimestamp(entry.duration) }}
                     </span>
                 </template>

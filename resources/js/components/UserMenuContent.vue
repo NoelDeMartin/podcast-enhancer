@@ -1,7 +1,5 @@
 <script setup lang="ts">
 import { Link, router } from '@inertiajs/vue3';
-import Logout from '~icons/carbon/logout';
-import Settings from '~icons/carbon/settings';
 
 import {
     DropdownMenuGroup,
@@ -27,7 +25,7 @@ defineProps<Props>();
 
 <template>
     <DropdownMenuLabel class="p-0 font-normal">
-        <div class="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
+        <div class="flex items-center gap-2 border-b-2 text-left text-sm">
             <UserInfo :user="user" :show-email="true" />
         </div>
     </DropdownMenuLabel>
@@ -35,7 +33,7 @@ defineProps<Props>();
     <DropdownMenuGroup>
         <DropdownMenuItem :as-child="true">
             <Link class="block w-full cursor-pointer" :href="edit()" prefetch>
-                <Settings class="mr-2 size-4" />
+                <i-carbon-settings class="mr-2 size-4" />
                 Settings
             </Link>
         </DropdownMenuItem>
@@ -48,7 +46,7 @@ defineProps<Props>();
             @click="handleLogout"
             as="button"
         >
-            <Logout class="mr-2 size-4" />
+            <i-carbon-logout class="mr-2 size-4" />
             Log out
         </Link>
     </DropdownMenuItem>

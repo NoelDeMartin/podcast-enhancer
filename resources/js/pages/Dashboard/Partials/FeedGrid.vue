@@ -1,11 +1,6 @@
 <script setup lang="ts">
 import { Link, useForm, usePoll } from '@inertiajs/vue3';
 import { computed, ref, watch } from 'vue';
-import Edit from '~icons/carbon/edit';
-import MoreVertical from '~icons/carbon/overflow-menu-vertical';
-import Renew from '~icons/carbon/renew';
-import Rss from '~icons/carbon/rss';
-import TrashCan from '~icons/carbon/trash-can';
 
 import { show } from '@/actions/App/Http/Controllers/FeedController';
 import { sync as syncFeedAction } from '@/actions/App/Http/Controllers/FeedSyncController';
@@ -116,7 +111,7 @@ const formatLastSynced = (date: string) => {
                         class="size-full object-cover transition-transform duration-300 group-hover:scale-105"
                     />
                     <div v-else class="flex size-full items-center justify-center bg-gray-100">
-                        <Rss class="size-12 text-gray-400" />
+                        <i-carbon-rss class="size-12 text-gray-400" />
                     </div>
                     <div
                         class="absolute inset-0 bg-black/40 opacity-0 transition-opacity duration-300 group-hover:opacity-100"
@@ -127,7 +122,7 @@ const formatLastSynced = (date: string) => {
                     <TooltipProvider>
                         <Tooltip :delay-duration="0">
                             <TooltipTrigger as-child>
-                                <Renew
+                                <i-carbon-renew
                                     v-if="isFeedSyncing(feed)"
                                     class="size-5 animate-spin text-white drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]"
                                 />
@@ -184,7 +179,7 @@ const formatLastSynced = (date: string) => {
                     <DropdownMenuTrigger as-child>
                         <Button variant="ghost" class="-mr-3 size-8 shrink-0 p-0">
                             <span class="sr-only">Open menu for {{ feed.title }}</span>
-                            <MoreVertical class="size-6" />
+                            <i-carbon-overflow-menu-vertical class="size-6" />
                         </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
@@ -194,8 +189,11 @@ const formatLastSynced = (date: string) => {
                             :disabled="isFeedSyncing(feed)"
                             @click="syncFeed(feed)"
                         >
-                            <Renew v-if="isFeedSyncing(feed)" class="size-4 animate-spin" />
-                            <Renew v-else class="size-4" />
+                            <i-carbon-renew
+                                v-if="isFeedSyncing(feed)"
+                                class="size-4 animate-spin"
+                            />
+                            <i-carbon-renew v-else class="size-4" />
                             {{ isFeedSyncing(feed) ? 'Synchronizing...' : 'Synchronize' }}
                         </DropdownMenuItem>
 
@@ -204,14 +202,14 @@ const formatLastSynced = (date: string) => {
                             class="gap-1.5"
                             @click="emit('edit', feed)"
                         >
-                            <Edit class="size-4" />
+                            <i-carbon-edit class="size-4" />
                             Edit
                         </DropdownMenuItem>
                         <DropdownMenuItem
                             class="gap-1.5 text-red-600"
                             @click="emit('delete', feed)"
                         >
-                            <TrashCan class="size-4" />
+                            <i-carbon-trash-can class="size-4" />
                             Delete
                         </DropdownMenuItem>
                     </DropdownMenuContent>

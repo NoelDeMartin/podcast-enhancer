@@ -3,7 +3,6 @@ import { Head, router } from '@inertiajs/vue3';
 import { showModal } from '@noeldemartin/vue-modals';
 import { watchDebounced } from '@vueuse/core';
 import { ref } from 'vue';
-import Add from '~icons/carbon/add';
 
 import SearchInput from '@/components/SearchInput.vue';
 import { Button } from '@/components/ui/button';
@@ -65,7 +64,7 @@ const deleteFeed = (feed: any) => showModal(DeleteFeedModal, { feed });
                 </div>
                 <div class="flex w-full items-center sm:w-auto">
                     <Button @click="createFeed" class="w-full sm:w-auto">
-                        <Add class="mr-2 size-4" />
+                        <i-carbon-add class="mr-2 size-4" />
                         New Podcast
                     </Button>
                 </div>

@@ -1,6 +1,4 @@
-<script setup lang="ts">
-import Launch from '~icons/carbon/launch';
-</script>
+<script setup lang="ts"></script>
 
 <template>
     <section id="who-made-this" class="py-16 sm:py-24">
@@ -37,7 +35,7 @@ import Launch from '~icons/carbon/launch';
                                 class="group text-neo-blue relative isolate inline-flex items-center gap-1 no-underline focus-visible:outline-none"
                             >
                                 <span class="relative z-10">my personal website</span>
-                                <Launch class="relative z-10 size-5" />
+                                <i-carbon-launch class="relative z-10 size-5" />
                                 <div
                                     aria-hidden="true"
                                     class="bg-neo-blue pointer-events-none absolute inset-0 z-20 [clip-path:inset(calc(100%-3px)_0_0_0)] [transition:clip-path_200ms_ease-out] group-hover:[clip-path:inset(0_0_0_0)] group-focus-visible:[clip-path:inset(0_0_0_0)]"
@@ -46,7 +44,7 @@ import Launch from '~icons/carbon/launch';
                                         <span class="whitespace-nowrap text-white"
                                             >my personal website</span
                                         >
-                                        <Launch class="size-5 shrink-0 text-white" />
+                                        <i-carbon-launch class="size-5 shrink-0 text-white" />
                                     </div>
                                 </div> </a
                             >!

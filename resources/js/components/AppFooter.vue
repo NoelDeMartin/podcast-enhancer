@@ -1,7 +1,4 @@
 <script setup lang="ts">
-import Email from '~icons/carbon/email';
-import LogoGithub from '~icons/carbon/logo-github';
-
 import TextLink from '@/components/TextLink.vue';
 
 const currentYear = new Date().getFullYear();
@@ -29,14 +26,14 @@ const currentYear = new Date().getFullYear();
                     rel="noreferrer"
                     class="group hover:text-primary flex items-center gap-2 text-sm font-black tracking-widest uppercase transition-colors"
                 >
-                    <LogoGithub class="size-5" />
+                    <i-carbon-logo-github class="size-5" />
                     GitHub
                 </a>
                 <a
                     href="mailto:hey@noeldemartin.com?subject=Podcast+Enhancer"
                     class="group hover:text-primary flex items-center gap-2 text-sm font-black tracking-widest uppercase transition-colors"
                 >
-                    <Email class="size-5" />
+                    <i-carbon-email class="size-5" />
                     Contact
                 </a>
             </div>

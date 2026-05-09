@@ -1,8 +1,6 @@
 <script setup lang="ts">
 import { ref, useTemplateRef } from 'vue';
 import type { HTMLAttributes } from 'vue';
-import View from '~icons/carbon/view';
-import ViewOff from '~icons/carbon/view-off';
 
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
@@ -41,8 +39,8 @@ defineExpose({
             :aria-label="showPassword ? 'Hide password' : 'Show password'"
             :tabindex="-1"
         >
-            <ViewOff v-if="showPassword" class="size-4" />
-            <View v-else class="size-4" />
+            <i-carbon-view-off v-if="showPassword" class="size-4" />
+            <i-carbon-view v-else class="size-4" />
         </button>
     </div>
 </template>

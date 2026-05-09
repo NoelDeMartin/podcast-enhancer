@@ -1,12 +1,6 @@
 <script setup lang="ts">
 import { Link } from '@inertiajs/vue3';
 import { computed } from 'vue';
-import Calendar from '~icons/carbon/calendar';
-import Edit from '~icons/carbon/edit';
-import OverflowMenuVertical from '~icons/carbon/overflow-menu-vertical';
-import Rss from '~icons/carbon/rss';
-import Time from '~icons/carbon/time';
-import TrashCan from '~icons/carbon/trash-can';
 
 import { show as showEntryAction } from '@/actions/App/Http/Controllers/EntryController';
 import EntryEnhancementActions from '@/components/EntryEnhancementActions.vue';
@@ -114,7 +108,7 @@ const showEntryOverflowMenu = computed(
                         'border-neo-dark bg-neo-yellow flex size-20 items-center justify-center border-3 transition-transform duration-300 group-hover:rotate-0 sm:size-24',
                     ]"
                 >
-                    <Rss class="text-neo-dark size-10" />
+                    <i-carbon-rss class="text-neo-dark size-10" />
                 </div>
             </Link>
 
@@ -134,7 +128,7 @@ const showEntryOverflowMenu = computed(
                     <DropdownMenuTrigger as-child>
                         <Button variant="ghost" class="size-9">
                             <span class="sr-only">Open menu for {{ entry.name }}</span>
-                            <OverflowMenuVertical class="size-6" />
+                            <i-carbon-overflow-menu-vertical class="size-6" />
                         </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
@@ -143,7 +137,7 @@ const showEntryOverflowMenu = computed(
                                 class="gap-1.5 font-bold uppercase"
                                 @click="emit('edit', entry)"
                             >
-                                <Edit class="size-4" />
+                                <i-carbon-edit class="size-4" />
                                 Edit
                             </DropdownMenuItem>
                         </template>
@@ -159,7 +153,7 @@ const showEntryOverflowMenu = computed(
                                 class="gap-1.5 font-bold text-red-600 uppercase"
                                 @click="emit('delete', entry.slug)"
                             >
-                                <TrashCan class="size-4" />
+                                <i-carbon-trash-can class="size-4" />
                                 Delete
                             </DropdownMenuItem>
                         </template>
@@ -171,13 +165,13 @@ const showEntryOverflowMenu = computed(
                 class="text-neo-dark/70 xs:flex-row xs:items-center xs:gap-x-4 xs:gap-y-1 flex flex-col flex-wrap items-start gap-x-0 gap-y-2 text-sm font-bold [grid-area:meta]"
             >
                 <span class="inline-flex shrink-0 items-center gap-1.5">
-                    <Calendar class="size-4 shrink-0" />
+                    <i-carbon-calendar class="size-4 shrink-0" />
                     {{ formatDate(entry.published_at) }}
                 </span>
                 <template v-if="entry.duration">
                     <span class="text-neo-dark/30 shrink-0 max-sm:hidden">•</span>
                     <span class="inline-flex shrink-0 items-center gap-1.5">
-                        <Time class="size-4 shrink-0" />
+                        <i-carbon-time class="size-4 shrink-0" />
                         {{ formatTimestamp(entry.duration) }}
                     </span>
                 </template>

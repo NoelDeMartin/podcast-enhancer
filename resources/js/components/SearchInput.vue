@@ -1,6 +1,4 @@
 <script setup lang="ts">
-import Search from '~icons/carbon/search';
-
 import { Input } from '@/components/ui/input';
 
 defineProps<{
@@ -12,7 +10,7 @@ const modelValue = defineModel<string>();
 
 <template>
     <div class="relative w-full">
-        <Search class="text-muted-foreground absolute top-2.5 left-2.5 size-4" />
+        <i-carbon-search class="text-muted-foreground absolute top-2.5 left-2.5 size-4" />
         <Input
             v-model="modelValue"
             type="search"

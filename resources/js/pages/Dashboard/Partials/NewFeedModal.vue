@@ -2,7 +2,6 @@
 import { useForm } from '@inertiajs/vue3';
 import { ref } from 'vue';
 import Add from '~icons/carbon/add';
-import Renew from '~icons/carbon/renew';
 import Rss from '~icons/carbon/rss';
 
 import { store } from '@/actions/App/Http/Controllers/FeedController';
@@ -132,7 +131,7 @@ const visibleTabs = tabs.filter((tab) => !('hidden' in tab && tab.hidden));
                     Cancel
                 </Button>
                 <Button type="submit" :disabled="rssForm.processing">
-                    <Renew v-if="rssForm.processing" class="mr-2 size-4 animate-spin" />
+                    <i-carbon-renew v-if="rssForm.processing" class="mr-2 size-4 animate-spin" />
                     Import Podcast
                 </Button>
             </DialogFooter>

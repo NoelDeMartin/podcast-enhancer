@@ -1,6 +1,4 @@
 <script setup lang="ts">
-import AiGenerate from '~icons/carbon/ai-generate';
-
 import { DropdownMenuItem } from '@/components/ui/dropdown-menu';
 import { useEntryEnhancementActions } from '@/composables/useEntryEnhancementActions';
 
@@ -22,7 +20,7 @@ const actions = useEntryEnhancementActions(
         class="gap-1.5 font-bold uppercase"
         @click="action.run"
     >
-        <AiGenerate class="size-4" />
+        <i-carbon-ai-generate class="size-4" />
         {{ action.label }}
     </DropdownMenuItem>
 </template>

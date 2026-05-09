@@ -1,8 +1,4 @@
 <script setup lang="ts">
-import AiGenerate from '~icons/carbon/ai-generate';
-import ChevronRight from '~icons/carbon/chevron-right';
-import Time from '~icons/carbon/time';
-
 import { Button } from '@/components/ui/button';
 import { formatEntryTimestamp } from '@/lib/entries';
 
@@ -27,7 +23,7 @@ const timestamp = (seconds: number) =>
                 class="flex cursor-pointer list-none items-center justify-between gap-3 [&::-webkit-details-marker]:hidden"
             >
                 <span class="inline-flex min-w-0 flex-1 items-center gap-2">
-                    <ChevronRight
+                    <i-carbon-chevron-right
                         aria-hidden="true"
                         class="text-neo-dark/70 size-4 shrink-0 transition-transform group-open:rotate-90"
                     />
@@ -37,7 +33,7 @@ const timestamp = (seconds: number) =>
                     class="text-neo-dark/80 inline-flex shrink-0 items-center"
                     title="This content has been generated with AI"
                 >
-                    <AiGenerate aria-hidden="true" class="size-4" />
+                    <i-carbon-ai-generate aria-hidden="true" class="size-4" />
                     <span class="sr-only"> This content has been generated with AI </span>
                 </span>
             </summary>
@@ -55,7 +51,7 @@ const timestamp = (seconds: number) =>
                         :aria-label="`Seek to ${timestamp(chapter.startTime)}`"
                         @click="emit('seek', chapter.startTime)"
                     >
-                        <Time class="mr-1 size-3" />
+                        <i-carbon-time class="mr-1 size-3" />
                         {{ timestamp(chapter.startTime) }}
                     </Button>
                     <span class="text-sm">{{ chapter.title }}</span>

@@ -2,7 +2,6 @@
 import type { DropdownMenuRadioItemEmits, DropdownMenuRadioItemProps } from "reka-ui"
 import type { HTMLAttributes } from "vue"
 import { reactiveOmit } from "@vueuse/core"
-import RadioButton from "~icons/carbon/radio-button"
 import {
   DropdownMenuItemIndicator,
   DropdownMenuRadioItem,
@@ -31,7 +30,7 @@ const forwarded = useForwardPropsEmits(delegatedProps, emits)
     <span class="pointer-events-none absolute left-2 flex size-3.5 items-center justify-center">
       <DropdownMenuItemIndicator>
         <slot name="indicator-icon">
-          <RadioButton class="size-2 fill-current" />
+          <i-carbon-radio-button class="size-2 fill-current" />
         </slot>
       </DropdownMenuItemIndicator>
     </span>

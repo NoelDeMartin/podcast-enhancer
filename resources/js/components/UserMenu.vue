@@ -11,9 +11,15 @@ import {
 } from '@/components/ui/dropdown-menu';
 import UserMenuContent from '@/components/UserMenuContent.vue';
 import { getInitials } from '@/composables/useInitials';
+import { cn } from '@/lib/utils';
+
+const props = defineProps<{
+    class?: string;
+}>();
 
 const page = usePage();
 const auth = computed(() => page.props.auth);
+const className = computed(() => props.class);
 </script>
 
 <template>
@@ -25,7 +31,12 @@ const auth = computed(() => page.props.auth);
                 class="group relative size-10 rounded-none p-0 hover:bg-transparent"
             >
                 <Avatar
-                    class="bg-neo-dark group-hover:shadow-neo-hard size-full transition-all duration-300 group-active:translate-x-[2px] group-active:translate-y-[2px] group-active:shadow-none"
+                    :class="
+                        cn(
+                            'bg-neo-dark group-hover:shadow-neo-hard size-full transition-all duration-300 group-active:translate-x-[2px] group-active:translate-y-[2px] group-active:shadow-none',
+                            className,
+                        )
+                    "
                 >
                     <AvatarImage v-if="auth.user.avatar" :src="auth.user.avatar" alt="" />
 

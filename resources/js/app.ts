@@ -4,6 +4,7 @@ import type { DefineComponent } from 'vue';
 import { createApp, h } from 'vue';
 
 import '../css/app.css';
+import { ModalsPortal } from '@/components/ui/modal';
 import { vScrollOnClick } from '@/directives/scrollOnClick';
 
 const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
@@ -16,7 +17,9 @@ void createInertiaApp({
             import.meta.glob<DefineComponent>('./pages/**/*.vue'),
         ),
     setup({ el, App, props, plugin }) {
-        createApp({ render: () => h(App, props) })
+        createApp({
+            render: () => h('div', [h(App, props), h(ModalsPortal)]),
+        })
             .use(plugin)
             .directive('scroll-on-click', vScrollOnClick)
             .mount(el);

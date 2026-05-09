@@ -2,7 +2,6 @@
 import type { CheckboxRootEmits, CheckboxRootProps } from "reka-ui"
 import type { HTMLAttributes } from "vue"
 import { reactiveOmit } from "@vueuse/core"
-import Checkmark from "~icons/material-symbols/check-rounded"
 import { CheckboxIndicator, CheckboxRoot, useForwardPropsEmits } from "reka-ui"
 import { cn } from "@/lib/utils"
 
@@ -28,7 +27,7 @@ const forwarded = useForwardPropsEmits(delegatedProps, emits)
       class="grid place-content-center text-current transition-none"
     >
       <slot v-bind="slotProps">
-        <Checkmark class="size-4 text-current" />
+        <i-material-symbols-check-rounded class="size-4 text-current" />
       </slot>
     </CheckboxIndicator>
   </CheckboxRoot>

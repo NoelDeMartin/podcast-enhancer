@@ -3,7 +3,6 @@ import { Link } from '@inertiajs/vue3';
 import { computed } from 'vue';
 
 import AppLogo from '@/components/AppLogo.vue';
-import { ModalsPortal } from '@/components/ui/modal';
 import { home } from '@/routes';
 
 const props = defineProps<{
@@ -56,7 +55,5 @@ const logoHref = computed(() => (props.logoUrl === null ? null : (props.logoUrl 
                 </div>
             </div>
         </main>
-
-        <ModalsPortal />
     </div>
 </template>

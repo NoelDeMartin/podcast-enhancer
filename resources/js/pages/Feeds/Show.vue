@@ -4,10 +4,6 @@ import { useForm } from '@inertiajs/vue3';
 import { showModal } from '@noeldemartin/vue-modals';
 import { watchDebounced } from '@vueuse/core';
 import { computed, ref, watch } from 'vue';
-import Add from '~icons/carbon/add';
-import Renew from '~icons/carbon/renew';
-import Rss from '~icons/carbon/rss';
-import WarningAlt from '~icons/carbon/warning-alt';
 
 import { destroy as destroyEntry } from '@/actions/App/Http/Controllers/EntryController';
 import { show as showFeed } from '@/actions/App/Http/Controllers/FeedController';
@@ -125,7 +121,7 @@ const syncFeed = () => {
                         class="text-orange-500 hover:text-orange-600"
                         title="RSS Podcast Feed"
                     >
-                        <Rss class="size-5" />
+                        <i-carbon-rss class="size-5" />
                     </a>
                 </div>
 
@@ -139,23 +135,23 @@ const syncFeed = () => {
                         :disabled="isSyncing || getBatchStatus(feed) === 'pending'"
                         class="w-full sm:w-auto"
                     >
-                        <Renew
+                        <i-carbon-renew
                             v-if="isSyncing || getBatchStatus(feed) === 'pending'"
                             class="mr-2 size-4 animate-spin"
                         />
-                        <Renew v-else class="mr-2 size-4" />
+                        <i-carbon-renew v-else class="mr-2 size-4" />
                         {{
                             getBatchStatus(feed) === 'pending' ? 'Synchronizing...' : 'Synchronize'
                         }}
                     </Button>
                     <template v-else-if="!feed.rss_url && can.update">
                         <Button @click="addEntry" class="w-full sm:w-auto">
-                            <Add class="mr-2 size-4" />
+                            <i-carbon-add class="mr-2 size-4" />
                             Add Episode
                         </Button>
 
                         <Button variant="outline" @click="importEpisodes" class="w-full sm:w-auto">
-                            <Rss class="mr-2 size-4" />
+                            <i-carbon-rss class="mr-2 size-4" />
                             Add from RSS
                         </Button>
                     </template>
@@ -163,7 +159,7 @@ const syncFeed = () => {
             </div>
 
             <Alert v-if="getBatchStatus(feed) === 'failed'" variant="destructive">
-                <WarningAlt />
+                <i-carbon-warning-alt />
                 <AlertTitle>Synchronization Failed</AlertTitle>
                 <AlertDescription>
                     <p>The most recent sync failed. View the error details to investigate.</p>

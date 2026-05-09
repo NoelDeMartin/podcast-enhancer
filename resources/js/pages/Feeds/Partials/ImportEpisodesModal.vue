@@ -2,7 +2,6 @@
 import { useForm } from '@inertiajs/vue3';
 import { ref } from 'vue';
 import { computed } from 'vue';
-import Renew from '~icons/carbon/renew';
 
 import {
     fetch as fetchRssAction,
@@ -121,7 +120,7 @@ const toggleEpisode = (index: number) => {
             </div>
             <DialogFooter>
                 <Button :disabled="isFetchingRss || !rssUrl" @click="fetchRss">
-                    <Renew v-if="isFetchingRss" class="mr-2 size-4 animate-spin" />
+                    <i-carbon-renew v-if="isFetchingRss" class="mr-2 size-4 animate-spin" />
                     Fetch Episodes
                 </Button>
             </DialogFooter>

@@ -4,7 +4,7 @@ This application is a personal podcast manager. Essentially, users will introduc
 
 ## Frontend
 
-- Prefer using icons from the carbon collection (instead of lucide).
+- Prefer using icons from the carbon collection for new code.
 
 ## Testing
 

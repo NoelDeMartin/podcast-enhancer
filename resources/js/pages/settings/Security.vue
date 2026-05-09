@@ -2,7 +2,6 @@
 import { Form, Head } from '@inertiajs/vue3';
 import { showModal } from '@noeldemartin/vue-modals';
 import { onUnmounted } from 'vue';
-import Security from '~icons/carbon/security';
 
 import SecurityController from '@/actions/App/Http/Controllers/Settings/SecurityController';
 import Heading from '@/components/Heading.vue';

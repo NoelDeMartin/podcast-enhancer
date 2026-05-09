@@ -2,7 +2,6 @@
 import AppContent from '@/components/AppContent.vue';
 import AppFooter from '@/components/AppFooter.vue';
 import AppHeader from '@/components/AppHeader.vue';
-import { ModalsPortal } from '@/components/ui/modal';
 
 type Props = {
     floatingHeader?: boolean;
@@ -27,7 +26,6 @@ defineProps<Props>();
                 <slot />
             </AppContent>
             <AppFooter />
-            <ModalsPortal />
         </div>
     </div>
 </template>

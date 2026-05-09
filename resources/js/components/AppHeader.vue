@@ -3,6 +3,7 @@ import { Link, usePage } from '@inertiajs/vue3';
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
 
 import AppLogo from '@/components/AppLogo.vue';
+import CreditsButton from '@/components/CreditsButton.vue';
 import { Button } from '@/components/ui/button';
 import UserMenu from '@/components/UserMenu.vue';
 import { dashboard, login } from '@/routes';
@@ -87,9 +88,10 @@ onBeforeUnmount(() => {
                 <slot />
             </div>
 
-            <div class="flex items-center">
+            <div class="flex items-center gap-2">
                 <slot name="right">
-                    <UserMenu v-if="auth.user" />
+                    <CreditsButton v-if="auth.user" />
+                    <UserMenu v-if="auth.user" class="border-3" />
                     <Button v-else as-child size="sm" variant="outline">
                         <Link :href="login()">Log In</Link>
                     </Button>

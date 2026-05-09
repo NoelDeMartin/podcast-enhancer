@@ -1,16 +1,6 @@
 <script setup lang="ts">
 import { useMediaControls } from '@vueuse/core';
 import { computed, onMounted, ref, useTemplateRef, watch } from 'vue';
-import Close from '~icons/carbon/close';
-import Download from '~icons/carbon/download';
-import PauseFilled from '~icons/carbon/pause-filled';
-import PlayFilledAlt from '~icons/carbon/play-filled-alt';
-import ResetAlt from '~icons/carbon/reset-alt';
-import SkipBack from '~icons/carbon/skip-back';
-import SkipForward from '~icons/carbon/skip-forward';
-import VolumeMute from '~icons/carbon/volume-mute';
-import VolumeUp from '~icons/carbon/volume-up';
-import Spinner from '~icons/svg-spinners/180-ring';
 
 import { formatEntryTimestamp } from '@/lib/entries';
 
@@ -144,7 +134,7 @@ defineExpose({
                     aria-label="Close floating player"
                     title="Close floating player"
                 >
-                    <Close class="size-6" />
+                    <i-carbon-close class="size-6" />
                 </button>
             </div>
 
@@ -155,9 +145,9 @@ defineExpose({
                     @click="playing = !playing"
                     :aria-label="playing ? 'Pause' : 'Play'"
                 >
-                    <Spinner v-if="waiting" class="size-7" />
-                    <PauseFilled v-else-if="playing" class="size-7" />
-                    <PlayFilledAlt v-else class="size-7 translate-x-px" />
+                    <i-svg-spinners-180-ring v-if="waiting" class="size-7" />
+                    <i-carbon-pause-filled v-else-if="playing" class="size-7" />
+                    <i-carbon-play-filled-alt v-else class="size-7 translate-x-px" />
                 </button>
             </div>
 
@@ -177,7 +167,7 @@ defineExpose({
                     @click="seekBy(-10)"
                     aria-label="Back 10 seconds"
                 >
-                    <SkipBack class="size-5" />
+                    <i-carbon-skip-back class="size-5" />
                 </button>
 
                 <button
@@ -186,7 +176,7 @@ defineExpose({
                     @click="seekBy(30)"
                     aria-label="Forward 30 seconds"
                 >
-                    <SkipForward class="size-5" />
+                    <i-carbon-skip-forward class="size-5" />
                 </button>
 
                 <button
@@ -195,7 +185,7 @@ defineExpose({
                     @click="currentTime = 0"
                     aria-label="Restart"
                 >
-                    <ResetAlt class="size-5" />
+                    <i-carbon-reset-alt class="size-5" />
                 </button>
 
                 <div class="hidden items-center gap-2 sm:flex">
@@ -206,8 +196,8 @@ defineExpose({
                         :aria-pressed="muted"
                         :aria-label="muted ? 'Unmute' : 'Mute'"
                     >
-                        <VolumeMute v-if="muted || volume === 0" class="size-5" />
-                        <VolumeUp v-else class="size-5" />
+                        <i-carbon-volume-mute v-if="muted || volume === 0" class="size-5" />
+                        <i-carbon-volume-up v-else class="size-5" />
                     </button>
 
                     <div class="relative h-2 w-20 bg-white/15">
@@ -241,7 +231,7 @@ defineExpose({
                     aria-label="Download audio file"
                     title="Download"
                 >
-                    <Download class="size-5" />
+                    <i-carbon-download class="size-5" />
                 </a>
                 <div
                     class="text-[11px] font-bold whitespace-nowrap text-white/80 tabular-nums sm:text-xs"
