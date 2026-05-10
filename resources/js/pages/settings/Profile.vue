@@ -131,7 +131,10 @@ const { getInitials } = useInitials();
                         </div>
                     </div>
                     <div class="flex items-center gap-4">
-                        <Button :disabled="processing"> Save Changes </Button>
+                        <Button :disabled="processing">
+                            <i-svg-spinners-180-ring v-if="processing" class="size-4" />
+                            Save Changes
+                        </Button>
 
                         <Transition
                             enter-active-class="transition ease-in-out"

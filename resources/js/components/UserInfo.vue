@@ -22,16 +22,7 @@ const showAvatar = computed(() => props.user?.avatar && props.user.avatar !== ''
 
 <template>
     <template v-if="user">
-        <div class="border-r-3">
-            <Avatar class="size-12 overflow-hidden">
-                <AvatarImage v-if="showAvatar" :src="user.avatar!" alt="" />
-                <AvatarFallback class="text-black">
-                    {{ getInitials(user.name) }}
-                </AvatarFallback>
-            </Avatar>
-        </div>
-
-        <div class="grid flex-1 text-left text-sm leading-tight">
+        <div class="grid flex-1 px-3 py-2 text-left text-sm leading-tight">
             <span class="truncate font-medium">{{ user.name }}</span>
             <span v-if="showEmail" class="text-muted-foreground truncate text-xs">{{
                 user.email
