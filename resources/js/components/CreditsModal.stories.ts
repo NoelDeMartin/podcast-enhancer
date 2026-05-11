@@ -77,7 +77,7 @@ export const Many: Story = {
             usages: Array.from({ length: 50 }, (_, i) => ({
                 id: i + 1,
                 created_at: new Date(2026, 4, 8 - i).toISOString(),
-                credits: Math.floor(Math.random() * 20) + 1,
+                credits: Math.floor(Math.random() * 150) + 1,
                 entry: {
                     name:
                         i % 10 === 0

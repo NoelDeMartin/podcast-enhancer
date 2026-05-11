@@ -17,7 +17,8 @@ import {
 } from '@/components/ui/table';
 import { useFailureModal } from '@/composables/useFailureModal';
 import { formatCredits } from '@/lib/credits';
-import { formatDateTime, getBatchStatus } from '@/lib/entries';
+import { getBatchStatus } from '@/lib/entries';
+import { formatDate } from '@/lib/utils';
 import { creditsUsage } from '@/routes';
 import type { CreditUsage } from '@/types';
 
@@ -89,15 +90,22 @@ onMounted(fetchUsages);
 
             <div class="mt-4 space-y-4">
                 <h3 class="px-1 text-lg font-bold">Usage History</h3>
-                <div class="border-neo-dark max-h-96 overflow-y-auto border-3">
+                <div class="border-neo-dark overflow-y-auto border-3 sm:max-h-96">
                     <Table class="table-fixed border-collapse">
+                        <colgroup>
+                            <col class="w-20 sm:w-44" />
+                            <col />
+                            <col class="w-12 sm:w-32" />
+                        </colgroup>
                         <TableHeader>
                             <TableRow>
-                                <TableHead class="w-[130px] sm:w-[180px]">Date</TableHead>
-                                <TableHead>Description</TableHead>
-                                <TableHead class="w-[70px] text-right sm:w-[80px]"
-                                    >Credits</TableHead
+                                <TableHead class="whitespace-normal sm:whitespace-nowrap"
+                                    >Date</TableHead
                                 >
+                                <TableHead class="min-w-0 whitespace-normal sm:whitespace-nowrap"
+                                    >Episode</TableHead
+                                >
+                                <TableHead class="sr-only">Usage</TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
@@ -112,11 +120,18 @@ onMounted(fetchUsages);
                                 >
                             </TableRow>
                             <TableRow v-for="usage in usages" :key="usage.id">
-                                <TableCell class="text-[10px] leading-tight font-bold sm:text-sm">
-                                    {{ formatDateTime(usage.created_at) }}
+                                <TableCell
+                                    class="align-top text-xs leading-snug font-bold whitespace-normal sm:align-middle sm:text-sm sm:whitespace-nowrap"
+                                >
+                                    <span class="hidden sm:inline">{{
+                                        formatDate(usage.created_at, 'datetime')
+                                    }}</span>
+                                    <span class="inline sm:hidden">{{
+                                        formatDate(usage.created_at, 'day-short')
+                                    }}</span>
                                 </TableCell>
-                                <TableCell>
-                                    <div class="flex items-center gap-1">
+                                <TableCell class="w-full max-w-0 min-w-0">
+                                    <div class="flex min-w-0 items-center gap-1">
                                         <i-carbon-renew
                                             v-if="
                                                 usage.entry &&
@@ -148,7 +163,7 @@ onMounted(fetchUsages);
                                                     entry: usage.entry.slug,
                                                 })
                                             "
-                                            class="block truncate font-bold hover:underline"
+                                            class="min-w-0 flex-1 truncate font-bold hover:underline"
                                             :title="usage.entry.name"
                                             @click="() => close()"
                                         >
@@ -156,18 +171,22 @@ onMounted(fetchUsages);
                                         </Link>
                                         <div
                                             v-else-if="usage.entry"
-                                            class="truncate font-bold"
+                                            class="min-w-0 flex-1 truncate font-bold"
                                             :title="usage.entry.name"
                                         >
                                             {{ usage.entry.name }}
                                         </div>
-                                        <span v-else class="text-muted-foreground italic"
+                                        <span
+                                            v-else
+                                            class="text-muted-foreground min-w-0 flex-1 truncate italic"
                                             >Unknown entry</span
                                         >
                                     </div>
                                 </TableCell>
 
-                                <TableCell class="text-right font-black text-red-600 tabular-nums">
+                                <TableCell
+                                    class="text-right text-xs font-black whitespace-nowrap text-red-600 tabular-nums sm:text-sm"
+                                >
                                     -{{ usage.credits }}
                                 </TableCell>
                             </TableRow>

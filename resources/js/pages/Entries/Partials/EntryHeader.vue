@@ -11,7 +11,8 @@ import {
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { useEntryEnhancementActions } from '@/composables/useEntryEnhancementActions';
-import { formatDate, formatTimestamp } from '@/lib/entries';
+import { formatTimestamp } from '@/lib/entries';
+import { formatDate } from '@/lib/utils';
 
 const props = defineProps<{
     entry: any;
