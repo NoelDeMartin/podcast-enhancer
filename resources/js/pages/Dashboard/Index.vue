@@ -51,8 +51,6 @@ const deleteFeed = (feed: any) => showModal(DeleteFeedModal, { feed });
 </script>
 
 <template>
-    <Head title="Dashboard" />
-
     <AppLayout>
         <div
             class="mx-auto flex size-full max-w-7xl flex-1 flex-col gap-6 overflow-x-auto rounded-none p-4 sm:p-6"

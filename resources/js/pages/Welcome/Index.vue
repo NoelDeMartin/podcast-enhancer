@@ -17,8 +17,6 @@ const auth = computed(() => page.props.auth);
 </script>
 
 <template>
-    <Head title="Podcast Enhancer - Improve your podcast experience" />
-
     <AppLayout floating-header :logo-url="null">
         <template #header>
             <nav class="hidden items-center gap-8 md:flex">
