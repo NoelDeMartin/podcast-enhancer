@@ -3,4 +3,5 @@ export const user = {
     email: 'john@example.com',
     avatar: 'https://github.com/shadcn.png',
     plan: 'basic',
+    credits: 100,
 };
