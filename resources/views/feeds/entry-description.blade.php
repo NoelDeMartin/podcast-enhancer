@@ -21,7 +21,7 @@
 <h2>Timestamps</h2>
 <ul>
     @foreach($entry->chapters as $chapter)
-        <li>{{ gmdate($chapter['startTime'] >= 3600 ? 'H:i:s' : 'i:s', (int) $chapter['startTime']) }} - {{ e($chapter['title']) }}</li>
+        <li>{{ gmdate($chapter['startTime'] >= 3600 ? 'H:i:s' : 'i:s', (int) $chapter['startTime']) }} - {{ $chapter['title'] }}</li>
     @endforeach
 </ul>
 @endif

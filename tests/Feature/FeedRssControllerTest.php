@@ -45,6 +45,8 @@ it('includes podcast chapters in rss when available', function () {
         'chapters' => [
             ['title' => 'Intro', 'startTime' => 0],
             ['title' => 'Main Topic', 'startTime' => 60],
+            ['title' => "It's Video Week!", 'startTime' => 120],
+            ['title' => 'Tom & Jerry', 'startTime' => 180],
         ],
     ]);
 
@@ -55,6 +57,10 @@ it('includes podcast chapters in rss when available', function () {
         ->assertSee('xmlns:psc="http://podlove.org/simple-chapters"', false)
         ->assertSee('<li>00:00 - Intro</li>', false)
         ->assertSee('<li>01:00 - Main Topic</li>', false)
+        ->assertSee('<li>02:00 - It&#039;s Video Week!</li>', false)
+        ->assertSee('<li>03:00 - Tom &amp; Jerry</li>', false)
+        ->assertDontSee('&amp;#039;', false)
+        ->assertDontSee('&amp;amp;', false)
         ->assertSee('<content:encoded><![CDATA[', false)
         ->assertSee('<psc:chapters version="1.2">', false)
         ->assertSee('<psc:chapter start="00:00:00" title="Intro" />', false)
