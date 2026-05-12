@@ -15,9 +15,9 @@ class CreditUsageController extends Controller
         $usages = $user->creditUsages()
             ->with(['entry:id,name,slug,feed_id,transcription_path', 'entry.feed:id,slug', 'entry.latestJobBatch'])
             ->latest()
-            ->get();
+            ->paginate(10);
 
-        $this->loadModelFailedJobDetails($usages->pluck('entry')->filter());
+        $this->loadModelFailedJobDetails($usages->getCollection()->pluck('entry')->filter());
 
         return response()->json([
             'usages' => $usages,

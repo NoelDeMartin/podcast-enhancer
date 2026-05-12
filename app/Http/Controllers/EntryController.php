@@ -33,7 +33,8 @@ class EntryController extends Controller
 
         Gate::authorize('view', $entry);
 
-        $entry->load(['feed' => fn ($query) => $query->withoutGlobalScope(UserScope::class), 'latestJobBatch']);
+        $entry->setRelation('feed', $feed);
+        $entry->load(['latestJobBatch']);
 
         $this->loadModelFailedJobDetails($entry);
 

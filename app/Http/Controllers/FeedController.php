@@ -39,6 +39,7 @@ class FeedController extends Controller
     public function show(string $slug): Response
     {
         $feed = Feed::withoutGlobalScope(UserScope::class)
+            ->with(['latestJobBatch'])
             ->where('slug', $slug)
             ->firstOrFail();
 
@@ -53,10 +54,10 @@ class FeedController extends Controller
             ->paginate(10)
             ->withQueryString();
 
-        $feed->load(['latestJobBatch']);
-
         $this->loadModelFailedJobDetails($feed);
         $this->loadModelFailedJobDetails($entries->getCollection());
+
+        $entries->getCollection()->each->setRelation('feed', $feed);
 
         $entries->through(fn ($entry) => $entry->setAttribute('can', [
             'produce' => $user?->can('produce', $entry),

@@ -31,11 +31,11 @@ it('authenticated users can see their credit usage', function () {
     actingAs($user)
         ->getJson(route('credits-usage'))
         ->assertStatus(200)
-        ->assertJsonPath('usages', fn ($usages) => count($usages) === 1)
-        ->assertJsonPath('usages.0.credits', 10)
-        ->assertJsonPath('usages.0.entry.name', $entry->name)
-        ->assertJsonPath('usages.0.entry.slug', $entry->slug)
-        ->assertJsonPath('usages.0.entry.feed.slug', $feed->slug)
+        ->assertJsonPath('usages.data', fn ($usages) => count($usages) === 1)
+        ->assertJsonPath('usages.data.0.credits', 10)
+        ->assertJsonPath('usages.data.0.entry.name', $entry->name)
+        ->assertJsonPath('usages.data.0.entry.slug', $entry->slug)
+        ->assertJsonPath('usages.data.0.entry.feed.slug', $feed->slug)
         ->assertJsonPath('current_credits', 100);
 });
 
@@ -51,7 +51,7 @@ it('users cannot see other users credit usage', function () {
     actingAs($user)
         ->getJson(route('credits-usage'))
         ->assertStatus(200)
-        ->assertJsonPath('usages', []);
+        ->assertJsonPath('usages.data', []);
 });
 
 it('credit usage response includes job status data', function () {
@@ -96,7 +96,7 @@ it('credit usage response includes job status data', function () {
     actingAs($user)
         ->getJson(route('credits-usage'))
         ->assertStatus(200)
-        ->assertJsonPath('usages.0.entry.latest_job_batch.job_batch.id', $jobBatchId)
-        ->assertJsonPath('usages.0.entry.latest_job_batch.job_batch.failed_job_details.0.exception', 'Test Exception')
+        ->assertJsonPath('usages.data.0.entry.latest_job_batch.job_batch.id', $jobBatchId)
+        ->assertJsonPath('usages.data.0.entry.latest_job_batch.job_batch.failed_job_details.0.exception', 'Test Exception')
         ->assertJsonPath('current_credits', 50);
 });

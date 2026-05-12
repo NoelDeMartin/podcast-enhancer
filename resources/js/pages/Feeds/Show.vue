@@ -10,8 +10,8 @@ import { show as showFeed } from '@/actions/App/Http/Controllers/FeedController'
 import FeedRssController from '@/actions/App/Http/Controllers/FeedRssController';
 import { sync as syncFeedAction } from '@/actions/App/Http/Controllers/FeedSyncController';
 import FailureModal from '@/components/modals/FailureModal/FailureModal.vue';
-import Pagination from '@/components/Pagination.vue';
 import SearchInput from '@/components/SearchInput.vue';
+import ServerPagination from '@/components/ServerPagination.vue';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -196,7 +196,7 @@ const syncFeed = () => {
                 </Card>
             </div>
 
-            <Pagination :links="entries.links" label="Episode Pages" />
+            <ServerPagination :links="entries.links" label="Episode Pages" />
         </div>
     </AppLayout>
 </template>

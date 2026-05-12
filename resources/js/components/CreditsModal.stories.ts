@@ -19,6 +19,7 @@ const meta: Meta<NewFeedModalStoryArgs> = {
     parameters: {
         inertia: {
             props: {
+                appUrl: 'http://localhost',
                 auth: {
                     user: {
                         ...userStub,
@@ -74,17 +75,26 @@ export const Many: Story = {
     args: {
         credits: 100,
         response: {
-            usages: Array.from({ length: 50 }, (_, i) => ({
-                id: i + 1,
-                created_at: new Date(2026, 4, 8 - i).toISOString(),
-                credits: Math.floor(Math.random() * 150) + 1,
-                entry: {
-                    name:
-                        i % 10 === 0
-                            ? `Episode ${i + 1}: This is an extremely long episode name that should definitely break the UI if it is not handled correctly with truncation or wrapping`
-                            : `Episode ${i + 1}: Standard podcast episode title`,
-                },
-            })),
+            usages: {
+                data: Array.from({ length: 10 }, (_, i) => ({
+                    id: i + 1,
+                    created_at: new Date(2026, 4, 8 - i).toISOString(),
+                    credits: Math.floor(Math.random() * 150) + 1,
+                    entry: {
+                        name:
+                            i % 10 === 0
+                                ? `Episode ${i + 1}: This is an extremely long episode name that should definitely break the UI if it is not handled correctly with truncation or wrapping`
+                                : `Episode ${i + 1}: Standard podcast episode title`,
+                    },
+                })),
+                links: [
+                    { url: null, label: '&larr; Previous', active: false },
+                    { url: '/credits-usage?page=1', label: '1', active: true },
+                    { url: '/credits-usage?page=2', label: '2', active: false },
+                    { url: '/credits-usage?page=3', label: '3', active: false },
+                    { url: '/credits-usage?page=2', label: 'Next &rarr;', active: false },
+                ],
+            },
             current_credits: 100,
         },
     },
@@ -94,7 +104,10 @@ export const Empty: Story = {
     args: {
         credits: 0,
         response: {
-            usages: [],
+            usages: {
+                data: [],
+                links: [],
+            },
             current_credits: 0,
         },
     },
@@ -104,47 +117,50 @@ export const ProcessingFeedback: Story = {
     args: {
         credits: 42,
         response: {
-            usages: [
-                {
-                    id: 1,
-                    created_at: new Date(2026, 4, 8).toISOString(),
-                    credits: 12,
-                    entry: {
+            usages: {
+                data: [
+                    {
                         id: 1,
-                        name: 'Episode 1: Failed processing should show an icon button',
-                        slug: 'episode-1-failed-processing',
-                        latest_job_batch: {
-                            job_batch: {
-                                id: 'test-batch-id',
-                                finished_at: null,
-                                cancelled_at: Date.now(),
-                                failed_job_details: [
-                                    {
-                                        exception: 'Something went wrong.',
-                                    },
-                                ],
+                        created_at: new Date(2026, 4, 8).toISOString(),
+                        credits: 12,
+                        entry: {
+                            id: 1,
+                            name: 'Episode 1: Failed processing should show an icon button',
+                            slug: 'episode-1-failed-processing',
+                            latest_job_batch: {
+                                job_batch: {
+                                    id: 'test-batch-id',
+                                    finished_at: null,
+                                    cancelled_at: Date.now(),
+                                    failed_job_details: [
+                                        {
+                                            exception: 'Something went wrong.',
+                                        },
+                                    ],
+                                },
                             },
                         },
                     },
-                },
-                {
-                    id: 2,
-                    created_at: new Date(2026, 4, 8, 1).toISOString(),
-                    credits: 7,
-                    entry: {
+                    {
                         id: 2,
-                        name: 'Episode 2: Still processing should show a spinner',
-                        slug: 'episode-2-still-processing',
-                        latest_job_batch: {
-                            job_batch: {
-                                id: 'test-batch-id-2',
-                                finished_at: null,
-                                cancelled_at: null,
+                        created_at: new Date(2026, 4, 8, 1).toISOString(),
+                        credits: 7,
+                        entry: {
+                            id: 2,
+                            name: 'Episode 2: Still processing should show a spinner',
+                            slug: 'episode-2-still-processing',
+                            latest_job_batch: {
+                                job_batch: {
+                                    id: 'test-batch-id-2',
+                                    finished_at: null,
+                                    cancelled_at: null,
+                                },
                             },
                         },
                     },
-                },
-            ],
+                ],
+                links: [],
+            },
             current_credits: 42,
         },
     },

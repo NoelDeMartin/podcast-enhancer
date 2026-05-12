@@ -57,6 +57,10 @@ class EntryPolicy
 
     private function isOwner(User $user, Entry $entry): bool
     {
-        return $user->id === $entry->feed()->withoutGlobalScope(UserScope::class)->first()?->user_id;
+        $feed = $entry->relationLoaded('feed')
+            ? $entry->feed
+            : $entry->feed()->withoutGlobalScope(UserScope::class)->first();
+
+        return $user->id === $feed?->user_id;
     }
 }

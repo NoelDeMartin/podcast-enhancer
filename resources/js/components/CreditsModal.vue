@@ -3,7 +3,9 @@ import { Link, usePage } from '@inertiajs/vue3';
 import { useIntervalFn } from '@vueuse/core';
 import { computed, onMounted, ref, watch } from 'vue';
 
+import { index } from '@/actions/App/Http/Controllers/CreditUsageController';
 import { show } from '@/actions/App/Http/Controllers/EntryController';
+import ClientPagination from '@/components/ClientPagination.vue';
 import { Button } from '@/components/ui/button';
 import { Modal } from '@/components/ui/modal';
 import { useModal } from '@/components/ui/modal/utils';
@@ -19,7 +21,6 @@ import { useFailureModal } from '@/composables/useFailureModal';
 import { formatCredits } from '@/lib/credits';
 import { getBatchStatus } from '@/lib/entries';
 import { formatDate } from '@/lib/utils';
-import { creditsUsage } from '@/routes';
 import type { CreditUsage } from '@/types';
 
 const { close } = useModal();
@@ -28,15 +29,23 @@ const page = usePage();
 const user = computed(() => page.props.auth.user);
 
 const usages = ref<CreditUsage[]>([]);
+const links = ref<any[]>([]);
 const loading = ref(true);
+const currentUrl = ref<string | null>(null);
 
 const hasActiveJobs = computed(() =>
     usages.value.some((usage) => usage.entry && getBatchStatus(usage.entry) === 'pending'),
 );
 
-async function fetchUsages() {
+async function fetchUsages(url: string | null = null) {
+    if (url === null && currentUrl.value === null) {
+        loading.value = true;
+    }
+
     try {
-        const response = await fetch(creditsUsage().url, {
+        const fetchUrl = new URL(url || currentUrl.value || index().url, page.props.appUrl);
+
+        const response = await fetch(fetchUrl.toString(), {
             headers: {
                 Accept: 'application/json',
                 'X-Requested-With': 'XMLHttpRequest',
@@ -45,7 +54,11 @@ async function fetchUsages() {
 
         if (response.ok) {
             const data = await response.json();
-            usages.value = data.usages;
+            usages.value = data.usages.data;
+            links.value = data.usages.links;
+            currentUrl.value =
+                data.usages.path +
+                (data.usages.current_page > 1 ? `?page=${data.usages.current_page}` : '');
             page.props.auth.user.credits = data.current_credits;
         }
     } finally {
@@ -53,7 +66,13 @@ async function fetchUsages() {
     }
 }
 
-const { pause, resume } = useIntervalFn(fetchUsages, 3000, { immediate: false });
+function handlePageChange(url: string | null) {
+    if (url) {
+        fetchUsages(url);
+    }
+}
+
+const { pause, resume } = useIntervalFn(() => fetchUsages(), 3000, { immediate: false });
 
 watch(hasActiveJobs, (active) => (active ? resume() : pause()), { immediate: true });
 
@@ -193,6 +212,14 @@ onMounted(fetchUsages);
                         </TableBody>
                     </Table>
                 </div>
+
+                <ClientPagination
+                    v-if="links.length > 3"
+                    class="pt-2"
+                    label="Credits pagination"
+                    :links="links"
+                    :on-page-change="handlePageChange"
+                />
             </div>
         </div>
     </Modal>

@@ -16,7 +16,7 @@ const preview: Preview = {
                 setInertiaPage(parameters.inertia);
             } else {
                 setInertiaPage({
-                    props: { auth: { user: null } },
+                    props: { appUrl: 'http://localhost', auth: { user: null } },
                     url: '/',
                     version: null,
                 });

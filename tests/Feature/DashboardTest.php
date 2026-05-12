@@ -14,6 +14,9 @@ it('allows authenticated users to visit the dashboard', function () {
 
     $response = $this->get(route('dashboard'));
     $response->assertOk();
+    $response->assertInertia(fn ($page) => $page
+        ->component('Dashboard/Index')
+        ->where('appUrl', rtrim((string) url('/'), '/')));
 });
 
 it('redirects unverified users to the verification notice page', function () {
