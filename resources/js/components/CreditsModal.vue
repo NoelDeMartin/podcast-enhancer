@@ -3,7 +3,7 @@ import { Link, usePage } from '@inertiajs/vue3';
 import { useIntervalFn } from '@vueuse/core';
 import { computed, onMounted, ref, watch } from 'vue';
 
-import { index } from '@/actions/App/Http/Controllers/CreditUsageController';
+import { index } from '@/actions/App/Http/Controllers/CreditController';
 import { show } from '@/actions/App/Http/Controllers/EntryController';
 import ClientPagination from '@/components/ClientPagination.vue';
 import { Button } from '@/components/ui/button';
@@ -153,7 +153,7 @@ onMounted(fetchUsages);
                                     >You haven't used any credits yet.</TableCell
                                 >
                             </TableRow>
-                            <TableRow v-for="usage in usages" :key="usage.id">
+                            <TableRow v-for="usage in usages" :key="`${usage.type}-${usage.id}`">
                                 <TableCell
                                     class="align-top text-xs leading-snug font-bold whitespace-normal sm:align-middle sm:text-sm sm:whitespace-nowrap"
                                 >
@@ -165,7 +165,10 @@ onMounted(fetchUsages);
                                     }}</span>
                                 </TableCell>
                                 <TableCell class="w-full max-w-0 min-w-0">
-                                    <div class="flex min-w-0 items-center gap-1">
+                                    <div
+                                        v-if="usage.type === 'usage'"
+                                        class="flex min-w-0 items-center gap-1"
+                                    >
                                         <i-carbon-renew
                                             v-if="
                                                 usage.entry &&
@@ -216,12 +219,22 @@ onMounted(fetchUsages);
                                             >Unknown entry</span
                                         >
                                     </div>
+                                    <div
+                                        v-else
+                                        class="truncate font-bold"
+                                        :title="usage.description"
+                                    >
+                                        {{ usage.description }}
+                                    </div>
                                 </TableCell>
 
                                 <TableCell
-                                    class="text-right text-xs font-black whitespace-nowrap text-red-600 tabular-nums sm:text-sm"
+                                    class="text-right text-xs font-black whitespace-nowrap tabular-nums sm:text-sm"
+                                    :class="
+                                        usage.type === 'usage' ? 'text-red-600' : 'text-green-600'
+                                    "
                                 >
-                                    -{{ usage.credits }}
+                                    {{ usage.type === 'usage' ? '-' : '+' }}{{ usage.credits }}
                                 </TableCell>
                             </TableRow>
                         </TableBody>

@@ -1,6 +1,6 @@
 <?php
 
-use App\Http\Controllers\CreditUsageController;
+use App\Http\Controllers\CreditController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\EntryController;
 use App\Http\Controllers\FeedController;
@@ -18,7 +18,7 @@ Route::get('feeds/{feed}/entries/{entry}', [EntryController::class, 'show'])->na
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
-    Route::get('credits-usage', [CreditUsageController::class, 'index'])->name('credits-usage');
+    Route::get('credits', [CreditController::class, 'index'])->name('credits');
 
     Route::post('feeds/sync', [FeedSyncController::class, 'store'])->name('feeds.sync.store');
 

@@ -2,6 +2,8 @@ export interface CreditUsage {
     id: number;
     credits: number;
     created_at: string;
+    type: 'usage' | 'topup';
+    description?: string;
     entry?: {
         id: number;
         name: string;
