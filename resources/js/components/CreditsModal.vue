@@ -31,15 +31,20 @@ const user = computed(() => page.props.auth.user);
 const usages = ref<CreditUsage[]>([]);
 const links = ref<any[]>([]);
 const loading = ref(true);
+const fetching = ref(false);
 const currentUrl = ref<string | null>(null);
 
 const hasActiveJobs = computed(() =>
     usages.value.some((usage) => usage.entry && getBatchStatus(usage.entry) === 'pending'),
 );
 
-async function fetchUsages(url: string | null = null) {
+async function fetchUsages(url: string | null = null, fromInterval = false) {
     if (url === null && currentUrl.value === null) {
         loading.value = true;
+    }
+
+    if (!fromInterval) {
+        fetching.value = true;
     }
 
     try {
@@ -63,6 +68,7 @@ async function fetchUsages(url: string | null = null) {
         }
     } finally {
         loading.value = false;
+        fetching.value = false;
     }
 }
 
@@ -72,7 +78,7 @@ function handlePageChange(url: string | null) {
     }
 }
 
-const { pause, resume } = useIntervalFn(() => fetchUsages(), 3000, { immediate: false });
+const { pause, resume } = useIntervalFn(() => fetchUsages(null, true), 3000, { immediate: false });
 
 watch(hasActiveJobs, (active) => (active ? resume() : pause()), { immediate: true });
 
@@ -108,8 +114,14 @@ onMounted(fetchUsages);
             </div>
 
             <div class="mt-4 space-y-4">
-                <h3 class="px-1 text-lg font-bold">Usage History</h3>
-                <div class="border-neo-dark overflow-y-auto border-3 sm:max-h-96">
+                <h3 class="flex items-center gap-2 px-1 text-lg font-bold">
+                    <span>Usage History</span>
+                    <i-svg-spinners-180-ring v-if="fetching && !loading" class="size-4" />
+                </h3>
+                <div
+                    class="border-neo-dark overflow-y-auto border-3 transition-opacity sm:max-h-96"
+                    :class="{ 'opacity-50': fetching && !loading }"
+                >
                     <Table class="table-fixed border-collapse">
                         <colgroup>
                             <col class="w-20 sm:w-44" />
@@ -129,9 +141,12 @@ onMounted(fetchUsages);
                         </TableHeader>
                         <TableBody>
                             <TableRow v-if="loading">
-                                <TableCell colspan="3" class="h-24 text-center font-bold"
-                                    >Loading history...</TableCell
-                                >
+                                <TableCell colspan="3" class="h-24 text-center font-bold">
+                                    <div class="flex flex-col items-center justify-center gap-2">
+                                        <i-svg-spinners-180-ring class="size-8" />
+                                        <span class="sr-only">Loading history...</span>
+                                    </div>
+                                </TableCell>
                             </TableRow>
                             <TableRow v-else-if="usages.length === 0">
                                 <TableCell colspan="3" class="h-24 text-center font-bold"
@@ -215,7 +230,8 @@ onMounted(fetchUsages);
 
                 <ClientPagination
                     v-if="links.length > 3"
-                    class="pt-2"
+                    class="pt-2 transition-opacity"
+                    :class="{ 'pointer-events-none opacity-50': fetching && !loading }"
                     label="Credits pagination"
                     :links="links"
                     :on-page-change="handlePageChange"

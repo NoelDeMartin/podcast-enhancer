@@ -11,11 +11,49 @@ import CreditsModal from './CreditsModal.vue';
 type NewFeedModalStoryArgs = {
     credits?: number;
     response?: any;
+    delay?: number;
 };
+
+const generateResponse = (page: number) => ({
+    usages: {
+        data: Array.from({ length: 10 }, (_, i) => ({
+            id: (page - 1) * 10 + i + 1,
+            created_at: new Date(2026, 4, 8 - ((page - 1) * 10 + i)).toISOString(),
+            credits: Math.floor(Math.random() * 150) + 1,
+            entry: {
+                name:
+                    i === 0 && page === 1
+                        ? `Episode ${(page - 1) * 10 + i + 1}: This is an extremely long episode name that should definitely break the UI if it is not handled correctly with truncation or wrapping`
+                        : `Episode ${(page - 1) * 10 + i + 1}: Standard podcast episode title`,
+            },
+        })),
+        links: [
+            {
+                url: page > 1 ? `/credits-usage?page=${page - 1}` : null,
+                label: '&larr; Previous',
+                active: false,
+            },
+            { url: '/credits-usage?page=1', label: '1', active: page === 1 },
+            { url: '/credits-usage?page=2', label: '2', active: page === 2 },
+            { url: '/credits-usage?page=3', label: '3', active: page === 3 },
+            {
+                url: page < 3 ? `/credits-usage?page=${page + 1}` : null,
+                label: 'Next &rarr;',
+                active: false,
+            },
+        ],
+        path: '/credits-usage',
+        current_page: page,
+    },
+    current_credits: 100,
+});
 
 const meta: Meta<NewFeedModalStoryArgs> = {
     title: 'Modals/CreditsModal',
     component: CreditsModal,
+    args: {
+        delay: 1000,
+    },
     parameters: {
         inertia: {
             props: {
@@ -43,12 +81,19 @@ const meta: Meta<NewFeedModalStoryArgs> = {
             });
 
             // Mock fetch
-            window.fetch = ((url: string) => {
+            window.fetch = (async (url: string) => {
                 if (url.includes('/credits-usage')) {
-                    return Promise.resolve({
+                    const pageMatch = url.match(/page=(\d+)/);
+                    const page = pageMatch ? parseInt(pageMatch[1]) : 1;
+
+                    if (args.delay) {
+                        await new Promise((resolve) => setTimeout(resolve, args.delay));
+                    }
+
+                    return {
                         ok: true,
-                        json: () => Promise.resolve(args.response),
-                    });
+                        json: () => Promise.resolve(args.response || generateResponse(page)),
+                    };
                 }
                 return Promise.reject(new Error('Unknown URL'));
             }) as any;
@@ -74,29 +119,6 @@ type Story = StoryObj<typeof meta>;
 export const Many: Story = {
     args: {
         credits: 100,
-        response: {
-            usages: {
-                data: Array.from({ length: 10 }, (_, i) => ({
-                    id: i + 1,
-                    created_at: new Date(2026, 4, 8 - i).toISOString(),
-                    credits: Math.floor(Math.random() * 150) + 1,
-                    entry: {
-                        name:
-                            i % 10 === 0
-                                ? `Episode ${i + 1}: This is an extremely long episode name that should definitely break the UI if it is not handled correctly with truncation or wrapping`
-                                : `Episode ${i + 1}: Standard podcast episode title`,
-                    },
-                })),
-                links: [
-                    { url: null, label: '&larr; Previous', active: false },
-                    { url: '/credits-usage?page=1', label: '1', active: true },
-                    { url: '/credits-usage?page=2', label: '2', active: false },
-                    { url: '/credits-usage?page=3', label: '3', active: false },
-                    { url: '/credits-usage?page=2', label: 'Next &rarr;', active: false },
-                ],
-            },
-            current_credits: 100,
-        },
     },
 };
 
