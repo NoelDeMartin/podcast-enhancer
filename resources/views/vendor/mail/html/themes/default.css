@@ -104,19 +104,26 @@ img {
 }
 
 .header a {
-    color: #18181b;
-    font-size: 19px;
-    font-weight: bold;
     text-decoration: none;
 }
 
 /* Logo */
 
 .logo {
-    height: 25px;
+    color: #010101;
+    display: inline-block;
+    font-family: 'Space Grotesk', Helvetica, Arial, sans-serif;
+    font-size: 32px;
+    font-weight: 700;
+    letter-spacing: -0.05em;
+    line-height: 1;
     margin-top: 15px;
-    max-height: 25px;
-    max-width: 85%;
+    text-transform: uppercase;
+    white-space: nowrap;
+}
+
+.logo span {
+    color: #ff3ea5;
 }
 
 /* Body */

@@ -3,8 +3,8 @@
     <x-slot:header>
         <tr>
             <td class="header">
-                <a href="{{ config('app.url') }}" style="display: inline-block;" aria-label="{{ config('app.name') }}">
-                    <x-app-logo class="logo" />
+                <a href="{{ config('app.url') }}" class="logo">
+                    Podcast <span>Enhancer</span>
                 </a>
             </td>
         </tr>
