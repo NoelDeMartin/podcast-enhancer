@@ -3,6 +3,7 @@ import { Link, useForm, usePoll } from '@inertiajs/vue3';
 import { computed, ref, watch } from 'vue';
 
 import { show } from '@/actions/App/Http/Controllers/FeedController';
+import FeedRssController from '@/actions/App/Http/Controllers/FeedRssController';
 import { sync as syncFeedAction } from '@/actions/App/Http/Controllers/FeedSyncController';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
@@ -183,6 +184,18 @@ const formatLastSynced = (date: string) => {
                         </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
+                        <DropdownMenuItem :as-child="true">
+                            <a
+                                :href="FeedRssController.url(feed.slug)"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                class="flex w-full cursor-pointer items-center gap-1.5"
+                            >
+                                <i-carbon-rss class="size-4" />
+                                Open RSS Feed
+                            </a>
+                        </DropdownMenuItem>
+
                         <DropdownMenuItem
                             v-if="feed.rss_url && feed.can?.sync"
                             class="gap-1.5"
