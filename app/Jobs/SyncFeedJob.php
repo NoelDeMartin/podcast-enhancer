@@ -34,6 +34,8 @@ class SyncFeedJob implements ShouldQueue
             'title' => $data['title'] ?? $feed->title,
             'description' => $data['description'] ?? $feed->description,
             'image_url' => $data['image_url'] ?? $feed->image_url,
+            'explicit' => $data['explicit'] ?? $feed->explicit,
+            'categories' => $data['categories'] ?? $feed->categories,
             'last_synced_at' => now(),
         ]);
     }

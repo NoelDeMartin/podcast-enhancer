@@ -4,11 +4,16 @@
     $showNotesUrl = route('entries.show', [$entry->feed, $entry]);
     $appUrl = url('/');
     $isEnhanced = $entry->summary || $entry->transcription_path || $entry->chapters;
+
+    $renderSummary = function ($summary) {
+        if (preg_match('/<[a-z][\s\S]*>/i', $summary)) {
+            return $summary;
+        }
+        return '<p>' . nl2br(e($summary)) . '</p>';
+    };
 @endphp
 
-@if($aiSummary)
-<p>{!! nl2br($aiSummary) !!}</p>
-@endif
+{!! $renderSummary($aiSummary) !!}
 
 @if($isEnhanced)
 <p>🧙 Enhanced by <a href="{{ $appUrl }}">Podcast Enhancer</a></p>
@@ -28,5 +33,5 @@
 
 @if(filled($originalSummary))
 <h2>Show Notes</h2>
-<p>{!! nl2br($originalSummary) !!}</p>
+{!! $renderSummary($originalSummary) !!}
 @endif

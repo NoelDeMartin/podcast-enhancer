@@ -27,6 +27,8 @@ class Feed extends Model
         'rss_url',
         'image_url',
         'last_synced_at',
+        'explicit',
+        'categories',
     ];
 
     protected $appends = [
@@ -38,6 +40,7 @@ class Feed extends Model
     {
         return [
             'last_synced_at' => 'datetime',
+            'categories' => 'array',
         ];
     }
 

@@ -34,6 +34,7 @@ class Entry extends Model
     ];
 
     protected $appends = [
+        'absolute_url',
         'absolute_audio_url',
         'absolute_image_url',
         'audio_is_external',
@@ -68,6 +69,13 @@ class Entry extends Model
     {
         return Attribute::make(
             get: fn () => Media::url($this->audio_url),
+        );
+    }
+
+    protected function absoluteUrl(): Attribute
+    {
+        return Attribute::make(
+            get: fn () => route('entries.show', [$this->feed, $this]),
         );
     }
 

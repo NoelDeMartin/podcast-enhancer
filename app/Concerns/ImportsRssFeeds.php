@@ -29,6 +29,18 @@ trait ImportsRssFeeds
             $imageUrl = (string) $xml->channel->children('itunes', true)->image->attributes()->href;
         }
 
+        $itunes = $xml->channel->children('itunes', true);
+        $explicit = (string) ($itunes->explicit ?? '');
+        $categories = collect($itunes->category)
+            ->flatMap(function ($category) {
+                return collect([(string) $category->attributes()->text])
+                    ->concat(collect($category->category)->map(fn ($sub) => (string) $sub->attributes()->text));
+            })
+            ->filter()
+            ->unique()
+            ->values()
+            ->all();
+
         $episodes = [];
 
         foreach ($xml->channel->item as $item) {
@@ -64,6 +76,8 @@ trait ImportsRssFeeds
             'title' => $title,
             'description' => $description,
             'image_url' => $imageUrl,
+            'explicit' => $explicit !== '' ? $explicit : null,
+            'categories' => ! empty($categories) ? $categories : null,
             'episodes' => $episodes,
         ];
     }

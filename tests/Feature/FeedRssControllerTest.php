@@ -84,3 +84,49 @@ it('omits podcast chapters in rss when not available', function () {
         ->assertSuccessful()
         ->assertDontSee('<psc:chapters', false);
 });
+
+it('generates a valid rss feed with recommended elements and stripped html', function () {
+    Storage::fake('public');
+
+    $feed = Feed::factory()->create([
+        'title' => 'My Podcast',
+        'description' => 'A <em>cool</em> podcast.',
+        'categories' => ['Technology', 'Software'],
+        'explicit' => 'yes',
+    ]);
+    $entry = Entry::factory()->create([
+        'feed_id' => $feed->id,
+        'name' => 'Episode <strong>1</strong>',
+        'summary' => 'This is the <em>first</em> episode summary.',
+        'audio_url' => 'audios/audio.mp3',
+    ]);
+
+    Storage::disk('public')->put('audios/audio.mp3', 'dummy content');
+
+    $this->get(route('feeds.rss', $feed))
+        ->assertSuccessful()
+        ->assertSee('<description>A cool podcast.</description>', false)
+        ->assertSee('xmlns:atom="http://www.w3.org/2005/Atom"', false)
+        ->assertSee('<atom:link href="'.route('feeds.rss', $feed).'" rel="self" type="application/rss+xml" />', false)
+        ->assertSee('<itunes:category text="Technology" />', false)
+        ->assertSee('<itunes:category text="Software" />', false)
+        ->assertSee('<itunes:explicit>yes</itunes:explicit>', false)
+        ->assertSee('<itunes:summary>A cool podcast.</itunes:summary>', false)
+        ->assertSee('<title>Episode 1</title>', false)
+        ->assertSee('<guid isPermaLink="true">'.route('entries.show', [$feed, $entry]).'</guid>', false)
+        ->assertSee('<itunes:summary>This is the first episode summary.</itunes:summary>', false);
+});
+
+it('omits optional itunes tags when null', function () {
+    Storage::fake('public');
+
+    $feed = Feed::factory()->create([
+        'categories' => null,
+        'explicit' => null,
+    ]);
+
+    $this->get(route('feeds.rss', $feed))
+        ->assertSuccessful()
+        ->assertDontSee('<itunes:category', false)
+        ->assertDontSee('<itunes:explicit', false);
+});
