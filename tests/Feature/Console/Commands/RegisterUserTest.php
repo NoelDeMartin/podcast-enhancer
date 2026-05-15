@@ -1,13 +1,9 @@
 <?php
 
 use App\Models\User;
-use Illuminate\Auth\Notifications\VerifyEmail;
 use Illuminate\Console\Command;
-use Illuminate\Support\Facades\Notification;
 
 it('can register a new user', function () {
-    Notification::fake();
-
     $this->artisan('auth:register')
         ->expectsQuestion('What is the user\'s name?', 'Test User')
         ->expectsQuestion('What is the user\'s email address?', 'test@example.com')
@@ -15,13 +11,13 @@ it('can register a new user', function () {
         ->expectsQuestion('Confirm the password', 'password123')
         ->assertExitCode(Command::SUCCESS);
 
-    $this->assertDatabaseHas('users', [
-        'name' => 'Test User',
-        'email' => 'test@example.com',
-    ]);
-
     $user = User::where('email', 'test@example.com')->first();
-    Notification::assertSentTo($user, VerifyEmail::class);
+
+    expect($user)
+        ->not->toBeNull()
+        ->name->toBe('Test User')
+        ->email->toBe('test@example.com')
+        ->hasVerifiedEmail()->toBeTrue();
 });
 
 it('shows validation errors when registration fails', function () {

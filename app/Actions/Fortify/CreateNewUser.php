@@ -15,7 +15,6 @@ class CreateNewUser implements CreatesNewUsers
 
     /**
      * @param  array<string, string>  $input
-     * @param  bool  $verifyEmail
      */
     public function create(array $input, bool $verifyEmail = false): User
     {
