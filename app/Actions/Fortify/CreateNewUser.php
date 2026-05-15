@@ -15,8 +15,9 @@ class CreateNewUser implements CreatesNewUsers
 
     /**
      * @param  array<string, string>  $input
+     * @param  bool  $verifyEmail
      */
-    public function create(array $input): User
+    public function create(array $input, bool $verifyEmail = false): User
     {
         Validator::make($input, [
             ...$this->profileRules(),
@@ -28,6 +29,10 @@ class CreateNewUser implements CreatesNewUsers
             'email' => $input['email'],
             'password' => $input['password'],
         ]);
+
+        if ($verifyEmail) {
+            $user->markEmailAsVerified();
+        }
 
         event(new Registered($user));
 

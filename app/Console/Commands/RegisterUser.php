@@ -49,7 +49,7 @@ class RegisterUser extends Command
                 'email' => $email,
                 'password' => $password,
                 'password_confirmation' => $passwordConfirmation,
-            ]);
+            ], verifyEmail: true);
 
             info("User {$user->name} ({$user->email}) created successfully!");
 
