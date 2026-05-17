@@ -14,7 +14,7 @@ class UpdateEntryRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name' => ['required', 'string', 'max:255'],
+            'name' => ['required', 'string', 'max:1024'],
             'audio_url' => ['nullable', 'string'],
             'file' => ['nullable', 'file', 'mimes:mp3,mp4,m4a,ogg,wav,flac,aac,opus,wma'],
             'delete_file' => ['nullable', 'boolean'],

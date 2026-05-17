@@ -15,7 +15,7 @@ class StoreEntryRequest extends FormRequest
     {
         return [
             'feed_id' => ['required', 'exists:feeds,id'],
-            'name' => ['required', 'string', 'max:255'],
+            'name' => ['required', 'string', 'max:1024'],
             'published_at' => ['required', 'date'],
             'audio_url' => ['nullable', 'string'],
             'file' => ['nullable', 'file', 'mimes:mp3,mp4,m4a,ogg,wav,flac,aac,opus,wma'],
