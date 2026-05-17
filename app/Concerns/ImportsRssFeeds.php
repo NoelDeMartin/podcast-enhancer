@@ -5,6 +5,7 @@ namespace App\Concerns;
 use App\Models\Entry;
 use App\Models\Feed;
 use Carbon\CarbonImmutable;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Http;
 
 trait ImportsRssFeeds
@@ -82,16 +83,45 @@ trait ImportsRssFeeds
         ];
     }
 
+    protected function importEpisodes(Feed $feed, array $episodesData): Collection
+    {
+        $episodes = collect($episodesData)->filter(fn ($episode) => ! empty($episode['audio_url']));
+
+        if ($episodes->isEmpty()) {
+            return collect();
+        }
+
+        $audioUrls = $episodes->pluck('audio_url')->unique()->all();
+        $names = $episodes->pluck('name')->unique()->all();
+
+        $existingAudioUrls = $feed->entries()
+            ->whereIn('audio_url', $audioUrls)
+            ->pluck('audio_url')
+            ->flip();
+
+        $existingNames = $feed->entries()
+            ->whereIn('name', $names)
+            ->pluck('name')
+            ->flip();
+
+        return $episodes->map(function ($episodeData) use ($feed, $existingAudioUrls, $existingNames) {
+            $audioUrl = $episodeData['audio_url'];
+            $name = $episodeData['name'];
+
+            if ($existingAudioUrls->has($audioUrl) || $existingNames->has($name)) {
+                return null;
+            }
+
+            return $this->importEpisode($feed, $episodeData);
+        })->filter();
+    }
+
     protected function importEpisode(Feed $feed, array $episodeData): ?Entry
     {
         $audioUrl = $episodeData['audio_url'];
         $name = $episodeData['name'];
 
         if (! $audioUrl) {
-            return null;
-        }
-
-        if ($feed->entries()->where('audio_url', $audioUrl)->exists() || $feed->entries()->where('name', $name)->exists()) {
             return null;
         }
 

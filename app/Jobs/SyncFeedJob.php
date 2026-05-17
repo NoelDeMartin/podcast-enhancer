@@ -26,9 +26,7 @@ class SyncFeedJob implements ShouldQueue
 
         $data = $this->fetchAndParseRss($feed->rss_url);
 
-        foreach ($data['episodes'] as $episodeData) {
-            $this->importEpisode($feed, $episodeData);
-        }
+        $this->importEpisodes($feed, $data['episodes']);
 
         $feed->update([
             'title' => $data['title'] ?? $feed->title,

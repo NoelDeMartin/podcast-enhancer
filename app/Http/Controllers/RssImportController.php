@@ -59,7 +59,7 @@ class RssImportController extends Controller
             ]);
         }
 
-        $count = $matchedEpisodes->filter(fn ($episode) => $this->importEpisode($feed, $episode))->count();
+        $count = $this->importEpisodes($feed, $matchedEpisodes->all())->count();
 
         return redirect()->back()->with('success', $count.' episodes imported successfully.');
     }

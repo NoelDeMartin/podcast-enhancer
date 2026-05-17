@@ -36,14 +36,9 @@ class FeedSyncController extends Controller
                 'last_synced_at' => now(),
             ]);
 
-            $episodes = collect($data['episodes'])
-                ->filter(fn ($episode) => ! empty($episode['audio_url']));
+            $imported = $this->importEpisodes($feed, $data['episodes']);
 
-            foreach ($episodes as $episode) {
-                $this->importEpisode($feed, $episode);
-            }
-
-            return redirect()->back()->with('success', "Feed created and {$episodes->count()} episodes imported successfully.");
+            return redirect()->back()->with('success', "Feed created and {$imported->count()} episodes imported successfully.");
         } catch (\Exception $e) {
             $errorMessage = $e->getMessage() === 'Failed to fetch RSS feed.' ? 'Failed to fetch RSS feed.' : 'Invalid RSS feed format.';
 
