@@ -1,4 +1,4 @@
-# Podcast Enhancer
+# 🎙️ Podcast Enhancer
 
 Improve your podcasts with summaries, chapters, and transcripts.
 
