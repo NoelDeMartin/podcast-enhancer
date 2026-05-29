@@ -1,4 +1,4 @@
-import DOMPurify from 'dompurify';
+import DOMPurify from 'isomorphic-dompurify';
 import linkifyHtml from 'linkify-html';
 
 export type BatchStatus = 'pending' | 'failed' | 'completed' | null;
