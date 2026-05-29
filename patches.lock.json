@@ -1,4 +1,17 @@
 {
-    "_hash": "6142bfcb78f54dfbf5247ae5e463f25bdb8fff1890806e2e45aa81a59c211653",
-    "patches": []
+    "_hash": "12b1b0c75c6abab125103cf9c1ed4e566b6cac30f3d56a21a6ad8ca3ba386a3d",
+    "patches": {
+        "laravel/ai": [
+            {
+                "package": "laravel/ai",
+                "description": "0",
+                "url": "patches/laravel-ai-src-gateway-mistral-mistralgateway-php.patch",
+                "sha256": "bf532a1b4f94426106e455e45df4470949b5137214b0bec0b7388b14623d157a",
+                "depth": 1,
+                "extra": {
+                    "provenance": "root"
+                }
+            }
+        ]
+    }
 }
