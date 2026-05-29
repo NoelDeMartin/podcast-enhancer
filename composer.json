@@ -12,7 +12,7 @@
         "php": "^8.3",
         "cweagans/composer-patches": "^2.0",
         "inertiajs/inertia-laravel": "^2.0",
-        "laravel/ai": "^0.6.0",
+        "laravel/ai": "^0.7.2",
         "laravel/fortify": "^1.34",
         "laravel/framework": "^13.11.2",
         "laravel/nightwatch": "^1.24",
@@ -105,7 +105,11 @@
         ]
     },
     "extra": {
-        "patches": {},
+        "patches": {
+            "laravel/ai": [
+                "patches/laravel-ai-src-gateway-mistral-mistralgateway-php.patch"
+            ]
+        },
         "laravel": {
             "dont-discover": [
                 "laravel/telescope"
