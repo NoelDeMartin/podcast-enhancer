@@ -1,23 +1,26 @@
 <script setup lang="ts">
 import { Link } from '@inertiajs/vue3';
+import { computed } from 'vue';
 
 import PaginationLinkLabel from '@/components/PaginationLinkLabel.vue';
-import { type PaginationLink, paginationLinkClasses, paginationLinkRel } from '@/lib/pagination';
+import { type PaginationLink, paginationLinkClasses, paginationLinkRel, collapsePaginationLinks } from '@/lib/pagination';
 
-defineProps<{
+const props = defineProps<{
     label?: string;
     links: PaginationLink[];
 }>();
+
+const collapsedLinks = computed(() => collapsePaginationLinks(props.links));
 </script>
 
 <template>
     <nav
-        v-if="links.length > 3"
+        v-if="collapsedLinks.length > 3"
         role="navigation"
         :aria-label="label || 'Pages'"
         class="flex flex-wrap items-center justify-center gap-1"
     >
-        <template v-for="(link, key) in links" :key="key">
+        <template v-for="(link, key) in collapsedLinks" :key="key">
             <div v-if="link.url === null" :class="paginationLinkClasses(link)">
                 <PaginationLinkLabel :label="link.label" />
             </div>

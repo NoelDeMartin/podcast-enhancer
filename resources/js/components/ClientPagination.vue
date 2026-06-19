@@ -1,12 +1,16 @@
 <script setup lang="ts">
+import { computed } from 'vue';
+
 import PaginationLinkLabel from '@/components/PaginationLinkLabel.vue';
-import { type PaginationLink, paginationLinkClasses } from '@/lib/pagination';
+import { type PaginationLink, paginationLinkClasses, collapsePaginationLinks } from '@/lib/pagination';
 
 const props = defineProps<{
     label?: string;
     links: PaginationLink[];
     onPageChange: (url: string) => void;
 }>();
+
+const collapsedLinks = computed(() => collapsePaginationLinks(props.links));
 
 function handlePageChange(url: string | null) {
     if (url) {
@@ -17,12 +21,12 @@ function handlePageChange(url: string | null) {
 
 <template>
     <nav
-        v-if="links.length > 3"
+        v-if="collapsedLinks.length > 3"
         role="navigation"
         :aria-label="label || 'Pages'"
-        class="flex flex-nowrap items-center justify-center gap-1"
+        class="flex flex-wrap items-center justify-center gap-1"
     >
-        <template v-for="(link, key) in links" :key="key">
+        <template v-for="(link, key) in collapsedLinks" :key="key">
             <component
                 :is="link.url === null ? 'div' : 'button'"
                 :type="link.url === null ? undefined : 'button'"
