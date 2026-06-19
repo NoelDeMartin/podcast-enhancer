@@ -26,6 +26,7 @@ YOUR TASK:
 1. Write a summary of the episode.
 2. Create a logical list of chapters for the episode with clear, descriptive titles.
 3. For each chapter, extract the exact `startTime` in seconds based on the bracketed numbers in the transcript.
+4. For each chapter, write a summary of what is discussed.
 
 CRITICAL RULES:
 - Every chapter `startTime` MUST exactly match one of the bracketed timestamps present in the transcript.
@@ -45,6 +46,7 @@ PROMPT;
                 ->items($schema->object([
                     'title' => $schema->string()->required()->description('Title of the chapter'),
                     'startTime' => $schema->integer()->required()->description('Start of the chapter in seconds'),
+                    'summary' => $schema->string()->required()->description('Summary of what is discussed in the chapter'),
                 ])->required())
                 ->required()
                 ->description('List of chapters'),

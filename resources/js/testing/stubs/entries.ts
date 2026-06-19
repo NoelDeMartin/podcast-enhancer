@@ -9,9 +9,21 @@ export const entries = [
         absolute_image_url: 'https://placecats.com/200/200',
         summary: 'A deep dive into the new features of Laravel 11.',
         chapters: [
-            { timestamp: '00:00', title: 'Introduction' },
-            { timestamp: '05:00', title: 'New Directory Structure' },
-            { timestamp: '15:00', title: 'Conclusion' },
+            {
+                startTime: 0,
+                title: 'Introduction',
+                summary: 'Introduction to the Laravel 11 release and general announcements.',
+            },
+            {
+                startTime: 300,
+                title: 'New Directory Structure',
+                summary: 'A deep dive into the streamlined directory structure of Laravel 11.',
+            },
+            {
+                startTime: 900,
+                title: 'Conclusion',
+                summary: 'Wrapping up the episode with final thoughts and links.',
+            },
         ],
         transcription_path: 'transcriptions/1.json',
     },

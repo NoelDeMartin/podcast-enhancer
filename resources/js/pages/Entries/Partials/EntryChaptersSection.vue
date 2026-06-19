@@ -37,11 +37,12 @@ const timestamp = (seconds: number) =>
                     <span class="sr-only"> This content has been generated with AI </span>
                 </span>
             </summary>
-            <ul class="mt-4 grid grid-cols-[max-content_1fr] gap-x-3 gap-y-3">
+            <ul class="mt-4 grid grid-cols-[max-content_1fr] gap-x-3 gap-y-4">
                 <li
                     v-for="(chapter, index) in entry.chapters"
                     :key="index"
-                    class="col-span-2 grid grid-cols-subgrid items-center"
+                    class="col-span-2 grid grid-cols-subgrid"
+                    :class="chapter.summary ? 'items-start' : 'items-center'"
                 >
                     <Button
                         type="button"
@@ -54,7 +55,17 @@ const timestamp = (seconds: number) =>
                         <i-carbon-time class="mr-1 size-3" />
                         {{ timestamp(chapter.startTime) }}
                     </Button>
-                    <span class="text-sm">{{ chapter.title }}</span>
+                    <div class="flex min-w-0 flex-col gap-1">
+                        <span class="text-sm leading-relaxed font-semibold">{{
+                            chapter.title
+                        }}</span>
+                        <p
+                            v-if="chapter.summary"
+                            class="text-muted-foreground text-xs leading-relaxed"
+                        >
+                            {{ chapter.summary }}
+                        </p>
+                    </div>
                 </li>
             </ul>
         </details>

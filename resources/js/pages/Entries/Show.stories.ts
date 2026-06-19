@@ -66,9 +66,21 @@ const baseEntry = {
         regenerate: true,
     },
     chapters: [
-        { startTime: 0, title: 'Introduction' },
-        { startTime: 300, title: 'New Directory Structure' },
-        { startTime: 900, title: 'Conclusion' },
+        {
+            startTime: 0,
+            title: 'Introduction',
+            summary: 'Introduction to the Laravel 11 release and general announcements.',
+        },
+        {
+            startTime: 300,
+            title: 'New Directory Structure',
+            summary: 'A deep dive into the streamlined directory structure of Laravel 11.',
+        },
+        {
+            startTime: 900,
+            title: 'Conclusion',
+            summary: 'Wrapping up the episode with final thoughts and links.',
+        },
     ],
     transcription: JSON.stringify([
         { start_seconds: 3, speaker: 'Host', text: 'Welcome back to the Laravel Podcast.' },

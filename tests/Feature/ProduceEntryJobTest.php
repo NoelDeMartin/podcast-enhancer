@@ -25,8 +25,8 @@ it('processes the transcript and saves summary and chapters', function () {
         [
             'summary' => 'This is the generated summary.',
             'chapters' => [
-                ['title' => 'Intro', 'startTime' => 0],
-                ['title' => 'Main Topic', 'startTime' => 5],
+                ['title' => 'Intro', 'startTime' => 0, 'summary' => 'Introduction of the podcast.'],
+                ['title' => 'Main Topic', 'startTime' => 5, 'summary' => 'Main topic discussion.'],
             ],
         ],
     ]);
@@ -43,8 +43,10 @@ it('processes the transcript and saves summary and chapters', function () {
         ->and($entry->chapters)->toBeArray()
         ->and($entry->chapters[0]['title'])->toBe('Intro')
         ->and($entry->chapters[0]['startTime'])->toBe(0)
+        ->and($entry->chapters[0]['summary'])->toBe('Introduction of the podcast.')
         ->and($entry->chapters[1]['title'])->toBe('Main Topic')
-        ->and($entry->chapters[1]['startTime'])->toBe(5);
+        ->and($entry->chapters[1]['startTime'])->toBe(5)
+        ->and($entry->chapters[1]['summary'])->toBe('Main topic discussion.');
 
     PodcastEditorAgent::assertPrompted('[0] Welcome to the show. Today we discuss AI.');
 });
@@ -60,7 +62,7 @@ it('strips control characters from AI-generated chapters and summary', function 
         [
             'summary' => "This summary contains a NUL \u{0000} character.",
             'chapters' => [
-                ['title' => "Presentaci\u{0000} del convidat", 'startTime' => 0],
+                ['title' => "Presentaci\u{0000} del convidat", 'startTime' => 0, 'summary' => "Description \u{0000} with NUL."],
             ],
         ],
     ]);
@@ -75,7 +77,8 @@ it('strips control characters from AI-generated chapters and summary', function 
 
     expect($entry->summary)->toBe('This summary contains a NUL  character.')
         ->and($entry->chapters[0]['title'])->toBe('Presentaci del convidat')
-        ->and($entry->chapters[0]['startTime'])->toBe(0);
+        ->and($entry->chapters[0]['startTime'])->toBe(0)
+        ->and($entry->chapters[0]['summary'])->toBe('Description  with NUL.');
 });
 
 it('uses original_summary in the prompt if present', function () {
@@ -88,7 +91,7 @@ it('uses original_summary in the prompt if present', function () {
     PodcastEditorAgent::fake([
         [
             'summary' => 'AI Summary.',
-            'chapters' => [['title' => 'Intro', 'startTime' => 0]],
+            'chapters' => [['title' => 'Intro', 'startTime' => 0, 'summary' => 'Intro summary.']],
         ],
     ]);
 
@@ -131,7 +134,7 @@ it('uses default provider on attempts 1-3', function (int $attempts) {
     PodcastEditorAgent::fake([
         [
             'summary' => 'Summary.',
-            'chapters' => [['title' => 'Intro', 'startTime' => 0]],
+            'chapters' => [['title' => 'Intro', 'startTime' => 0, 'summary' => 'Intro summary.']],
         ],
     ]);
 
@@ -156,7 +159,7 @@ it('uses failover provider array on attempt 4 and above', function (int $attempt
     PodcastEditorAgent::fake([
         [
             'summary' => 'Summary.',
-            'chapters' => [['title' => 'Intro', 'startTime' => 0]],
+            'chapters' => [['title' => 'Intro', 'startTime' => 0, 'summary' => 'Intro summary.']],
         ],
     ]);
 
@@ -181,7 +184,7 @@ it('fails over to anthropic on attempt 4+ if mistral fails', function () {
             ? throw new ProviderOverloadedException('Mistral Overloaded')
             : [
                 'summary' => 'Failover Summary.',
-                'chapters' => [['title' => 'Intro', 'startTime' => 0]],
+                'chapters' => [['title' => 'Intro', 'startTime' => 0, 'summary' => 'Intro summary.']],
             ],
     ]);
 

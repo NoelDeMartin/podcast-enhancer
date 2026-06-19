@@ -135,7 +135,7 @@ class ProduceEntryJob implements ShouldQueue
     }
 
     /**
-     * @return array{summary: string, chapters: array<int, array{title: string, startTime: int}>}
+     * @return array{summary: string, chapters: array<int, array{title: string, startTime: int, summary: string}>}
      */
     private function sanitizeAiResponse(StructuredAgentResponse|array $response): array
     {
@@ -148,6 +148,7 @@ class ProduceEntryJob implements ShouldQueue
             ->map(fn (array $chapter) => [
                 'title' => trim($this->stripControlCharacters((string) ($chapter['title'] ?? ''))),
                 'startTime' => (int) ($chapter['startTime'] ?? 0),
+                'summary' => trim($this->stripControlCharacters((string) ($chapter['summary'] ?? ''))),
             ])
             ->filter(fn (array $chapter) => $chapter['title'] !== '')
             ->values()
