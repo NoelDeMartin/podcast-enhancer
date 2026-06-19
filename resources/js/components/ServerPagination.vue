@@ -3,7 +3,12 @@ import { Link } from '@inertiajs/vue3';
 import { computed } from 'vue';
 
 import PaginationLinkLabel from '@/components/PaginationLinkLabel.vue';
-import { type PaginationLink, paginationLinkClasses, paginationLinkRel, collapsePaginationLinks } from '@/lib/pagination';
+import {
+    type PaginationLink,
+    paginationLinkClasses,
+    paginationLinkRel,
+    collapsePaginationLinks,
+} from '@/lib/pagination';
 
 const props = defineProps<{
     label?: string;

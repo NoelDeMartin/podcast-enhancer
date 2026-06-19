@@ -2,7 +2,11 @@
 import { computed } from 'vue';
 
 import PaginationLinkLabel from '@/components/PaginationLinkLabel.vue';
-import { type PaginationLink, paginationLinkClasses, collapsePaginationLinks } from '@/lib/pagination';
+import {
+    type PaginationLink,
+    paginationLinkClasses,
+    collapsePaginationLinks,
+} from '@/lib/pagination';
 
 const props = defineProps<{
     label?: string;
