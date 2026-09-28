@@ -8,34 +8,40 @@ use Laravel\Ai\Exceptions\RateLimitedException;
 
 trait HandlesAiErrors
 {
+    /**
+     * Seconds to wait after each failed attempt. The last retry happens ~65 minutes after the
+     * first attempt, giving some slack to rate limits that reset after one hour.
+     *
+     * @var array<int, int>
+     */
+    public const array AI_ERROR_BACKOFF = [60, 120, 240, 480, 960, 2040];
+
     protected function postponeIfRateLimited(RateLimitedException $exception, array $context = []): void
     {
-        if ($this->attempts() >= 8) {
-            throw $exception;
-        }
+        $backoff = $this->backoffForAttempt() ?? throw $exception;
 
         Log::info(static::class.' postponed due to AI provider rate limit.', array_merge([
             'attempt' => $this->attempts(),
+            'error' => $exception->getMessage(),
         ], $context));
 
-        $this->release($this->backoffForAttempt());
+        $this->release($backoff);
     }
 
     protected function postponeIfOverloaded(ProviderOverloadedException $exception, array $context = []): void
     {
-        if ($this->attempts() >= 8) {
-            throw $exception;
-        }
+        $backoff = $this->backoffForAttempt() ?? throw $exception;
 
         Log::info(static::class.' postponed due to AI provider overload.', array_merge([
             'attempt' => $this->attempts(),
+            'error' => $exception->getMessage(),
         ], $context));
 
-        $this->release($this->backoffForAttempt());
+        $this->release($backoff);
     }
 
-    protected function backoffForAttempt(): int
+    protected function backoffForAttempt(): ?int
     {
-        return [60, 120, 240, 480, 960, 1920, 3600][$this->attempts() - 1] ?? 3600;
+        return self::AI_ERROR_BACKOFF[$this->attempts() - 1] ?? null;
     }
 }

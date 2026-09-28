@@ -16,7 +16,7 @@ use Laravel\Ai\Exceptions\RateLimitedException;
 use Laravel\Ai\Transcription;
 
 #[Timeout(300)]
-#[Tries(8)]
+#[Tries(7)]
 class TranscribeAudioJob implements ShouldQueue
 {
     use Batchable, HandlesAiErrors, InteractsWithQueue, Queueable;

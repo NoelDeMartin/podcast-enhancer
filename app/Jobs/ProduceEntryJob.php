@@ -19,8 +19,8 @@ use Laravel\Ai\Exceptions\ProviderOverloadedException;
 use Laravel\Ai\Exceptions\RateLimitedException;
 use Laravel\Ai\Responses\StructuredAgentResponse;
 
-#[Timeout(300)]
-#[Tries(8)]
+#[Timeout(900)]
+#[Tries(7)]
 class ProduceEntryJob implements ShouldQueue
 {
     use Batchable, HandlesAiErrors, InteractsWithQueue, Queueable;

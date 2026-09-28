@@ -3,6 +3,8 @@
 use App\Ai\Agents\PodcastEditorAgent;
 use App\Jobs\ProduceEntryJob;
 use App\Models\Entry;
+use Illuminate\Queue\Attributes\Timeout;
+use Illuminate\Queue\Attributes\Tries;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Storage;
 use Laravel\Ai\Exceptions\ProviderOverloadedException;
@@ -262,4 +264,39 @@ it('postpones job when provider is overloaded', function () {
     $job->shouldReceive('release')->once();
 
     $job->handle();
+});
+
+it('allows enough time for the full failover chain before the queue retries the job', function () {
+    $timeout = (new ReflectionClass(ProduceEntryJob::class))
+        ->getAttributes(Timeout::class)[0]
+        ->newInstance()
+        ->timeout;
+
+    expect($timeout)->toBeGreaterThanOrEqual(3 * 300)
+        ->and(config('queue.connections.database.retry_after'))->toBeGreaterThan($timeout);
+});
+
+it('gives up after the last AI error backoff', function () {
+    $segments = [['text' => 'Hello.', 'start_seconds' => 0]];
+    Storage::put('transcriptions/fake.json', json_encode($segments));
+
+    $entry = Entry::factory()->create([
+        'transcription_path' => 'transcriptions/fake.json',
+    ]);
+
+    PodcastEditorAgent::fake([
+        fn () => throw new RateLimitedException('Rate limited'),
+    ]);
+
+    $tries = (new ReflectionClass(ProduceEntryJob::class))
+        ->getAttributes(Tries::class)[0]
+        ->newInstance()
+        ->tries;
+
+    $job = Mockery::mock(ProduceEntryJob::class, [$entry->id])->makePartial();
+    $job->shouldReceive('attempts')->andReturn($tries);
+    $job->shouldNotReceive('release');
+
+    expect(fn () => $job->handle())->toThrow(RateLimitedException::class)
+        ->and($tries)->toBe(count(ProduceEntryJob::AI_ERROR_BACKOFF) + 1);
 });
