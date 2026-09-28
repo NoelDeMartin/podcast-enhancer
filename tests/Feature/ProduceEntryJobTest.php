@@ -6,6 +6,7 @@ use App\Models\Entry;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Storage;
 use Laravel\Ai\Exceptions\ProviderOverloadedException;
+use Laravel\Ai\Exceptions\RateLimitedException;
 
 beforeEach(function () {
     Storage::fake('local');
@@ -194,6 +195,54 @@ it('fails over to anthropic on attempt 4+ if mistral fails', function () {
     $job->handle();
 
     PodcastEditorAgent::assertPrompted(fn ($prompt) => $prompt->provider->name() === 'anthropic');
+});
+
+it('fails over to the cheapest model of the default provider before the failover provider', function () {
+    $segments = [['text' => 'Hello.', 'start_seconds' => 0]];
+    Storage::put('transcriptions/fake.json', json_encode($segments));
+
+    $entry = Entry::factory()->create([
+        'transcription_path' => 'transcriptions/fake.json',
+    ]);
+
+    PodcastEditorAgent::fake([
+        fn ($prompt, $attachments, $provider, $model) => $model === 'mistral-medium-latest'
+            ? throw new RateLimitedException('Mistral rate limited')
+            : [
+                'summary' => 'Cheapest Model Summary.',
+                'chapters' => [['title' => 'Intro', 'startTime' => 0, 'summary' => 'Intro summary.']],
+            ],
+    ]);
+
+    $job = Mockery::mock(ProduceEntryJob::class, [$entry->id])->makePartial();
+    $job->shouldReceive('attempts')->andReturn(4);
+
+    $job->handle();
+
+    PodcastEditorAgent::assertPrompted(fn ($prompt) => $prompt->provider->name() === 'mistral' && $prompt->model === 'mistral-small-latest');
+    PodcastEditorAgent::assertNotPrompted(fn ($prompt) => $prompt->provider->name() === 'anthropic');
+    expect($entry->fresh()->summary)->toBe('Cheapest Model Summary.');
+});
+
+it('does not fail over to the cheapest model on attempts 1-3', function () {
+    $segments = [['text' => 'Hello.', 'start_seconds' => 0]];
+    Storage::put('transcriptions/fake.json', json_encode($segments));
+
+    $entry = Entry::factory()->create([
+        'transcription_path' => 'transcriptions/fake.json',
+    ]);
+
+    PodcastEditorAgent::fake([
+        fn () => throw new RateLimitedException('Mistral rate limited'),
+    ]);
+
+    $job = Mockery::mock(ProduceEntryJob::class, [$entry->id])->makePartial();
+    $job->shouldReceive('attempts')->andReturn(3);
+    $job->shouldReceive('release')->once();
+
+    $job->handle();
+
+    PodcastEditorAgent::assertNotPrompted(fn ($prompt) => $prompt->model === 'mistral-small-latest');
 });
 
 it('postpones job when provider is overloaded', function () {

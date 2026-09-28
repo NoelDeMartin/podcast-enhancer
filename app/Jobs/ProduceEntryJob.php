@@ -13,6 +13,8 @@ use Illuminate\Queue\Attributes\Tries;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
+use Laravel\Ai\Ai;
+use Laravel\Ai\Exceptions\FailoverableException;
 use Laravel\Ai\Exceptions\ProviderOverloadedException;
 use Laravel\Ai\Exceptions\RateLimitedException;
 use Laravel\Ai\Responses\StructuredAgentResponse;
@@ -64,7 +66,7 @@ class ProduceEntryJob implements ShouldQueue
         }
 
         try {
-            $response = (new PodcastEditorAgent)->prompt($prompt, timeout: 300, provider: $this->provider());
+            $response = $this->promptAgent($prompt);
         } catch (RateLimitedException $e) {
             $this->postponeIfRateLimited($e, [
                 'entry_id' => $entry->id,
@@ -98,11 +100,30 @@ class ProduceEntryJob implements ShouldQueue
         ]);
     }
 
-    protected function provider(): string|array
+    /**
+     * Prompt the agent with the default provider. From the 4th attempt on, failover to the
+     * default provider's cheapest model and then to the failover provider.
+     */
+    protected function promptAgent(string $prompt): StructuredAgentResponse
     {
-        return $this->attempts() >= 4
-            ? [config('ai.default'), config('ai.default_failover')]
-            : config('ai.default');
+        $agent = new PodcastEditorAgent;
+        $defaultProvider = config('ai.default');
+
+        try {
+            return $agent->prompt($prompt, timeout: 300, provider: $defaultProvider);
+        } catch (FailoverableException $e) {
+            if ($this->attempts() < 4) {
+                throw $e;
+            }
+
+            $cheapestModel = Ai::textProvider($defaultProvider)->cheapestTextModel();
+
+            return $agent->prompt($prompt, timeout: 300, provider: [
+                $defaultProvider => $cheapestModel,
+            ] + [
+                config('ai.default_failover') => null,
+            ]);
+        }
     }
 
     /**
