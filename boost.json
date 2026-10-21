@@ -11,12 +11,14 @@
     "nightwatch_mcp": false,
     "sail": false,
     "skills": [
+        "infer-conventions",
         "ai-sdk-development",
         "fortify-development",
         "laravel-best-practices",
+        "testing-best-practices",
         "configure-nightwatch",
         "wayfinder-development",
-        "pest-testing",
+        "telescope-debugging",
         "inertia-vue-development",
         "tailwindcss-development"
     ]
