@@ -58,6 +58,13 @@ const getSyncStatus = (feed: any) => {
         };
     }
 
+    if (getBatchStatus(feed) === 'failed') {
+        return {
+            indicator: 'bg-red-500',
+            label: 'Sync failed',
+        };
+    }
+
     if (!feed.last_synced_at) {
         return {
             indicator: 'bg-gray-400',

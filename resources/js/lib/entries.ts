@@ -10,7 +10,7 @@ export function getBatchStatus(entry: any): BatchStatus {
         return null;
     }
 
-    if (batch.cancelled_at !== null) {
+    if (batch.cancelled_at !== null || (batch.failed_jobs && batch.failed_jobs > 0)) {
         return 'failed';
     }
 

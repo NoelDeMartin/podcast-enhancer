@@ -2,8 +2,11 @@
 
 use App\Models\Entry;
 use App\Models\Feed;
+use App\Models\FeedJobBatch;
+use App\Models\JobBatch;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Str;
 
 use function Pest\Laravel\assertDatabaseHas;
 use function Pest\Laravel\assertDatabaseMissing;
@@ -78,4 +81,36 @@ it('can access public rss feed without authentication', function () {
         ->assertSee('Security Test Feed')
         ->assertSee('Secure Episode')
         ->assertSee('Timestamps');
+});
+
+it('shows a red dot on the dashboard when a feed sync has failed', function () {
+    $user = User::factory()->create();
+    $feed = Feed::factory()->for($user)->create([
+        'title' => 'Failing Sync Feed',
+        'rss_url' => 'https://example.com/feed.xml',
+        'last_synced_at' => now()->subDay(),
+    ]);
+
+    $jobBatchId = (string) Str::uuid();
+
+    JobBatch::forceCreate([
+        'id' => $jobBatchId,
+        'name' => 'Sync feed '.$feed->id,
+        'total_jobs' => 1,
+        'pending_jobs' => 0,
+        'failed_jobs' => 1,
+        'failed_job_ids' => [(string) Str::uuid()],
+        'cancelled_at' => now()->timestamp,
+        'created_at' => now()->timestamp,
+    ]);
+
+    FeedJobBatch::create([
+        'feed_id' => $feed->id,
+        'batch_id' => $jobBatchId,
+    ]);
+
+    $this->actingAs($user)
+        ->visit('/dashboard')
+        ->waitForText('Failing Sync Feed')
+        ->assertPresent('.bg-red-500');
 });

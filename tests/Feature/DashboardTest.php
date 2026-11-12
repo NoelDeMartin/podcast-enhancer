@@ -1,7 +1,10 @@
 <?php
 
 use App\Models\Feed;
+use App\Models\FeedJobBatch;
+use App\Models\JobBatch;
 use App\Models\User;
+use Illuminate\Support\Str;
 
 it('redirects guests to the login page', function () {
     $response = $this->get(route('dashboard'));
@@ -88,5 +91,39 @@ it('includes latestJobBatch and can permissions for feeds on the dashboard', fun
             )
             ->etc()
         )
+    );
+});
+
+it('loads latestJobBatch for feeds on the dashboard including failed status', function () {
+    $user = User::factory()->create();
+    $feed = Feed::factory()->for($user)->create([
+        'rss_url' => 'https://example.com/feed.xml',
+    ]);
+
+    $jobBatchId = (string) Str::uuid();
+
+    JobBatch::forceCreate([
+        'id' => $jobBatchId,
+        'name' => 'Sync feed '.$feed->id,
+        'total_jobs' => 1,
+        'pending_jobs' => 0,
+        'failed_jobs' => 1,
+        'failed_job_ids' => [(string) Str::uuid()],
+        'cancelled_at' => now()->timestamp,
+        'created_at' => now()->timestamp,
+    ]);
+
+    FeedJobBatch::create([
+        'feed_id' => $feed->id,
+        'batch_id' => $jobBatchId,
+    ]);
+
+    $response = $this->actingAs($user)->get(route('dashboard'));
+
+    $response->assertOk();
+    $response->assertInertia(fn ($page) => $page
+        ->component('Dashboard/Index')
+        ->where('feeds.0.latest_job_batch.job_batch.id', $jobBatchId)
+        ->where('feeds.0.latest_job_batch.job_batch.cancelled_at', fn ($val) => ! is_null($val))
     );
 });

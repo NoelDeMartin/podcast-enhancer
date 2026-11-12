@@ -119,6 +119,25 @@ export const Syncing: Story = {
     },
 };
 
+export const SyncFailed: Story = {
+    args: {
+        ...Default.args,
+        feeds: [
+            {
+                ...feeds[0],
+                latest_job_batch: {
+                    job_batch: {
+                        finished_at: null,
+                        cancelled_at: 1715690000,
+                        failed_jobs: 1,
+                    },
+                },
+            },
+            ...feeds.slice(1),
+        ],
+    },
+};
+
 export const ProPlan: Story = {
     args: {
         ...Default.args,
