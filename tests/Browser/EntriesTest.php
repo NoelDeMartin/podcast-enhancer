@@ -59,7 +59,7 @@ it('can manage entries for a feed', function () {
             break;
         }
 
-        usleep(200_000);
+        $page->wait(0.2);
     }
 
     expect($deleted)->toBeTrue();
