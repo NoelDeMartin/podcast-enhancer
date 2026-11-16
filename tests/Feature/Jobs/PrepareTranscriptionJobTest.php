@@ -6,6 +6,7 @@ use App\Models\CreditUsage;
 use App\Models\Entry;
 use App\Models\Feed;
 use App\Models\User;
+use Illuminate\Http\Client\RequestException;
 use Illuminate\Support\Facades\Bus;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Queue;
@@ -47,6 +48,7 @@ it('consumes credits successfully when enough funds are available', function () 
     ]);
 
     Queue::assertPushed(SplitAudioJob::class);
+    Http::assertSent(fn ($request) => $request->hasHeader('User-Agent', 'PodcastEnhancer/1.0'));
 });
 
 it('fails and deletes temp file when insufficient credits', function () {
@@ -109,3 +111,26 @@ it('calculates credits by rounding up minutes', function ($seconds, $expectedCre
     [120, 2],
     [121, 3],
 ]);
+
+it('throws an exception when downloading external audio fails', function () {
+    Http::fake([
+        'https://example.com/forbidden.mp3' => Http::response('Forbidden', 403),
+    ]);
+
+    $user = User::factory()->create(['credits' => 10]);
+    $feed = Feed::factory()->for($user)->create();
+    $entry = Entry::factory()->for($feed)->create([
+        'audio_url' => 'https://example.com/forbidden.mp3',
+    ]);
+
+    $batch = Bus::batch([])->dispatch();
+
+    FFMpeg::shouldReceive('fromDisk')->never();
+
+    $job = new PrepareTranscriptionJob($entry->id, $user->id);
+    $job->withBatchId($batch->id);
+
+    expect(fn () => $job->handle())->toThrow(RequestException::class);
+
+    Storage::disk('local')->assertMissing("tmp/batch-{$batch->id}/audio.mp3");
+});

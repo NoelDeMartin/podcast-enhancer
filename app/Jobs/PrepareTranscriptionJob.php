@@ -61,7 +61,7 @@ class PrepareTranscriptionJob implements ShouldQueue
                 'tmp_path' => $tmpPath,
                 'batch_id' => $this->batchId,
             ]);
-            $response = Http::timeout(300)->get($entry->audio_url);
+            $response = Http::timeout(300)->get($entry->audio_url)->throw();
 
             Storage::disk('local')->writeStream($tmpPath, $response->resource());
         } else {

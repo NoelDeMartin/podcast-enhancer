@@ -49,6 +49,10 @@ class AppServiceProvider extends ServiceProvider
             'allow_redirects' => [
                 'max' => 15,
             ],
+            'headers' => [
+                'User-Agent' => 'PodcastEnhancer/1.0',
+            ],
+            'version' => 2.0,
         ]);
     }
 }
